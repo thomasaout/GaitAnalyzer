@@ -169,3 +169,17 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+.DS_Store
+
+.idea/
+
+data/
+
+models/biorbd_models/Geometry/
+
+models/biorbd_models/Geometry_cleaned/
+
+models/biorbd_models/
+
+models/OpenSim_models/
