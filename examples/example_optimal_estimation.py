@@ -84,9 +84,9 @@ if __name__ == "__main__":
     results = ResultManager(subject_name="VIF_04", subject_mass=71)
     # Please note that the OpenSim model should already be scaled in the OpenSim GUI
     results.create_biorbd_model(osim_model_type=OsimModels.WholeBody())
-    results.add_experimental_data(c3d_file_name=c3d_file_name, animate_c3d=False)
+    results.add_experimental_data(c3d_file_name=c3d_file_name, animate_c3d_flag=False)
     # results.add_events(plot_phases=True)
-    results.reconstruct_kinematics()
+    results.reconstruct_kinematics(animate_kinematics_flag=False)
 
     extract_data_for_OCP(exp_data, file_path)
 

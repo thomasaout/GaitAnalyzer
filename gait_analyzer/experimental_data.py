@@ -1,15 +1,13 @@
 import ezc3d
 import biorbd
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib import colormaps
 
 
 class ExperimentalData:
     """
     This class contains all the experimental data from a trial (markers, EMG, force plates data, gait parameters).
     """
-    def __init__(self, c3d_file_name: str, biorbd_model: biorbd.Model, animate_c3d: bool):
+    def __init__(self, c3d_file_name: str, biorbd_model: biorbd.Model, animate_c3d_flag: bool):
         """
         Initialize the ExperimentalData.
         .
@@ -47,7 +45,7 @@ class ExperimentalData:
         # Extract data from the c3d file
         self.perform_initial_treatment()
         self.extract_gait_parameters()
-        if animate_c3d:
+        if animate_c3d_flag:
             self.animate_c3d()
 
 
