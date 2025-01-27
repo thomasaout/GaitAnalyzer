@@ -51,9 +51,11 @@ class ResultManager:
     def add_experimental_data(self, file_path: str):
 
         # Checks
-        if self. experimental_data is not None:
+        if self.experimental_data is not None:
             raise Exception("Experimental data already added")
+        if self.biorbd_model_creator is None:
+            raise Exception("Please add the biorbd model first by running ResultManager.create_biorbd_model()")
 
         # Add experimental data
-        self.experimental_data = ExperimentalData(file_path=file_path, biorbd_model_path=biorbd_model_path)
+        self.experimental_data = ExperimentalData(file_path=file_path)
 

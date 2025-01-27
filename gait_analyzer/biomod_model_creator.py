@@ -91,15 +91,18 @@ class OsimModels:
 
 class BiomodModelCreator:
     def __init__(self, subject_name: str, osim_model_type):
+        # Initial attributes
         self.subject_name = subject_name
         self.osim_model = osim_model_type
 
+        # Extended attributes
         osim_model_path = "../models/OpenSim_models"
         biorbd_model_path = "../models/biorbd_models"
         vtp_geometry_path = "Geometry"  # TODO: Charbie -> can we point to the Opensim folder where all opensim's vtp files are stored
         self.osim_model_full_path = osim_model_path + '/' + osim_model_type.osim_model_name + '_' + subject_name + ".osim"
         self.biorbd_model_full_path = biorbd_model_path + '/' + osim_model_type.osim_model_name + '_' + subject_name + ".bioMod"
 
+        # Convert the osim model to a biorbd model
         converter = otb.Converter(
             self.biorbd_model_full_path,  # .bioMod file to export to
             self.osim_model_full_path,  # .osim file to convert from
@@ -115,8 +118,8 @@ class BiomodModelCreator:
             muscles_to_ignore=osim_model_type.muscles_to_ignore,
         )
         converter.convert_file()
-
         self.biorbd_model = biorbd.Model(self.biorbd_model_full_path)
+
 
     def inputs(self):
         return {
