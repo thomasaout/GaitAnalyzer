@@ -6,18 +6,49 @@ from matplotlib import colormaps
 
 
 class ExperimentalData:
-    def __init__(self, c3d_file_path: str, biorbd_model):
-
+    """
+    This class contains all the experimental data from a trial (markers, EMG, force plates data, gait parameters).
+    """
+    def __init__(self, c3d_file_name: str, biorbd_model: biorbd.Model, animate_c3d: bool):
+        """
+        Initialize the ExperimentalData.
+        .
+        Parameters
+        ----------
+        c3d_file_name: str
+            The name of the trial's c3d file.
+        biorbd_model: biorbd.Model
+            The subject's personalized biorbd model.
+        animate_c3d: bool
+            If True, the c3d file will be animated.
+        """
         # Checks
-        if not isinstance(c3d_file_path, str):
-            raise ValueError("c3d_file_path must be a string")
+        if not isinstance(c3d_file_name, str):
+            raise ValueError("c3d_file_name must be a string")
 
         # Initial attributes
-        self.c3d_file_path = c3d_file_path
+        self.c3d_file_name = c3d_file_name
+        self.c3d_full_file_path = "../data/" + c3d_file_name
+        self.biorbd_model = biorbd_model
+
+        # Extended attributes
+        self.model_marker_names = None
+        self.marker_sampling_frequency = None
+        self.markers_dt = None
+        self.nb_marker_frames = None
+        self.markers_sorted = None
+        self.analogs_sampling_frequency = None
+        self.analogs_dt = None
+        self.nb_analog_frames = None
+        self.grf_sorted = None
+        self.marker_time_vector = None
+        self.analogs_time_vector = None
 
         # Extract data from the c3d file
         self.perform_initial_treatment()
-        self.extract_gait_parameters(biorbd_model)
+        self.extract_gait_parameters()
+        if animate_c3d:
+            self.animate_c3d()
 
 
     def perform_initial_treatment(self):
@@ -25,26 +56,30 @@ class ExperimentalData:
         Extract important information and sort the data
         """
         # Load model
-        model = biorbd.Model(self.biorbd_model_path)
-        self.model_marker_names = [m.to_string() for m in model.markerNames()]
-        # model_muscle_names = [m.to_string() for m in model.muscleNames()]
+        self.model_marker_names = [m.to_string() for m in self.biorbd_model.markerNames()]
+        # model_muscle_names = [m.to_string() for m in self.biorbd_model.muscleNames()]
 
-        # Get an array of the position of the experimental self.markers
-        c3d = ezc3d.c3d(self.file_path)
+        # Get an array of the position of the experimental markers
+        c3d = ezc3d.c3d(self.c3d_full_file_path)
         markers = c3d["data"]["points"]
         self.marker_sampling_frequency = c3d["parameters"]["POINT"]["RATE"]["value"][0]  # Hz
         self.markers_dt = 1 / c3d["header"]["points"]["frame_rate"]
         self.nb_marker_frames = markers.shape[2]
         exp_marker_names = c3d["parameters"]["POINT"]["LABELS"]["value"]
+        markers_units = 1
+        if c3d["parameters"]["POINT"]["UNITS"]["value"][0] == "mm":
+            marker_units = 0.001
+        # if len(self.model_marker_names) > len(exp_marker_names):
+        #     supplementary_marker_names = [name for name in self.model_marker_names if name not in exp_marker_names]
+        #     for name in supplementary_marker_names:
+        #         if not name.endswith("JC"):
+        #             raise ValueError(f"The marker {name} is not in the c3d file.")
+        #             # TODO: Flo -> The JC markers were added before the OpenSim scaling, what should we do with those ?
         markers_sorted = np.zeros((3, len(self.model_marker_names), self.nb_marker_frames))
         for i_marker, name in enumerate(self.model_marker_names):
             marker_idx = exp_marker_names.index(name)
-            markers_sorted[:, marker_idx, :] = markers[:3, marker_idx, :]
+            markers_sorted[:, marker_idx, :] = markers[:3, marker_idx, :] * marker_units
         self.markers_sorted = markers_sorted
-        self.right_leg_grf = np.vstack((markers[:3, exp_marker_names.index("moment2"), :],
-                                   markers[:3, exp_marker_names.index("force2"), :]))
-        self.left_leg_grf = np.vstack((markers[:3, exp_marker_names.index("moment1"), :],
-                                  markers[:3, exp_marker_names.index("force1"), :]))
 
         # Get an array of the experimental muscle activity
         analogs = c3d["data"]["analogs"]
@@ -78,23 +113,37 @@ class ExperimentalData:
 
         self.marker_time_vector = np.linspace(0, self.markers_dt * self.nb_marker_frames, self.nb_marker_frames)
         self.analogs_time_vector = np.linspace(0, self.analogs_dt * self.nb_analog_frames, self.nb_analog_frames)
-        # plt.figure()
-        # plt.plot(self.analogs_time_vector, grf_sorted[0, 2, :], '-r')
-        # plt.plot(self.analogs_time_vector, grf_sorted[0, 1, :], '-g')
-        # plt.plot(self.analogs_time_vector, grf_sorted[0, 2, :], '.b')
-        # plt.plot(self.analogs_time_vector, y, '-b')
-        # plt.plot(self.analogs_time_vector, grf_sorted[0, 3, :], '-m')
-        # plt.plot(self.analogs_time_vector, grf_sorted[0, 4, :], '-c')
-        # plt.plot(self.analogs_time_vector, grf_sorted[0, 5, :], '-k')
-        # cal_velovity = np.diff(markers_sorted[2, self.model_marker_names.index("LCAL"), :]) / self.markers_dt
-        # time_velocity = (self.marker_time_vector[1:] + self.marker_time_vector[:-1]) / 2
-        # plt.plot(self.marker_time_vector, markers_sorted[2, self.model_marker_names.index("LCAL"), :], '-b')
-        # plt.plot(time_velocity, cal_velovity, '-k')
-        # plt.xlim(0, 1.4)
-        # plt.show()
 
-    def extract_gait_parameters(self, biorbd_model):
+
+    def animate_c3d(self):
+        # TODO: Charbie -> animate the c3d file with pyorerun
+        pass
+
+
+    def extract_gait_parameters(self):
         """
         TODO: Guys -> please provide code :)
         """
         pass
+
+
+    def inputs(self):
+        return {
+            "c3d_file_path": self.c3d_file_path,
+            "biorbd_model": self.biorbd_model,
+        }
+
+    def outputs(self):
+        return {
+            "model_marker_names": self.model_marker_names,
+            "marker_sampling_frequency": self.marker_sampling_frequency,
+            "markers_dt": self.markers_dt,
+            "nb_marker_frames": self.nb_marker_frames,
+            "markers_sorted": self.markers_sorted,
+            "analogs_sampling_frequency": self.analogs_sampling_frequency,
+            "analogs_dt": self.analogs_dt,
+            "nb_analog_frames": self.nb_analog_frames,
+            "grf_sorted": self.grf_sorted,
+            "marker_time_vector": self.marker_time_vector,
+            "analogs_time_vector": self.analogs_time_vector,
+        }

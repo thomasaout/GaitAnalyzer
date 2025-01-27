@@ -19,6 +19,12 @@ class OsimModels:
         raise RuntimeError(
             "This method is implemented in the child class. You should call OsimModels.[mode type name].muscles_to_ignore.")
 
+    @property
+    def markers_to_ignore(self):
+        raise RuntimeError(
+            "This method is implemented in the child class. You should call OsimModels.[mode type name].markers_to_ignore.")
+
+
     # Child classes acting as an enum
     class WholeBody:
         """This is a hole body model that consists of 23 bodies, 42 degrees of freedom and 30 muscles.
@@ -88,6 +94,21 @@ class OsimModels:
                                      "vas_med_l",
                                      "vas_lat_l"]
 
+        @property
+        def markers_to_ignore(self):
+            return ['LHJC',
+                     'RHJC',
+                     'RKJC',
+                     'RAJC',
+                     'LKJC',
+                     'LAJC',
+                     'REJC',
+                     'RSJC',
+                     'RWJC',
+                     'LSJC',
+                     'LEJC',
+                     'LWJC']
+
 
 class BiomodModelCreator:
     def __init__(self, subject_name: str, osim_model_type):
@@ -116,6 +137,7 @@ class BiomodModelCreator:
             print_general_informations=True,
             vtp_polygons_to_triangles=True,
             muscles_to_ignore=osim_model_type.muscles_to_ignore,
+            markers_to_ignore=osim_model_type.markers_to_ignore,
         )
         converter.convert_file()
         self.biorbd_model = biorbd.Model(self.biorbd_model_full_path)

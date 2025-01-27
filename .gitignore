@@ -183,3 +183,5 @@ models/biorbd_models/Geometry_cleaned/
 models/biorbd_models/
 
 models/OpenSim_models/
+
+*.png

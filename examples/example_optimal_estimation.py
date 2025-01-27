@@ -73,22 +73,21 @@ def extract_data_for_OCP(exp_data, file_path):
 
 if __name__ == "__main__":
 
-    biorbd_model_path = "data/VIF_04.bioMod"
-    file_path = "data/VIF_04_Cond0007_processed2.c3d"
-    static_file_path = "data/VIF_04_Statique.c3d"
+    # biorbd_model_path = "data/VIF_04.bioMod"
+    # static_file_path = "data/VIF_04_Statique.c3d"
+    c3d_file_name = "VIF_04_Cond0007.c3d"
 
     #  --- Example of how to get help on a GaitAnalyzer class --- #
     helper(Operator)
 
     # --- Example of analysis --- #
     results = ResultManager(subject_name="VIF_04", subject_mass=71)
-    # Please note that the OpenSim model should already be scaled in the GUI
+    # Please note that the OpenSim model should already be scaled in the OpenSim GUI
     results.create_biorbd_model(osim_model_type=OsimModels.WholeBody())
-    results.add_experimental_data(file_path=file_path)
+    results.add_experimental_data(c3d_file_name=c3d_file_name, animate_c3d=False)
+    # results.add_events(plot_phases=True)
+    results.reconstruct_kinematics()
 
-    exp_data = ExperimentalData(file_path=file_path, biorbd_model_path=biorbd_model_path)
-    exp_data.find_event_timestamps()
-    # Kinematics and all ... would go here, I think
     extract_data_for_OCP(exp_data, file_path)
 
     ocp = prepare_ocp(biorbd_model_path=biorbd_model_path,
