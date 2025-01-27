@@ -1,17 +1,33 @@
-import ezc3d
-import biorbd
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
 
+from gait_analyzer.operator import Operator
+from gait_analyzer.experimental_data import ExperimentalData
+
 
 class Events:
-    def __init__(self, file_path: str, biorbd_model_path:str):
-        self.file_path = file_path
-        self.biorbd_model_path = biorbd_model_path
-        self.initial_treatment()
+    """
+    This class contains all the events detected from the experimental data.
+    """
+    def __init__(self, experimental_data: ExperimentalData, plot_phases: bool = False):
+        """
+        Initialize the Events.
+        .
+        Parameters
+        ----------
+        experimental_data: ExperimentalData
+            The experimental data from the trial
+        """
+        # Checks
+        if not isinstance(experimental_data, ExperimentalData):
+            raise ValueError("experimental_data must be an instance of ExperimentalData. You can declare it by running ExperimentalData(file_path).")
 
-        # Class Events
+        # Initial attributes
+        self.experimental_data = experimental_data
+
+        #Extended attributes
         self.events = {"right_leg_heel_touch": [],  # heel strike
                         "right_leg_toes_touch": [],  # beginning of flat foot
                         "right_leg_heel_off": [],  # end of flat foot
@@ -21,97 +37,27 @@ class Events:
                         "left_leg_heel_off": [],  # end of flat foot
                         "left_leg_toes_off": [],  # beginning of swing
                        }
-        self.phases_right_leg = {"flat_foot": np.zeros((self.nb_analog_frames, )),
-                          "toes_only": np.zeros((self.nb_analog_frames, )),
-                          "swing": np.zeros((self.nb_analog_frames, )),
-                          "heel_only": np.zeros((self.nb_analog_frames, ))}
-        self.phases_left_leg = {"flat_foot": np.zeros((self.nb_analog_frames, )),
-                              "toes_only": np.zeros((self.nb_analog_frames, )),
-                              "swing": np.zeros((self.nb_analog_frames, )),
-                              "heel_only": np.zeros((self.nb_analog_frames, ))}
-        self.phases = {"heelR_toesR": np.zeros((self.nb_analog_frames, )),
-                       "toesR": np.zeros((self.nb_analog_frames, )),
-                       "toesR_heelL": np.zeros((self.nb_analog_frames, )),
-                       "toesR_heelL_toesL": np.zeros((self.nb_analog_frames, )),
-                       "heelL_toesL": np.zeros((self.nb_analog_frames,)),
-                       "toesL": np.zeros((self.nb_analog_frames,)),
-                       "toesL_heelR": np.zeros((self.nb_analog_frames,)),
-                       "toesL_heelR_toesR": np.zeros((self.nb_analog_frames,)),
+        nb_analog_frames = self.experimental_data.nb_analog_frames
+        self.phases_right_leg = {"flat_foot": np.zeros((nb_analog_frames, )),
+                          "toes_only": np.zeros((nb_analog_frames, )),
+                          "swing": np.zeros((nb_analog_frames, )),
+                          "heel_only": np.zeros((nb_analog_frames, ))}
+        self.phases_left_leg = {"flat_foot": np.zeros((nb_analog_frames, )),
+                              "toes_only": np.zeros((nb_analog_frames, )),
+                              "swing": np.zeros((nb_analog_frames, )),
+                              "heel_only": np.zeros((nb_analog_frames, ))}
+        self.phases = {"heelR_toesR": np.zeros((nb_analog_frames, )),
+                       "toesR": np.zeros((nb_analog_frames, )),
+                       "toesR_heelL": np.zeros((nb_analog_frames, )),
+                       "toesR_heelL_toesL": np.zeros((nb_analog_frames, )),
+                       "heelL_toesL": np.zeros((nb_analog_frames,)),
+                       "toesL": np.zeros((nb_analog_frames,)),
+                       "toesL_heelR": np.zeros((nb_analog_frames,)),
+                       "toesL_heelR_toesR": np.zeros((nb_analog_frames,)),
                        }
-
-
-    def initial_treatment(self):
-        """
-        Extract important information and sort the data
-        """
-        # Load model
-        model = biorbd.Model(self.biorbd_model_path)
-        self.model_marker_names = [m.to_string() for m in model.markerNames()]
-        # model_muscle_names = [m.to_string() for m in model.muscleNames()]
-
-        # Get an array of the position of the experimental self.markers
-        c3d = ezc3d.c3d(self.file_path)
-        markers = c3d["data"]["points"]
-        self.marker_sampling_frequency = c3d["parameters"]["POINT"]["RATE"]["value"][0]  # Hz
-        self.markers_dt = 1 / c3d["header"]["points"]["frame_rate"]
-        self.nb_marker_frames = markers.shape[2]
-        exp_marker_names = c3d["parameters"]["POINT"]["LABELS"]["value"]
-        markers_sorted = np.zeros((3, len(self.model_marker_names), self.nb_marker_frames))
-        for i_marker, name in enumerate(self.model_marker_names):
-            marker_idx = exp_marker_names.index(name)
-            markers_sorted[:, marker_idx, :] = markers[:3, marker_idx, :]
-        self.markers_sorted = markers_sorted
-        self.right_leg_grf = np.vstack((markers[:3, exp_marker_names.index("moment2"), :],
-                                   markers[:3, exp_marker_names.index("force2"), :]))
-        self.left_leg_grf = np.vstack((markers[:3, exp_marker_names.index("moment1"), :],
-                                  markers[:3, exp_marker_names.index("force1"), :]))
-
-        # Get an array of the experimental muscle activity
-        analogs = c3d["data"]["analogs"]
-        self.nb_analog_frames = analogs.shape[2]
-        self.analogs_sampling_frequency = c3d["parameters"]["ANALOG"]["RATE"]["value"][0]  # Hz
-        self.analogs_dt = 1 / c3d["header"]["analogs"]["frame_rate"]
-        analog_names = c3d["parameters"]["ANALOG"]["LABELS"]["value"]
-        # print(analog_names)
-        # emg_sorted = np.zeros((len(model_muscle_names), self.nb_analog_frames))
-        # for i_muscle, name in enumerate(model_muscle_names):
-        #     muscle_idx = analog_names.index(name)
-        #     emg_sorted[i_muscle, :] = analogs[muscle_idx, :]
-        # self.emg_sorted = emg_sorted
-        # # TODO: Charbie -> treatment of the EMG signal to remove stimulation artifacts
-
-        # Get the experimental ground reaction forces
-        force_platform_1_channels = c3d["parameters"]["FORCE_PLATFORM"]["CHANNEL"]["value"][:, 0]
-        force_platform_2_channels = c3d["parameters"]["FORCE_PLATFORM"]["CHANNEL"]["value"][:, 1]
-        grf_sorted = np.zeros((2, 6, self.nb_analog_frames))
-        for i in range(6):
-            platform_1_idx = analog_names.index(f"Channel_{force_platform_1_channels[i]:02d}")
-            platform_2_idx = analog_names.index(f"Channel_{force_platform_2_channels[i]:02d}")
-            grf_sorted[0, i, :] = analogs[0, platform_1_idx, :]
-            grf_sorted[1, i, :] = analogs[0, platform_2_idx, :]
-        self.grf_sorted = grf_sorted
-
-        # from scipy import signal
-        # b, a = signal.butter(2, 1/50, btype='low')
-        # y = signal.filtfilt(b, a, grf_sorted[0, 2, :], padlen=150)
-        # # 4th 6-10
-
-        self.marker_time_vector = np.linspace(0, self.markers_dt * self.nb_marker_frames, self.nb_marker_frames)
-        self.analogs_time_vector = np.linspace(0, self.analogs_dt * self.nb_analog_frames, self.nb_analog_frames)
-        # plt.figure()
-        # plt.plot(self.analogs_time_vector, grf_sorted[0, 2, :], '-r')
-        # plt.plot(self.analogs_time_vector, grf_sorted[0, 1, :], '-g')
-        # plt.plot(self.analogs_time_vector, grf_sorted[0, 2, :], '.b')
-        # plt.plot(self.analogs_time_vector, y, '-b')
-        # plt.plot(self.analogs_time_vector, grf_sorted[0, 3, :], '-m')
-        # plt.plot(self.analogs_time_vector, grf_sorted[0, 4, :], '-c')
-        # plt.plot(self.analogs_time_vector, grf_sorted[0, 5, :], '-k')
-        # cal_velovity = np.diff(markers_sorted[2, self.model_marker_names.index("LCAL"), :]) / self.markers_dt
-        # time_velocity = (self.marker_time_vector[1:] + self.marker_time_vector[:-1]) / 2
-        # plt.plot(self.marker_time_vector, markers_sorted[2, self.model_marker_names.index("LCAL"), :], '-b')
-        # plt.plot(time_velocity, cal_velovity, '-k')
-        # plt.xlim(0, 1.4)
-        # plt.show()
+        self.find_event_timestamps()
+        if plot_phases:
+            self.plot_events()
 
 
     def detect_heel_touch(self):
@@ -119,8 +65,8 @@ class Events:
         Detect the heel touch event when the antero-posterior GRF reaches a certain threshold after the swing phase
         """
         maximal_forward_force_threshold = 0.005
-        grf_left_y_filtered = moving_average(self.grf_sorted[0, 1, :], 21)
-        grf_right_y_filtered = moving_average(self.grf_sorted[1, 1, :], 21)
+        grf_left_y_filtered = Operator.moving_average(self.experimental_data.grf_sorted[0, 1, :], 21)
+        grf_right_y_filtered = Operator.moving_average(self.experimental_data.grf_sorted[1, 1, :], 21)
 
         # Left
         swing_timings = np.where(self.phases_left_leg["swing"])[0]
@@ -129,9 +75,9 @@ class Events:
         )
         for i_swing, swing_phase in enumerate(left_swing_sequence):
             idx = swing_phase[-1] - 5
-            while idx < self.nb_analog_frames - 1 and np.abs(grf_left_y_filtered[idx]) < maximal_forward_force_threshold:
+            while idx < self.experimental_data.nb_analog_frames - 1 and np.abs(grf_left_y_filtered[idx]) < maximal_forward_force_threshold:
                 idx += 1
-            if idx <= self.nb_analog_frames - 1:
+            if idx <= self.experimental_data.nb_analog_frames - 1:
                 idx -= 1
                 self.events["left_leg_heel_touch"] += [int(((swing_phase[-1] + idx) / 2))]
 
@@ -142,9 +88,9 @@ class Events:
         )
         for i_swing, swing_phase in enumerate(right_swing_sequence):
             idx = swing_phase[-1] - 5
-            while idx < self.nb_analog_frames - 1 and np.abs(grf_right_y_filtered[idx]) < maximal_forward_force_threshold:
+            while idx < self.experimental_data.nb_analog_frames - 1 and np.abs(grf_right_y_filtered[idx]) < maximal_forward_force_threshold:
                 idx += 1
-            if idx <= self.nb_analog_frames - 1:
+            if idx <= self.experimental_data.nb_analog_frames - 1:
                 idx -= 1
                 self.events["right_leg_heel_touch"] += [int(((swing_phase[-1] + idx) / 2))]
 
@@ -153,8 +99,8 @@ class Events:
         """
         Detect the toes touch event when the vertical GRF is maximal
         """
-        grf_left_z_filtered = moving_average(self.grf_sorted[0, 2, :], 35)
-        grf_right_z_filtered = moving_average(self.grf_sorted[1, 2, :], 35)
+        grf_left_z_filtered = Operator.moving_average(self.experimental_data.grf_sorted[0, 2, :], 35)
+        grf_right_z_filtered = Operator.moving_average(self.experimental_data.grf_sorted[1, 2, :], 35)
 
         swing_timings = np.where(self.phases_left_leg["swing"])[0]
         left_swing_sequence = np.array_split(
@@ -162,10 +108,10 @@ class Events:
         )
         for i_swing, swing_phase in enumerate(left_swing_sequence):
             end_swing_idx = swing_phase[-1]
-            if end_swing_idx == self.nb_analog_frames - 1:
+            if end_swing_idx == self.experimental_data.nb_analog_frames - 1:
                 continue
             if i_swing == len(left_swing_sequence) - 1:
-                beginning_next_swing_idx = self.nb_analog_frames - 1
+                beginning_next_swing_idx = self.experimental_data.nb_analog_frames - 1
             else:
                 beginning_next_swing_idx = left_swing_sequence[i_swing+1][0]
             mid_stance = int((end_swing_idx + beginning_next_swing_idx) / 2)
@@ -179,10 +125,10 @@ class Events:
         )
         for i_swing, swing_phase in enumerate(right_swing_sequence):
             end_swing_idx = swing_phase[-1]
-            if end_swing_idx == self.nb_analog_frames - 1:
+            if end_swing_idx == self.experimental_data.nb_analog_frames - 1:
                 continue
             if i_swing == len(right_swing_sequence) - 1:
-                beginning_next_swing_idx = self.nb_analog_frames - 1
+                beginning_next_swing_idx = self.experimental_data.nb_analog_frames - 1
             else:
                 beginning_next_swing_idx = right_swing_sequence[i_swing+1][0]
             mid_stance = int((end_swing_idx + beginning_next_swing_idx) / 2)
@@ -195,21 +141,35 @@ class Events:
         Detect hell off events when the heel marker moves faster than 0.1 m/s
         """
         # Left
-        left_cal_velocity = np.diff(self.markers_sorted[2, self.model_marker_names.index("LCAL"), :]) / self.markers_dt
-        left_heel_moving = np.where(left_cal_velocity > 0.1)[0]
-        left_heel_moving_sequence = np.array_split(
-            left_heel_moving, np.flatnonzero(np.diff(left_heel_moving) > 1) + 1
+        left_cal_velocity = np.diff(self.experimental_data.markers_sorted[2, self.experimental_data.model_marker_names.index("LCAL"), :]) / self.experimental_data.markers_dt
+        # left_cal_velocity = np.abs(left_cal_velocity)
+        swing_timings = np.where(self.phases_left_leg["swing"])[0]
+        left_swing_sequence = np.array_split(
+            swing_timings, np.flatnonzero(np.diff(swing_timings) > 1) + 1
         )
-        for sequence in left_heel_moving_sequence:
-            self.events["left_leg_heel_off"] += [int(sequence[0]*self.markers_dt/self.analogs_dt)]
+        # TODO: Flo -> Visiblement, ces données sont filtrées. Est-ce que je pourrais avoir les raw data avec les bons marqueurs svp ?
+        for i_swing, swing_phase in enumerate(left_swing_sequence):
+            mid_swing_idx = int((swing_phase[-1] + swing_phase[0])/2)
+            left_heel_moving = np.where(left_cal_velocity[int(mid_swing_idx * self.experimental_data.analogs_dt/self.experimental_data.markers_dt):] > 0.1)[0]
+            # if left_heel_moving.shape == (0,):
+            plt.figure()
+            plt.plot((self.experimental_data.marker_time_vector[1:] + self.experimental_data.marker_time_vector[:-1]) / 2, left_cal_velocity, label="Left heel velocity")
+            plt.plot(self.experimental_data.marker_time_vector, self.experimental_data.markers_sorted[2, self.experimental_data.model_marker_names.index("LCAL"), :], label="Left heel height")
+            plt.plot(self.experimental_data.analogs_time_vector, self.experimental_data.grf_sorted[0, 2, :], label="Vertical Left GRF")
+            plt.plot(np.array([self.experimental_data.analogs_time_vector[0], self.experimental_data.analogs_time_vector[-1]]), np.array([0.1, 0.1]), '--k', label="Velocity  threshold")
+            plt.legend()
+            plt.show()
+            # raise RuntimeError("The left heel marker (LCAL) is not moving, please double check the data.")
+            left_heel_moving = left_heel_moving[0] + mid_swing_idx
+            self.events["left_leg_heel_off"] += [int(left_heel_moving * self.experimental_data.markers_dt/self.experimental_data.analogs_dt)]
         # Right
-        right_cal_velocity = np.diff(self.markers_sorted[2, self.model_marker_names.index("RCAL"), :]) / self.markers_dt
+        right_cal_velocity = np.diff(self.experimental_data.markers_sorted[2, self.experimental_data.model_marker_names.index("RCAL"), :]) / self.experimental_data.markers_dt
         right_heel_moving = np.where(right_cal_velocity > 0.1)[0]
         right_heel_moving_sequence = np.array_split(
             right_heel_moving, np.flatnonzero(np.diff(right_heel_moving) > 1) + 1
         )
         for sequence in right_heel_moving_sequence:
-            self.events["right_leg_heel_off"] += [int(sequence[0]*self.markers_dt/self.analogs_dt)]
+            self.events["right_leg_heel_off"] += [int(sequence[0]*self.experimental_data.markers_dt/self.experimental_data.analogs_dt)]
 
 
     def detect_toes_off(self):
@@ -223,7 +183,7 @@ class Events:
         )
         for i_swing, swing_phase in enumerate(left_swing_sequence):
             beginning_swing_idx = swing_phase[0]
-            if beginning_swing_idx == self.nb_analog_frames - 1 or beginning_swing_idx == 0:
+            if beginning_swing_idx == self.experimental_data.nb_analog_frames - 1 or beginning_swing_idx == 0:
                 continue
             self.events["left_leg_toes_off"] += [int(beginning_swing_idx)]
 
@@ -234,7 +194,7 @@ class Events:
         )
         for i_swing, swing_phase in enumerate(right_swing_sequence):
             beginning_swing_idx = swing_phase[0]
-            if beginning_swing_idx == self.nb_analog_frames - 1 or beginning_swing_idx == 0:
+            if beginning_swing_idx == self.experimental_data.nb_analog_frames - 1 or beginning_swing_idx == 0:
                 continue
             self.events["right_leg_toes_off"] += [int(beginning_swing_idx)]
 
@@ -244,8 +204,8 @@ class Events:
         Detect the swing phase when the vertical GRF is lower than a threshold
         """
         minimal_vertical_force_threshold = 0.007
-        grf_right_z_filtered = moving_average(self.grf_sorted[0, 2, :], 21)
-        grf_left_z_filtered = moving_average(self.grf_sorted[1, 2, :], 21)
+        grf_right_z_filtered = Operator.moving_average(self.experimental_data.grf_sorted[0, 2, :], 21)
+        grf_left_z_filtered = Operator.moving_average(self.experimental_data.grf_sorted[1, 2, :], 21)
         self.phases_left_leg["swing"][:] = np.abs(grf_right_z_filtered) < minimal_vertical_force_threshold
         self.phases_right_leg["swing"][:] = np.abs(grf_left_z_filtered) < minimal_vertical_force_threshold
         return
@@ -279,6 +239,9 @@ class Events:
     def find_event_timestamps(self):
         # Detect when each foot is in the air as a preliminary step for the detection of events
         # Please not that anything happening before the first temporary swing phase is not considered
+        # TODO: Charbie -> Add references to the articles where these methods are described
+        # TODO: Charbie -> Add an alternative AI detection method
+
         self.detect_swing_phases_temporary()
 
         # Detect events
@@ -310,96 +273,94 @@ class Events:
 
 
     def plot_events(self):
-        # time_velocity = (self.marker_time_vector[1:] + self.marker_time_vector[:-1]) / 2
-        # grf_left_y_filtered = moving_average(self.grf_sorted[0, 1, :], 21)
-        # grf_left_z_filtered = moving_average(self.grf_sorted[0, 2, :], 21)
-        # grf_left_z_filtered = moving_average(self.grf_sorted[0, 2, :], 35)
-        # axs[0].plot(grf_left_y_filtered, '--g', label='Y filtered')
-        # axs[0].plot(grf_left_z_filtered, '--b', label='Z filtered')
-        # axs[0].plot(np.where(self.phases_left_leg["swing"])[0], self.grf_sorted[0, 2, np.where(self.phases_left_leg["swing"])[0]], '.k')
-        # for heel_touch_index in self.events["left_leg_heel_touch"]:
-        #     axs[0].axvline(heel_touch_index, color='k')
-        # for toes_touch_index in self.events["left_leg_toes_touch"]:
-        #     axs[0].axvline(toes_touch_index, color='r')
-        # # axs[0].plot(np.array(self.events["left_leg_heel_touch"]), self.grf_sorted[0, 2, np.array(self.events["left_leg_heel_touch"])], 'om')
-        # # axs[0].plot(np.array(self.events["test"]), self.grf_sorted[0, 1, np.array(self.events["test"])], 'og')
-
-
+        """
+        Plot the GRF and the detected phases
+        """
         fig, axs = plt.subplots(3, 1, figsize=(15, 7))
 
-        axs[0].plot(self.analogs_time_vector, self.grf_sorted[0, 0, :], '-r', label='Medio-lateral')
-        axs[0].plot(self.analogs_time_vector, self.grf_sorted[0, 1, :], '-g', label='Antero-posterior')
-        axs[0].plot(self.analogs_time_vector, self.grf_sorted[0, 2, :], '-b', label='Vertical')
+        axs[0].plot(self.experimental_data.analogs_time_vector, self.experimental_data.grf_sorted[0, 0, :], '-r', label='Medio-lateral')
+        axs[0].plot(self.experimental_data.analogs_time_vector, self.experimental_data.grf_sorted[0, 1, :], '-g', label='Antero-posterior')
+        axs[0].plot(self.experimental_data.analogs_time_vector, self.experimental_data.grf_sorted[0, 2, :], '-b', label='Vertical')
 
-        axs[1].plot(self.analogs_time_vector, self.grf_sorted[1, 0, :], '-r', label='Medio-lateral')
-        axs[1].plot(self.analogs_time_vector, self.grf_sorted[1, 1, :], '-g', label='Antero-posterior')
-        axs[1].plot(self.analogs_time_vector, self.grf_sorted[1, 2, :], '-b', label='Vertical')
+        axs[1].plot(self.experimental_data.analogs_time_vector, self.experimental_data.grf_sorted[1, 0, :], '-r', label='Medio-lateral')
+        axs[1].plot(self.experimental_data.analogs_time_vector, self.experimental_data.grf_sorted[1, 1, :], '-g', label='Antero-posterior')
+        axs[1].plot(self.experimental_data.analogs_time_vector, self.experimental_data.grf_sorted[1, 2, :], '-b', label='Vertical')
 
         color = colormaps["magma"]
         for i_phase, key in enumerate(self.phases_left_leg):
             # Left
-            # axs[0].plot(self.analogs_time_vector, self.phases_left_leg[key], '.', color=color(i_phase/4), label=key)
+            axs[0].plot(self.experimental_data.analogs_time_vector, (self.phases_left_leg[key] * 0.1*(i_phase+1))  + 0.3, '.', color=color(i_phase/4))
             start_idx = 0
             is_label = False
             for idx in range(1, self.phases_left_leg[key].shape[0]):
-                if self.phases_left_leg[key][idx] == True:
-                    if self.phases_left_leg[key][idx-1] == False:
+                if self.phases_left_leg[key][idx]:
+                    if not self.phases_left_leg[key][idx-1]:
                         start_idx = idx
-                if self.phases_left_leg[key][idx] == False:
-                    if self.phases_left_leg[key][idx-1] == True:
+                if not self.phases_left_leg[key][idx]:
+                    if self.phases_left_leg[key][idx-1]:
                         end_idx = idx
                         if not is_label:
-                            axs[0].axvspan(self.analogs_time_vector[start_idx], self.analogs_time_vector[end_idx],
+                            axs[0].axvspan(self.experimental_data.analogs_time_vector[start_idx], self.experimental_data.analogs_time_vector[end_idx],
                                            alpha=0.2, color=color(i_phase / 4), label=key)
                             is_label = True
                         else:
-                            axs[0].axvspan(self.analogs_time_vector[start_idx], self.analogs_time_vector[end_idx], alpha=0.2, color=color(i_phase/4))
+                            axs[0].axvspan(self.experimental_data.analogs_time_vector[start_idx], self.experimental_data.analogs_time_vector[end_idx], alpha=0.2, color=color(i_phase/4))
             # Right
-            # axs[1].plot(self.analogs_time_vector, self.phases_right_leg[key], '.', color=color(i_phase/4), label=key)
+            axs[1].plot(self.experimental_data.analogs_time_vector, (self.phases_left_leg[key] * 0.1*(i_phase+1)) + 0.3, '.', color=color(i_phase/4))
             start_idx = 0
             is_label = False
             for idx in range(1, self.phases_right_leg[key].shape[0]):
-                if self.phases_right_leg[key][idx] == True:
-                    if self.phases_right_leg[key][idx-1] == False:
+                if self.phases_right_leg[key][idx]:
+                    if not self.phases_right_leg[key][idx-1]:
                         start_idx = idx
-                if self.phases_right_leg[key][idx] == False:
-                    if self.phases_right_leg[key][idx-1] == True:
+                if not self.phases_right_leg[key][idx]:
+                    if self.phases_right_leg[key][idx-1]:
                         end_idx = idx
                         if not is_label:
-                            axs[1].axvspan(self.analogs_time_vector[start_idx], self.analogs_time_vector[end_idx],
+                            axs[1].axvspan(self.experimental_data.analogs_time_vector[start_idx], self.experimental_data.analogs_time_vector[end_idx],
                                            alpha=0.2, color=color(i_phase/4), label=key)
                             is_label = True
                         else:
-                            axs[1].axvspan(self.analogs_time_vector[start_idx], self.analogs_time_vector[end_idx],
+                            axs[1].axvspan(self.experimental_data.analogs_time_vector[start_idx], self.experimental_data.analogs_time_vector[end_idx],
                                            alpha=0.2, color=color(i_phase / 4))
 
+        # Both legs
         for i_phase, key in enumerate(self.phases):
-            # axs[2].plot(self.analogs_time_vector, self.phases[key], '.', color=color(i_phase/8), label=key)
+            axs[2].plot(self.experimental_data.analogs_time_vector, self.phases[key] * 0.1*(i_phase+1), '.', color=color(i_phase/4))
             start_idx = 0
             is_label = False
             for idx in range(1, self.phases[key].shape[0]):
-                if self.phases[key][idx] == True:
-                    if self.phases[key][idx-1] == False:
+                if self.phases[key][idx]:
+                    if not self.phases[key][idx-1]:
                         start_idx = idx
-                if self.phases[key][idx] == False:
-                    if self.phases[key][idx-1] == True:
+                if not self.phases[key][idx]:
+                    if self.phases[key][idx-1]:
                         end_idx = idx
                         if not is_label:
-                            axs[2].axvspan(self.analogs_time_vector[start_idx], self.analogs_time_vector[end_idx], alpha=0.2, color=color(i_phase/8), label=key)
+                            axs[2].axvspan(self.experimental_data.analogs_time_vector[start_idx], self.experimental_data.analogs_time_vector[end_idx], alpha=0.2, color=color(i_phase/8), label=key)
                             is_label = True
                         else:
-                            axs[2].axvspan(self.analogs_time_vector[start_idx], self.analogs_time_vector[end_idx], alpha=0.2, color=color(i_phase/8))
+                            axs[2].axvspan(self.experimental_data.analogs_time_vector[start_idx], self.experimental_data.analogs_time_vector[end_idx], alpha=0.2, color=color(i_phase/8))
 
         axs[0].legend(bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0.)
         axs[1].legend(bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0.)
         axs[2].legend(bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0.)
         axs[0].set_ylabel('Left leg GRF')
-        axs[0].set_xlim(self.analogs_time_vector[20000], self.analogs_time_vector[30000])
         axs[1].set_ylabel('Right leg GRF')
-        axs[1].set_xlim(self.analogs_time_vector[20000], self.analogs_time_vector[30000])
         axs[2].set_ylabel('Phases both legs')
-        axs[2].set_xlim(self.analogs_time_vector[20000], self.analogs_time_vector[30000])
         plt.savefig("GRF.png")
         plt.show()
-        print('Here')
-    
+
+
+    def inputs(self):
+        return {
+            "experimental_data": self.experimental_data,
+        }
+
+    def outputs(self):
+        return {
+            "events": self.events,
+            "phases_left_leg": self.phases_left_leg,
+            "phases_right_leg": self.phases_right_leg,
+            "phases": self.phases,
+        }

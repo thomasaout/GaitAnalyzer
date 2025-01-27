@@ -1,6 +1,7 @@
 
 from gait_analyzer.biomod_model_creator import BiomodModelCreator
 from gait_analyzer.experimental_data import ExperimentalData
+from gait_analyzer.events import Events
 
 
 class ResultManager:
@@ -48,7 +49,7 @@ class ResultManager:
         self.biorbd_model_creator = BiomodModelCreator(self.subject_name, osim_model_type)
 
 
-    def add_experimental_data(self, file_path: str):
+    def add_experimental_data(self, c3d_file_name: str, animate_c3d: bool = False):
 
         # Checks
         if self.experimental_data is not None:
@@ -57,5 +58,22 @@ class ResultManager:
             raise Exception("Please add the biorbd model first by running ResultManager.create_biorbd_model()")
 
         # Add experimental data
-        self.experimental_data = ExperimentalData(file_path=file_path)
+        self.experimental_data = ExperimentalData(c3d_file_name=c3d_file_name,
+                                                  biorbd_model=self.biorbd_model_creator.biorbd_model,
+                                                  animate_c3d=animate_c3d)
+
+
+    def add_events(self, plot_phases):
+
+        # Checks
+        if self.biorbd_model_creator is None:
+            raise Exception("Please add the biorbd model first by running ResultManager.create_biorbd_model()")
+        if self.experimental_data is None:
+            raise Exception("Please add the experimental data first by running ResultManager.add_experimental_data()")
+        if self.events is not None:
+            raise Exception("Events already added")
+
+        # Add events
+        self.events = Events(experimental_data = self.experimental_data,
+                             plot_phases=plot_phases)
 
