@@ -3,6 +3,7 @@ from gait_analyzer.biomod_model_creator import BiomodModelCreator
 from gait_analyzer.experimental_data import ExperimentalData
 from gait_analyzer.events import Events
 from gait_analyzer.kinematics_reconstructor import KinematicsReconstructor
+from gait_analyzer.optimal_estimator import OptimalEstimator
 
 
 class ResultManager:
@@ -34,7 +35,7 @@ class ResultManager:
         self.gait_parameters = None
         self.events = None
         self.kinematics_reconstructor = None
-        self.optimal_estimation = None
+        self.optimal_estimator = None
 
 
     def create_biorbd_model(self, osim_model_type):
@@ -89,3 +90,21 @@ class ResultManager:
 
         # Reconstruct kinematics
         self.kinematics_reconstructor = KinematicsReconstructor(self.experimental_data, self.biorbd_model_creator.biorbd_model, animate_kinematics_flag=animate_kinematics_flag)
+
+    def estimate_optimally(self):
+        # Checks
+        if self.biorbd_model_creator is None:
+            raise Exception("Please add the biorbd model first by running ResultManager.create_biorbd_model()")
+        if self.experimental_data is None:
+            raise Exception("Please add the experimental data first by running ResultManager.add_experimental_data()")
+        if self.events is None:
+            raise Exception("Please run the events detection first by running ResultManager.add_events()")
+        if self.kinematics_reconstructor is None:
+            raise Exception("Please run the kinematics reconstruction first by running ResultManager.estimate_optimally()")
+
+        # Perform the optimal estimation optimization
+        self.optimal_estimator = OptimalEstimator(biorbd_model_path=self.biorbd_model_creator.biorbd_model_full_path,
+                                                  experimental_data=self.experimental_data,
+                                                     q=self.kinematics_reconstructor.q,
+                                                     qdot=self.kinematics_reconstructor.qdot,
+                                                     phases=self.events.phases)

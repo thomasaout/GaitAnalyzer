@@ -11,7 +11,7 @@ class Events:
     """
     This class contains all the events detected from the experimental data.
     """
-    def __init__(self, experimental_data: ExperimentalData, plot_phases: bool = False):
+    def __init__(self, experimental_data: ExperimentalData, plot_phases_flag: bool = False):
         """
         Initialize the Events.
         .
@@ -56,7 +56,7 @@ class Events:
                        "toesL_heelR_toesR": np.zeros((nb_analog_frames,)),
                        }
         self.find_event_timestamps()
-        if plot_phases:
+        if plot_phases_flag:
             self.plot_events()
 
 
@@ -152,13 +152,13 @@ class Events:
             mid_swing_idx = int((swing_phase[-1] + swing_phase[0])/2)
             left_heel_moving = np.where(left_cal_velocity[int(mid_swing_idx * self.experimental_data.analogs_dt/self.experimental_data.markers_dt):] > 0.1)[0]
             # if left_heel_moving.shape == (0,):
-            plt.figure()
-            plt.plot((self.experimental_data.marker_time_vector[1:] + self.experimental_data.marker_time_vector[:-1]) / 2, left_cal_velocity, label="Left heel velocity")
-            plt.plot(self.experimental_data.marker_time_vector, self.experimental_data.markers_sorted[2, self.experimental_data.model_marker_names.index("LCAL"), :], label="Left heel height")
-            plt.plot(self.experimental_data.analogs_time_vector, self.experimental_data.grf_sorted[0, 2, :], label="Vertical Left GRF")
-            plt.plot(np.array([self.experimental_data.analogs_time_vector[0], self.experimental_data.analogs_time_vector[-1]]), np.array([0.1, 0.1]), '--k', label="Velocity  threshold")
-            plt.legend()
-            plt.show()
+            # plt.figure()
+            # plt.plot((self.experimental_data.marker_time_vector[1:] + self.experimental_data.marker_time_vector[:-1]) / 2, left_cal_velocity, label="Left heel velocity")
+            # plt.plot(self.experimental_data.marker_time_vector, self.experimental_data.markers_sorted[2, self.experimental_data.model_marker_names.index("LCAL"), :], label="Left heel height")
+            # plt.plot(self.experimental_data.analogs_time_vector, self.experimental_data.grf_sorted[0, 2, :], label="Vertical Left GRF")
+            # plt.plot(np.array([self.experimental_data.analogs_time_vector[0], self.experimental_data.analogs_time_vector[-1]]), np.array([0.1, 0.1]), '--k', label="Velocity  threshold")
+            # plt.legend()
+            # plt.show()
             # raise RuntimeError("The left heel marker (LCAL) is not moving, please double check the data.")
             left_heel_moving = left_heel_moving[0] + mid_swing_idx
             self.events["left_leg_heel_off"] += [int(left_heel_moving * self.experimental_data.markers_dt/self.experimental_data.analogs_dt)]
@@ -267,9 +267,6 @@ class Events:
         self.detect_phases_both_legs("toesL", "toes_only", "swing")
         self.detect_phases_both_legs("toesL_heelR", "toes_only", "heel_only")
         self.detect_phases_both_legs("toesL_heelR_toesR", "toes_only", "flat_foot")
-
-        # Plot the phase detection results
-        self.plot_events()
 
 
     def plot_events(self):

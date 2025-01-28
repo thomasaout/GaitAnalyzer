@@ -3,14 +3,6 @@ import numpy as np
 
 class Operator:
 
-    def help(self):
-        print("This class contains some useful functions for signal analysis")
-        print("The following functions are available:")
-        for method in dir(self):
-            if callable(getattr(self, method)) and not method.startswith("__"):
-                print(f"- {method}")
-
-
     @staticmethod
     def moving_average(x: np.array, window_size: int):
         """
@@ -50,3 +42,11 @@ class Operator:
                 x_averaged[i] = np.mean(x[i - window_size // 2:i + window_size //
                                             2 + 1])
         return x_averaged
+
+    @staticmethod
+    def from_analog_frame_to_marker_frame():
+        pass
+
+    @staticmethod
+    def from_marker_frame_to_analog_frame():
+        pass
