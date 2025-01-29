@@ -35,6 +35,7 @@ class ResultManager:
         self.gait_parameters = None
         self.events = None
         self.kinematics_reconstructor = None
+        self.inverse_dynamics_performer = None
         self.optimal_estimator = None
 
     def create_biorbd_model(self, osim_model_type):
@@ -92,6 +93,28 @@ class ResultManager:
             self.biorbd_model_creator.biorbd_model,
             animate_kinematics_flag=animate_kinematics_flag,
         )
+
+
+    def perform_inverse_dynamics(self):
+        # Checks
+        if self.biorbd_model_creator is None:
+            raise Exception("Please add the biorbd model first by running ResultManager.create_biorbd_model()")
+        if self.experimental_data is None:
+            raise Exception("Please add the experimental data first by running ResultManager.add_experimental_data()")
+        if self.kinematics_reconstructor is None:
+            raise Exception("Please add the kinematics reconstructor first by running ResultManager.reconstruct_kinematics()")
+        if self.inverse_dynamics_performer is not None:
+            raise Exception("inverse_dynamics_performer already added")
+
+        # Perform inverse dynamics
+        self.inverse_dynamics_performer = InverseDynamicsPerformer(
+            self.experimental_data,
+            self.biorbd_model_creator.biorbd_model,
+            self.kinematics_reconstructor.q,
+            self.kinematics_reconstructor.qdot,
+            self.kinematics_reconstructor.qddot,
+        )
+
 
     def estimate_optimally(self):
         # Checks

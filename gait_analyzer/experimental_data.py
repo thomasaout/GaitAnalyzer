@@ -39,7 +39,7 @@ class ExperimentalData:
         self.analogs_sampling_frequency = None
         self.analogs_dt = None
         self.nb_analog_frames = None
-        self.grf_sorted = None
+        self.f_ext_sorted = None
         self.marker_time_vector = None
         self.analogs_time_vector = None
 
@@ -64,7 +64,7 @@ class ExperimentalData:
         self.markers_dt = 1 / c3d["header"]["points"]["frame_rate"]
         self.nb_marker_frames = markers.shape[2]
         exp_marker_names = c3d["parameters"]["POINT"]["LABELS"]["value"]
-        markers_units = 1
+        marker_units = 1
         if c3d["parameters"]["POINT"]["UNITS"]["value"][0] == "mm":
             marker_units = 0.001
         # if len(self.model_marker_names) > len(exp_marker_names):
@@ -85,6 +85,9 @@ class ExperimentalData:
         self.analogs_sampling_frequency = c3d["parameters"]["ANALOG"]["RATE"]["value"][0]  # Hz
         self.analogs_dt = 1 / c3d["header"]["analogs"]["frame_rate"]
         analog_names = c3d["parameters"]["ANALOG"]["LABELS"]["value"]
+        analog_units = np.ones((len(analog_names, )))
+        if c3d["parameters"]["ANALOG"]["UNITS"]["value"][0] == "mm":
+            analog_units = 0.001
         # print(analog_names)
         # emg_sorted = np.zeros((len(model_muscle_names), self.nb_analog_frames))
         # for i_muscle, name in enumerate(model_muscle_names):
@@ -96,17 +99,17 @@ class ExperimentalData:
         # Get the experimental ground reaction forces
         force_platform_1_channels = c3d["parameters"]["FORCE_PLATFORM"]["CHANNEL"]["value"][:, 0]
         force_platform_2_channels = c3d["parameters"]["FORCE_PLATFORM"]["CHANNEL"]["value"][:, 1]
-        grf_sorted = np.zeros((2, 6, self.nb_analog_frames))
+        f_ext_sorted = np.zeros((2, 6, self.nb_analog_frames))
         for i in range(6):
             platform_1_idx = analog_names.index(f"Channel_{force_platform_1_channels[i]:02d}")
             platform_2_idx = analog_names.index(f"Channel_{force_platform_2_channels[i]:02d}")
-            grf_sorted[0, i, :] = analogs[0, platform_1_idx, :]
-            grf_sorted[1, i, :] = analogs[0, platform_2_idx, :]
-        self.grf_sorted = grf_sorted
+            f_ext_sorted[0, i, :] = analogs[0, platform_1_idx, :]
+            f_ext_sorted[1, i, :] = analogs[0, platform_2_idx, :]
+        self.f_ext_sorted = f_ext_sorted
 
         # from scipy import signal
         # b, a = signal.butter(2, 1/50, btype='low')
-        # y = signal.filtfilt(b, a, grf_sorted[0, 2, :], padlen=150)
+        # y = signal.filtfilt(b, a, f_ext_sorted[0, 2, :], padlen=150)
         # # 4th 6-10
 
         self.marker_time_vector = np.linspace(0, self.markers_dt * self.nb_marker_frames, self.nb_marker_frames)
@@ -138,7 +141,7 @@ class ExperimentalData:
             "analogs_sampling_frequency": self.analogs_sampling_frequency,
             "analogs_dt": self.analogs_dt,
             "nb_analog_frames": self.nb_analog_frames,
-            "grf_sorted": self.grf_sorted,
+            "f_ext_sorted": self.f_ext_sorted,
             "marker_time_vector": self.marker_time_vector,
             "analogs_time_vector": self.analogs_time_vector,
         }

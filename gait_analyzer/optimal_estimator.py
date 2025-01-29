@@ -168,7 +168,7 @@ class OptimalEstimator:
                     * self.experimental_data.markers_dt
                     / self.experimental_data.analogs_dt
                 )
-                - 3
+                - 5
             )
             idx_end = (
                 int(
@@ -176,7 +176,7 @@ class OptimalEstimator:
                     * self.experimental_data.markers_dt
                     / self.experimental_data.analogs_dt
                 )
-                + 3
+                + 5
             )
             self.f_ext_exp_ocp["left_leg"][:3, i_node] = np.mean(
                 self.experimental_data.grf_sorted[0, 3:6, idx_beginning:idx_end], axis=1
