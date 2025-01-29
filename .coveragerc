@@ -1,0 +1,9 @@
+[run]
+# Include the directories where your source files reside.
+source =
+    gait_analyzer
+# Omit files/directories you don't want to include.
+omit =
+    tests/*
+    setup.py
+    docs/*
