@@ -176,6 +176,10 @@ cython_debug/
 
 data/
 
+results/
+
+examples/sandbox/
+
 models/biorbd_models/Geometry/
 
 models/biorbd_models/Geometry_cleaned/

@@ -24,7 +24,7 @@ class ResultManager:
         # Checks:
         if not isinstance(subject_name, str):
             raise ValueError("subject_name must be a string")
-        if not isinstance(subject_mass, int):
+        if not isinstance(subject_mass, float):
             raise ValueError("subject_mass must be an float")
 
         # Attributes

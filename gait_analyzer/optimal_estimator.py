@@ -1,6 +1,5 @@
 import numpy as np
 
-import biorbd
 from bioptim import (
     BiorbdModel,
     OptimalControlProgram,
@@ -13,6 +12,11 @@ from bioptim import (
     InterpolationType,
     Node,
     Solver,
+    ConstraintList,
+    ConstraintFcn,
+    PhaseTransitionList,
+    PhaseTransitionFcn,
+    BiMappingList,
 )
 
 from gait_analyzer.experimental_data import ExperimentalData
@@ -63,10 +67,69 @@ class OptimalEstimator:
         self.emg_exp_ocp = None
         self.n_shooting = None
         self.phase_time = None
+        self.generate_contact_biomods()
         self.prepare_reduced_experimental_data()
         self.prepare_ocp()
         self.solve()
         self.extract_muscle_forces()
+
+
+    def generate_contact_biomods(self):
+        """
+        Create other bioMod files with the addition of the different feet contact conditions.
+        """
+        def add_txt_per_condition(condition: str) -> str:
+            # TODO: Charbie -> Until biorbd is fixed to read biomods, I will hard code the position of the contacts
+            contact_text = "\n/*-------------- CONTACTS---------------\n*/\n"
+            if "heelL" in condition:
+                contact_text = f"contact\tLCAL\n"
+                contact_text += f"\tparent\tcalcn_l\n"
+                contact_text += f"\tposition\t-0.018184372684362127\t-0.036183919561541877\t0.010718604411614319\n"
+                contact_text += f"\taxis\txyz\n"
+                contact_text += "endcontact\n\n"
+            if "toesL" in condition:
+                contact_text = f"contact\tLMFH1\n"
+                contact_text += f"\tparent\tcalcn_l\n"
+                contact_text += f"\tposition\t0.19202791077724868\t-0.013754853217574914\t0.039283237127771042\n"
+                contact_text += f"\taxis\tz\n"
+                contact_text += "endcontact\n\n"
+
+                contact_text = f"contact\tLMFH5\n"
+                contact_text += f"\tparent\tcalcn_l\n"
+                contact_text += f"\tposition\t0.18583815793306013\t-0.0092170000425693677\t-0.072430596752376397\n"
+                contact_text += f"\taxis\tz\n"
+                contact_text += "endcontact\n\n"
+            if "heelR" in condition:
+                contact_text = f"contact\tRCAL\n"
+                contact_text += f"\tparent\tcalcn_r\n"
+                contact_text += f"\tposition\t-0.017776522017632024\t-0.030271301561674208\t-0.015068364463032391\n"
+                contact_text += f"\taxis\txyz\n"
+                contact_text += "endcontact\n\n"
+            if "toesR" in condition:
+                contact_text = f"contact\tRMFH1\n"
+                contact_text += f"\tparent\tcalcn_r\n"
+                contact_text += f"\tposition\t0.20126587479704638\t-0.0099656486276807066\t-0.039248701869426805\n"
+                contact_text += f"\taxis\tz\n"
+                contact_text += "endcontact\n\n"
+
+                contact_text = f"contact\tRMFH5\n"
+                contact_text += f"\tparent\tcalcn_r\n"
+                contact_text += f"\tposition\t0.18449626841163846\t-0.018897872323952902\t0.07033570386440513\n"
+                contact_text += f"\taxis\tz\n"
+                contact_text += "endcontact\n\n"
+
+            return contact_text
+
+        original_model_path = self.biorbd_model_path
+        conditions = ["heelR_toesR", "toesR_heelL", "toesR", "toesR_heelL", "heelL_toesL", "toesL", "toesL_heelR", "toesL_heelR_toesR"]
+        for condition in conditions:
+            new_model_path = original_model_path.replace(".bioMod", f"_{condition}.bioMod")
+            with open(original_model_path, "r+", encoding="utf-8") as file:
+                lines = file.readlines()
+            with open(new_model_path, "w+", encoding="utf-8") as file:
+                for line in lines:
+                    file.write(line)
+                file.write(add_txt_per_condition(condition))
 
 
     def prepare_reduced_experimental_data(self):
@@ -76,8 +139,6 @@ class OptimalEstimator:
         """
         # Temporarily I will try with everything!
         self.model_ocp = self.biorbd_model_path.replace(".bioMod", "_heelL_toesL.bioMod")
-        model_new = biorbd.Model(self.biorbd_model_path)
-        model_new.
 
         # Only the 10th right leg swing (while left leg in flat foot)
         swing_timings = np.where(self.phases["heelL_toesL"])[0]
@@ -99,7 +160,7 @@ class OptimalEstimator:
             self.f_ext_exp_ocp["left_leg"][3:, i_node] = np.mean(self.experimental_data.grf_sorted[0, 0:3, idx_beginning:idx_end], axis=1)  # Forces
             self.f_ext_exp_ocp["right_leg"][:3, i_node] = np.mean(self.experimental_data.grf_sorted[1, 3:6, idx_beginning:idx_end], axis=1)  # Moments
             self.f_ext_exp_ocp["right_leg"][3:, i_node] = np.mean(self.experimental_data.grf_sorted[1, 0:3, idx_beginning:idx_end], axis=1)  # Forces
-        self.markers_exp_ocp = self.experimental_data.markers_sorted[:, this_sequence_markers]
+        self.markers_exp_ocp = self.experimental_data.markers_sorted[:, :, this_sequence_markers]
 
         self.n_shooting = self.q_exp_ocp.shape[1]
         self.phase_time = self.n_shooting * self.experimental_data.markers_dt
@@ -109,7 +170,10 @@ class OptimalEstimator:
         Let's say swing phase only for now
         """
 
-        bio_model = BiorbdModel(self.biorbd_model_path)
+        bio_model = BiorbdModel(self.model_ocp)
+        nb_q = bio_model.nb_q
+        nb_root = 6
+        nb_tau = nb_q - nb_root
 
         # Declaration of the objectives
         objective_functions = ObjectiveList()
@@ -141,112 +205,38 @@ class OptimalEstimator:
             target=self.f_ext_exp_ocp,
         )
 
-        dynamics = DynamicsList()
+        constraints = ConstraintList()
+        constraints.add(
+            ConstraintFcn.TRACK_CONTACT_FORCES,
+            min_bound=0,
+            max_bound=np.inf,
+            node=Node.ALL_SHOOTING,
+            contact_index=2,
+        )
+        constraints.add(
+            ConstraintFcn.TRACK_CONTACT_FORCES,
+            min_bound=0,
+            max_bound=np.inf,
+            node=Node.ALL_SHOOTING,
+            contact_index=3,
+        )
+
+        dynamics = DynamicsList()  # Change for muscles
         dynamics.add(DynamicsFcn.TORQUE_DRIVEN, with_contact=True)
 
-        # Declaration of optimization variables bounds and initial guesses
-        # Path constraint
+        dof_mappings = BiMappingList()
+        dof_mappings.add("tau", to_second=[None]*nb_root + list(range(nb_tau)), to_first=list(range(nb_root, nb_tau+nb_root)))
+
+        # TODO: Charbie
         x_bounds = BoundsList()
         x_initial_guesses = InitialGuessList()
 
         u_bounds = BoundsList()
         u_initial_guesses = InitialGuessList()
+        u_bounds.add("tau", min_bound=[-1000]*nb_tau, max_bound=[1000]*nb_tau, interpolation=InterpolationType.CONSTANT)
 
-        x_bounds.add(
-            "q_roots",
-            min_bound=[
-                [0.0, -1.0, -0.1],
-                [0.0, -1.0, -0.1],
-                [0.0, -0.1, -0.1],
-                [0.0, -0.1, 2 * np.pi - 0.1],
-                [0.0, -np.pi / 4, -np.pi / 4],
-                [0.0, -0.1, -0.1],
-            ],
-            max_bound=[
-                [0.0, 1.0, 0.1],
-                [0.0, 1.0, 0.1],
-                [0.0, 10.0, 0.1],
-                [0.0, 2 * np.pi + 0.1, 2 * np.pi + 0.1],
-                [0.0, np.pi / 4, np.pi / 4],
-                [0.0, np.pi + 0.1, np.pi + 0.1],
-            ],
-        )
-        x_bounds.add(
-            "q_joints",
-            min_bound=[
-                [2.9, -0.05, -0.05],
-                [-2.9, -3.0, -3.0],
-            ],
-            max_bound=[
-                [2.9, 3.0, 3.0],
-                [-2.9, 0.05, 0.05],
-            ],
-        )
-
-        x_bounds.add(
-            "qdot_roots",
-            min_bound=[
-                [-0.5, -10.0, -10.0],
-                [-0.5, -10.0, -10.0],
-                [5.0, -100.0, -100.0],
-                [0.5, 0.5, 0.5],
-                [0.0, -100.0, -100.0],
-                [0.0, -100.0, -100.0],
-            ],
-            max_bound=[
-                [0.5, 10.0, 10.0],
-                [0.5, 10.0, 10.0],
-                [10.0, 100.0, 100.0],
-                [20.0, 20.0, 20.0],
-                [-0.0, 100.0, 100.0],
-                [-0.0, 100.0, 100.0],
-            ],
-        )
-        x_bounds.add(
-            "qdot_joints",
-            min_bound=[
-                [0.0, -100.0, -100.0],
-                [0.0, -100.0, -100.0],
-            ],
-            max_bound=[
-                [-0.0, 100.0, 100.0],
-                [-0.0, 100.0, 100.0],
-            ],
-        )
-
-        x_initial_guesses.add(
-            "q_roots",
-            initial_guess=[
-                [0.0, 0.0],
-                [0.0, 0.0],
-                [0.0, 0.0],
-                [0.0, 2 * np.pi],
-                [0.0, 0.0],
-                [0.0, np.pi],
-            ],
-            interpolation=InterpolationType.LINEAR,
-        )
-        x_initial_guesses.add(
-            "q_joints",
-            initial_guess=[
-                [2.9, 0.0],
-                [-2.9, 0.0],
-            ],
-            interpolation=InterpolationType.LINEAR,
-        )
-
-        x_initial_guesses.add(
-            "qdot_roots",
-            initial_guess=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            interpolation=InterpolationType.CONSTANT,
-        )
-        x_initial_guesses.add(
-            "qdot_joints",
-            initial_guess=[0.0, 0.0],
-            interpolation=InterpolationType.CONSTANT,
-        )
-
-        u_bounds.add("tau_joints", min_bound=[-100, -100], max_bound=[100, 100], interpolation=InterpolationType.CONSTANT)
+        phase_transitions = PhaseTransitionList()
+        phase_transitions.add(PhaseTransitionFcn.CYCLIC, phase_pre_idx=0)
 
         self.ocp = OptimalControlProgram(
             bio_model=bio_model,
@@ -258,6 +248,9 @@ class OptimalEstimator:
             x_init=x_initial_guesses,
             u_init=u_initial_guesses,
             objective_functions=objective_functions,
+            constraints=constraints,
+            phase_transitions=phase_transitions,
+            variable_mappings=dof_mappings,
             use_sx=False,
         )
 

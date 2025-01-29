@@ -3,7 +3,7 @@ from .biomod_model_creator import BiomodModelCreator, OsimModels
 from .experimental_data import ExperimentalData
 from .helper import helper
 from .kinematics_reconstructor import KinematicsReconstructor
-from .operator import Operator
+from .operator import Operator, AnalysisPerformer
 from .optimal_estimator import OptimalEstimator
 from .result_manager import ResultManager
 
