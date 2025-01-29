@@ -1,5 +1,7 @@
 # GaitAnalyzer
 
+This report is for gait analysis.
+
 
 ## Installation
 If you need help setting up your environment, you can follow the instructions in the section setup.
