@@ -8,6 +8,7 @@ from gait_analyzer import (
 )
 
 
+
 def analysis_to_perform(subject_name: str, subject_mass: float, c3d_file_name: str):
     # --- Example of analysis --- #
     results = ResultManager(subject_name=subject_name, subject_mass=subject_mass)
