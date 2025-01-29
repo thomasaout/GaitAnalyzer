@@ -1,4 +1,3 @@
-
 from gait_analyzer.biomod_model_creator import BiomodModelCreator
 from gait_analyzer.experimental_data import ExperimentalData
 from gait_analyzer.events import Events
@@ -10,6 +9,7 @@ class ResultManager:
     """
     This class contains all the results from the gait analysis and is the main class handling all types of analysis to perform on the experimental data.
     """
+
     def __init__(self, subject_name: str, subject_mass: float):
         """
         Initialize the ResultManager.
@@ -37,7 +37,6 @@ class ResultManager:
         self.kinematics_reconstructor = None
         self.optimal_estimator = None
 
-
     def create_biorbd_model(self, osim_model_type):
         """
         Create and add the biorbd model to the ResultManager
@@ -50,7 +49,6 @@ class ResultManager:
         # Add BiomodModelCreator
         self.biorbd_model_creator = BiomodModelCreator(self.subject_name, osim_model_type)
 
-
     def add_experimental_data(self, c3d_file_name: str, animate_c3d_flag: bool = False):
 
         # Checks
@@ -60,10 +58,11 @@ class ResultManager:
             raise Exception("Please add the biorbd model first by running ResultManager.create_biorbd_model()")
 
         # Add experimental data
-        self.experimental_data = ExperimentalData(c3d_file_name=c3d_file_name,
-                                                  biorbd_model=self.biorbd_model_creator.biorbd_model,
-                                                  animate_c3d_flag=animate_c3d_flag)
-
+        self.experimental_data = ExperimentalData(
+            c3d_file_name=c3d_file_name,
+            biorbd_model=self.biorbd_model_creator.biorbd_model,
+            animate_c3d_flag=animate_c3d_flag,
+        )
 
     def add_events(self, plot_phases_flag):
 
@@ -76,8 +75,7 @@ class ResultManager:
             raise Exception("Events already added")
 
         # Add events
-        self.events = Events(experimental_data = self.experimental_data,
-                             plot_phases_flag=plot_phases_flag)
+        self.events = Events(experimental_data=self.experimental_data, plot_phases_flag=plot_phases_flag)
 
     def reconstruct_kinematics(self, animate_kinematics_flag: bool = False):
         # Checks
@@ -89,7 +87,11 @@ class ResultManager:
             raise Exception("kinematics_reconstructor already added")
 
         # Reconstruct kinematics
-        self.kinematics_reconstructor = KinematicsReconstructor(self.experimental_data, self.biorbd_model_creator.biorbd_model, animate_kinematics_flag=animate_kinematics_flag)
+        self.kinematics_reconstructor = KinematicsReconstructor(
+            self.experimental_data,
+            self.biorbd_model_creator.biorbd_model,
+            animate_kinematics_flag=animate_kinematics_flag,
+        )
 
     def estimate_optimally(self):
         # Checks
@@ -100,11 +102,15 @@ class ResultManager:
         if self.events is None:
             raise Exception("Please run the events detection first by running ResultManager.add_events()")
         if self.kinematics_reconstructor is None:
-            raise Exception("Please run the kinematics reconstruction first by running ResultManager.estimate_optimally()")
+            raise Exception(
+                "Please run the kinematics reconstruction first by running ResultManager.estimate_optimally()"
+            )
 
         # Perform the optimal estimation optimization
-        self.optimal_estimator = OptimalEstimator(biorbd_model_path=self.biorbd_model_creator.biorbd_model_full_path,
-                                                  experimental_data=self.experimental_data,
-                                                     q=self.kinematics_reconstructor.q,
-                                                     qdot=self.kinematics_reconstructor.qdot,
-                                                     phases=self.events.phases)
+        self.optimal_estimator = OptimalEstimator(
+            biorbd_model_path=self.biorbd_model_creator.biorbd_model_full_path,
+            experimental_data=self.experimental_data,
+            q=self.kinematics_reconstructor.q,
+            qdot=self.kinematics_reconstructor.qdot,
+            phases=self.events.phases,
+        )

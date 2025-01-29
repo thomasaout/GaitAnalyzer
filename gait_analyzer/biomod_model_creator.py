@@ -1,4 +1,3 @@
-
 import biorbd
 import osim_to_biomod as otb
 
@@ -8,22 +7,27 @@ class OsimModels:
     # TODO: Charbie -> Otherwise, can Florian give the link to the OpenSim model?
     @property
     def osim_model_name(self):
-        raise RuntimeError("This method is implemented in the child class. You should call OsimModels.[mode type name].osim_model_name.")
+        raise RuntimeError(
+            "This method is implemented in the child class. You should call OsimModels.[mode type name].osim_model_name."
+        )
 
     @property
     def osim_model_full_path(self):
-        raise RuntimeError("This method is implemented in the child class. You should call OsimModels.[mode type name].osim_model_full_path.")
+        raise RuntimeError(
+            "This method is implemented in the child class. You should call OsimModels.[mode type name].osim_model_full_path."
+        )
 
     @property
     def muscles_to_ignore(self):
         raise RuntimeError(
-            "This method is implemented in the child class. You should call OsimModels.[mode type name].muscles_to_ignore.")
+            "This method is implemented in the child class. You should call OsimModels.[mode type name].muscles_to_ignore."
+        )
 
     @property
     def markers_to_ignore(self):
         raise RuntimeError(
-            "This method is implemented in the child class. You should call OsimModels.[mode type name].markers_to_ignore.")
-
+            "This method is implemented in the child class. You should call OsimModels.[mode type name].markers_to_ignore."
+        )
 
     # Child classes acting as an enum
     class WholeBody:
@@ -47,67 +51,59 @@ class OsimModels:
 
         @property
         def muscles_to_ignore(self):
-            return ["ant_delt_r",
-                             "ant_delt_l",
-                             "medial_delt_l",
-                             "post_delt_r",
-                             "post_delt_l",
-                             "medial_delt_r",
-                             "ercspn_r",
-                             "ercspn_l",
-                             "rect_abd_r",
-                             "rect_abd_l",
-                             "r_stern_mast",
-                             "l_stern_mast",
-                             "r_trap_acr",
-                             "l_trap_acr",
-                             "TRIlong",
-                             "TRIlong_l",
-                             "TRIlat",
-                             "TRIlat_l",
-                             "BIClong",
-                             "BIClong_l",
-                             "BRD",
-                             "BRD_l",
-                             "FCR",
-                             "FCR_l",
-                             "ECRL",
-                             "ECRL_l",
-                             "PT",
-                             "PT_l",
-                             "LAT2",
-                             "LAT2_l",
-                             "PECM2",
-                             "PECM2_l",
-                             ] + ["glut_med1_r",
-                                     "semiten_r",
-                                     "bifemlh_r",
-                                     "sar_r",
-                                     "tfl_r",
-                                     "vas_med_r",
-                                     "vas_lat_r",
-                                     "glut_med1_l",
-                                     "semiten_l",
-                                     "bifemlh_l",
-                                     "sar_l",
-                                     "tfl_l",
-                                     "vas_med_l",
-                                     "vas_lat_l"]
+            return [
+                "ant_delt_r",
+                "ant_delt_l",
+                "medial_delt_l",
+                "post_delt_r",
+                "post_delt_l",
+                "medial_delt_r",
+                "ercspn_r",
+                "ercspn_l",
+                "rect_abd_r",
+                "rect_abd_l",
+                "r_stern_mast",
+                "l_stern_mast",
+                "r_trap_acr",
+                "l_trap_acr",
+                "TRIlong",
+                "TRIlong_l",
+                "TRIlat",
+                "TRIlat_l",
+                "BIClong",
+                "BIClong_l",
+                "BRD",
+                "BRD_l",
+                "FCR",
+                "FCR_l",
+                "ECRL",
+                "ECRL_l",
+                "PT",
+                "PT_l",
+                "LAT2",
+                "LAT2_l",
+                "PECM2",
+                "PECM2_l",
+            ] + [
+                "glut_med1_r",
+                "semiten_r",
+                "bifemlh_r",
+                "sar_r",
+                "tfl_r",
+                "vas_med_r",
+                "vas_lat_r",
+                "glut_med1_l",
+                "semiten_l",
+                "bifemlh_l",
+                "sar_l",
+                "tfl_l",
+                "vas_med_l",
+                "vas_lat_l",
+            ]
 
         @property
         def markers_to_ignore(self):
-            return ['LHJC',
-                     'RHJC',
-                     'RKJC',
-                     'RAJC',
-                     'LKJC',
-                     'LAJC',
-                     'REJC',
-                     'RSJC',
-                     'RWJC',
-                     'LSJC',
-                     'LEJC',
-                     'LWJC']
+            return ["LHJC", "RHJC", "RKJC", "RAJC", "LKJC", "LAJC", "REJC", "RSJC", "RWJC", "LSJC", "LEJC", "LWJC"]
 
 
 class BiomodModelCreator:
@@ -119,9 +115,15 @@ class BiomodModelCreator:
         # Extended attributes
         osim_model_path = "../models/OpenSim_models"
         biorbd_model_path = "../models/biorbd_models"
-        vtp_geometry_path = "Geometry"  # TODO: Charbie -> can we point to the Opensim folder where all opensim's vtp files are stored
-        self.osim_model_full_path = osim_model_path + '/' + osim_model_type.osim_model_name + '_' + subject_name + ".osim"
-        self.biorbd_model_full_path = biorbd_model_path + '/' + osim_model_type.osim_model_name + '_' + subject_name + ".bioMod"
+        vtp_geometry_path = (
+            "Geometry"  # TODO: Charbie -> can we point to the Opensim folder where all opensim's vtp files are stored
+        )
+        self.osim_model_full_path = (
+            osim_model_path + "/" + osim_model_type.osim_model_name + "_" + subject_name + ".osim"
+        )
+        self.biorbd_model_full_path = (
+            biorbd_model_path + "/" + osim_model_type.osim_model_name + "_" + subject_name + ".bioMod"
+        )
 
         # Convert the osim model to a biorbd model
         converter = otb.Converter(
@@ -141,7 +143,6 @@ class BiomodModelCreator:
         )
         converter.convert_file()
         self.biorbd_model = biorbd.Model(self.biorbd_model_full_path)
-
 
     def inputs(self):
         return {

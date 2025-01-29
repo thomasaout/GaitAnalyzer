@@ -36,19 +36,18 @@ class Operator:
                 x = x.flatten()
             else:
                 raise ValueError("x must be a vector")
-        if x.shape[0]/2 < window_size:
+        if x.shape[0] / 2 < window_size:
             raise ValueError("window_size must be smaller than half of the length of the signal")
 
         # Compute the moving average
         x_averaged = np.zeros_like(x)
         for i in range(len(x)):
             if i < window_size // 2:
-                x_averaged[i] = np.mean(x[:i + window_size // 2 + 1])
+                x_averaged[i] = np.mean(x[: i + window_size // 2 + 1])
             elif i >= len(x) - window_size // 2:
-                x_averaged[i] = np.mean(x[i - window_size // 2:])
+                x_averaged[i] = np.mean(x[i - window_size // 2 :])
             else:
-                x_averaged[i] = np.mean(x[i - window_size // 2:i + window_size //
-                                            2 + 1])
+                x_averaged[i] = np.mean(x[i - window_size // 2 : i + window_size // 2 + 1])
         return x_averaged
 
     @staticmethod
@@ -63,7 +62,9 @@ class Operator:
 
 
 class AnalysisPerformer:
-    def __init__(self, analysis_to_perform: callable, subjects_to_analyze: list[str], result_folder: str = "../results/"):
+    def __init__(
+        self, analysis_to_perform: callable, subjects_to_analyze: list[str], result_folder: str = "../results/"
+    ):
         """
         Initialize the AnalysisPerformer.
         .
@@ -90,7 +91,6 @@ class AnalysisPerformer:
             os.makedirs(result_folder)
             print(f"Result folder did not exist, I have created it here {os.path.abspath(result_folder)}")
 
-
         # Initial attributes
         self.analysis_to_perform = analysis_to_perform
         self.subjects_to_analyze = subjects_to_analyze
@@ -98,7 +98,6 @@ class AnalysisPerformer:
 
         # Run the analysis
         self.run_analysis()
-
 
     @staticmethod
     def get_version():
@@ -108,7 +107,7 @@ class AnalysisPerformer:
 
         # Packages installed in the env
         # Running 'conda list' command and parse it as JSON
-        result = subprocess.run(['conda', 'list', '--json'], capture_output=True, text=True)
+        result = subprocess.run(["conda", "list", "--json"], capture_output=True, text=True)
         packages = json.loads(result.stdout)
         packages_versions = {elt["name"]: elt["version"] for elt in packages}
 
@@ -132,10 +131,11 @@ class AnalysisPerformer:
             "biorbd_version": packages_versions["biorbd"],
             "pyomeca_version": packages_versions["pyomeca"] if "pyomeca" in packages_versions else "Not installed",
             "ezc3d_version": packages_versions["ezc3d"],
-            "bioptim_version": packages_versions["bioptim"] if "bioptim" in packages_versions else "Not installed through conda-forge",
+            "bioptim_version": (
+                packages_versions["bioptim"] if "bioptim" in packages_versions else "Not installed through conda-forge"
+            ),
         }
         return version_dic
-
 
     def save_subject_results(self, results, result_file_name: str):
         """
@@ -153,11 +153,13 @@ class AnalysisPerformer:
         for attr_name in dir(results):
             attr = getattr(results, attr_name)
             if not callable(attr) and not attr_name.startswith("__"):
-                if hasattr(attr, 'outputs') and callable(getattr(attr, 'outputs')):
+                if hasattr(attr, "outputs") and callable(getattr(attr, "outputs")):
                     this_output_dict = attr.outputs()
                     for key, value in this_output_dict.items():
                         if key in result_dict:
-                            raise ValueError(f"Key {key} from class {attr_name} already exists in the result dictionary, please change the key to differentiate them.")
+                            raise ValueError(
+                                f"Key {key} from class {attr_name} already exists in the result dictionary, please change the key to differentiate them."
+                            )
                         elif key == "biorbd_model":
                             pass  # biorbd models are not picklable
                         else:
@@ -170,7 +172,6 @@ class AnalysisPerformer:
         # For matlab analysis
         savemat(result_file_name + ".mat", result_dict)
 
-
     def run_analysis(self):
         """
         Loops over the data files and perform the analysis specified by the user (on the subjects specified by the user).
@@ -182,7 +183,8 @@ class AnalysisPerformer:
                 os.makedirs(f"../data/{subject_name}")
                 tempo_subject_path = os.path.abspath(f"../data/{subject_name}")
                 raise RuntimeError(
-                    f"Data folder for subject {subject_name} does not exist. I have created it here {tempo_subject_path}, please put the data files in here.")
+                    f"Data folder for subject {subject_name} does not exist. I have created it here {tempo_subject_path}, please put the data files in here."
+                )
             if not os.path.exists(f"../data/{subject_name}/Sujet_{subject_name}.xlsx"):
                 tempo_subject_path = os.path.abspath(f"../data/{subject_name}/Sujet_{subject_name}.xlsx")
                 raise FileNotFoundError(f"Please put the participant information file here {tempo_subject_path}")

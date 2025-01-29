@@ -1,4 +1,3 @@
-
 import numpy as np
 import biorbd
 
@@ -9,6 +8,7 @@ class KinematicsReconstructor:
     """
     This class reconstruct the kinematics based on the marker position and the model predefined.
     """
+
     def __init__(self, experimental_data: ExperimentalData, biorbd_model, animate_kinematics_flag: bool = False):
         """
         Initialize the Events.
@@ -20,13 +20,15 @@ class KinematicsReconstructor:
         """
         # Checks
         if not isinstance(experimental_data, ExperimentalData):
-            raise ValueError("experimental_data must be an instance of ExperimentalData. You can declare it by running ExperimentalData(file_path).")
+            raise ValueError(
+                "experimental_data must be an instance of ExperimentalData. You can declare it by running ExperimentalData(file_path)."
+            )
 
         # Initial attributes
         self.experimental_data = experimental_data
         self.biorbd_model = biorbd_model
 
-        #Extended attributes
+        # Extended attributes
         self.q = np.ndarray(())
         self.qdot = np.ndarray(())
         self.qddot = np.ndarray(())
@@ -38,10 +40,10 @@ class KinematicsReconstructor:
         if animate_kinematics_flag:
             self.animate_kinematics()
 
-
     def perform_kinematics_reconstruction(self):
-        self.t, self.q, self.qdot, self.qddot = biorbd.extended_kalman_filter(self.biorbd_model, self.experimental_data.c3d_full_file_path)
-
+        self.t, self.q, self.qdot, self.qddot = biorbd.extended_kalman_filter(
+            self.biorbd_model, self.experimental_data.c3d_full_file_path
+        )
 
     def inverse_dynamics(self):
         # TODO: Guys -> How can you do an inverse kinematics if you do not know the foot pressure repartition ?
@@ -125,14 +127,12 @@ class KinematicsReconstructor:
         """
         pass
 
-
     def animate_kinematics(self):
         """
         Animate the kinematics
         """
         # TODO: Charbie -> Animate the kinematics using pyorerun
         pass
-
 
     def inputs(self):
         return {
