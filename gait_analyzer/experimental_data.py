@@ -7,6 +7,7 @@ class ExperimentalData:
     """
     This class contains all the experimental data from a trial (markers, EMG, force plates data, gait parameters).
     """
+
     def __init__(self, c3d_file_name: str, biorbd_model: biorbd.Model, animate_c3d_flag: bool):
         """
         Initialize the ExperimentalData.
@@ -47,7 +48,6 @@ class ExperimentalData:
         self.extract_gait_parameters()
         if animate_c3d_flag:
             self.animate_c3d()
-
 
     def perform_initial_treatment(self):
         """
@@ -112,18 +112,15 @@ class ExperimentalData:
         self.marker_time_vector = np.linspace(0, self.markers_dt * self.nb_marker_frames, self.nb_marker_frames)
         self.analogs_time_vector = np.linspace(0, self.analogs_dt * self.nb_analog_frames, self.nb_analog_frames)
 
-
     def animate_c3d(self):
         # TODO: Charbie -> animate the c3d file with pyorerun
         pass
-
 
     def extract_gait_parameters(self):
         """
         TODO: Guys -> please provide code :)
         """
         pass
-
 
     def inputs(self):
         return {

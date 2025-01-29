@@ -1,29 +1,14 @@
 name: environment
 channels:
   - conda-forge
-  - defaults
 dependencies:
-  - biorbd=1.11.2=py312h91cc1fa_1
-  - casadi=3.6.7=py312h8b31186_0
-  - ezc3d=1.5.17=np20py312h54d88c8_0
-  - ipopt=3.14.16=h3e4dc2c_11
-  - libblas=3.9.0=26_osxarm64_openblas
-  - libgfortran=5.0.0=13_2_0_hd922786_3
-  - libgfortran5=13.2.0=hf226fd6_3
-  - liblapack=3.9.0=26_osxarm64_openblas
-  - libopenblas=0.3.28=openmp_hf332438_1
-  - libxml2=2.13.5=h178c5d8_1
-  - matplotlib-base=3.10.0=py312hdbc7e53_0
-  - mumps-include=5.7.3=hce30654_5
-  - mumps-seq=5.7.3=he17653c_5
-  - numpy=2.2.1=py312h41c6370_0
-  - packaging=24.2=pyhd8ed1ab_2
-  - python=3.12.8=hc22306f_1_cpython
-  - rbdl=3.3.1=h7b3277c_4
-  - scipy=1.15.0=py312hb7ffdcd_0
-  - setuptools=75.6.0=pyhff2d567_1
-  - tinyxml=2.6.2=h260d524_2
-  - tinyxml2=10.0.0=hebf3989_0
-  - yaml=0.2.5=h3422bc3_2
-  - pandas=2.2.3-py312hcd31e36_1
-prefix: /opt/miniconda3/envs/environment
+  - numpy
+  - matplotlib
+  - biorbd>=1.11.2
+  - bioptim>=3.2.1
+  - ezc3d>=1.5.17
+  - scipy
+  - lxml
+  - pandas
+  - openpyxl
+  - gitpython

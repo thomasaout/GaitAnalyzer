@@ -17,7 +17,14 @@ setup(
         "examples",
     ],
     license="LICENSE",
-    keywords=["Walking", "Biomechanics", "Gait parameters", "Functional Electrical Stimulation", "Motion capture", "Ground reaction force"],
+    keywords=[
+        "Walking",
+        "Biomechanics",
+        "Gait parameters",
+        "Functional Electrical Stimulation",
+        "Motion capture",
+        "Ground reaction force",
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

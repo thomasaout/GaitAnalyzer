@@ -29,12 +29,10 @@ class OptimalEstimator:
     This method allows estimating the muscle forces and the joint torques more accurately.
     However, it is quite long.
     """
-    def __init__(self,
-                 biorbd_model_path: str,
-                 experimental_data: ExperimentalData,
-                 q: np.ndarray,
-                 qdot: np.ndarray,
-                 phases: dict):
+
+    def __init__(
+        self, biorbd_model_path: str, experimental_data: ExperimentalData, q: np.ndarray, qdot: np.ndarray, phases: dict
+    ):
         """
         Initialize the OptimalEstimator.
         .
@@ -73,11 +71,11 @@ class OptimalEstimator:
         self.solve()
         self.extract_muscle_forces()
 
-
     def generate_contact_biomods(self):
         """
         Create other bioMod files with the addition of the different feet contact conditions.
         """
+
         def add_txt_per_condition(condition: str) -> str:
             # TODO: Charbie -> Until biorbd is fixed to read biomods, I will hard code the position of the contacts
             contact_text = "\n/*-------------- CONTACTS---------------\n*/\n"
@@ -121,7 +119,16 @@ class OptimalEstimator:
             return contact_text
 
         original_model_path = self.biorbd_model_path
-        conditions = ["heelR_toesR", "toesR_heelL", "toesR", "toesR_heelL", "heelL_toesL", "toesL", "toesL_heelR", "toesL_heelR_toesR"]
+        conditions = [
+            "heelR_toesR",
+            "toesR_heelL",
+            "toesR",
+            "toesR_heelL",
+            "heelL_toesL",
+            "toesL",
+            "toesL_heelR",
+            "toesL_heelR_toesR",
+        ]
         for condition in conditions:
             new_model_path = original_model_path.replace(".bioMod", f"_{condition}.bioMod")
             with open(original_model_path, "r+", encoding="utf-8") as file:
@@ -130,7 +137,6 @@ class OptimalEstimator:
                 for line in lines:
                     file.write(line)
                 file.write(add_txt_per_condition(condition))
-
 
     def prepare_reduced_experimental_data(self):
         """
@@ -142,24 +148,48 @@ class OptimalEstimator:
 
         # Only the 10th right leg swing (while left leg in flat foot)
         swing_timings = np.where(self.phases["heelL_toesL"])[0]
-        right_swing_sequence = np.array_split(
-            swing_timings, np.flatnonzero(np.diff(swing_timings) > 1) + 1
-        )
+        right_swing_sequence = np.array_split(swing_timings, np.flatnonzero(np.diff(swing_timings) > 1) + 1)
         this_sequence_analogs = right_swing_sequence[9]
-        this_sequence_markers = np.arange(int(this_sequence_analogs[0] * self.experimental_data.analogs_dt/self.experimental_data.markers_dt),
-                                         int(this_sequence_analogs[-1] * self.experimental_data.analogs_dt/self.experimental_data.markers_dt))
+        this_sequence_markers = np.arange(
+            int(this_sequence_analogs[0] * self.experimental_data.analogs_dt / self.experimental_data.markers_dt),
+            int(this_sequence_analogs[-1] * self.experimental_data.analogs_dt / self.experimental_data.markers_dt),
+        )
         self.q_exp_ocp = self.q[:, this_sequence_markers]
         self.qdot_exp_ocp = self.qdot[:, this_sequence_markers]
-        self.f_ext_exp_ocp = {"left_leg": np.zeros((6, self.q_exp_ocp.shape[1])),
-                              "right_leg": np.zeros((6, self.q_exp_ocp.shape[1]))}
+        self.f_ext_exp_ocp = {
+            "left_leg": np.zeros((6, self.q_exp_ocp.shape[1])),
+            "right_leg": np.zeros((6, self.q_exp_ocp.shape[1])),
+        }
         for i_node in range(self.q_exp_ocp.shape[1]):
             # TODO: Guys/Charbie -> This method allows for rounding errors, there should be a mapping of frames instead
-            idx_beginning = int(this_sequence_markers[i_node] * self.experimental_data.markers_dt/self.experimental_data.analogs_dt) - 3
-            idx_end = int(this_sequence_markers[i_node] * self.experimental_data.markers_dt/self.experimental_data.analogs_dt) + 3
-            self.f_ext_exp_ocp["left_leg"][:3, i_node] = np.mean(self.experimental_data.grf_sorted[0, 3:6, idx_beginning:idx_end], axis=1)  # Moments
-            self.f_ext_exp_ocp["left_leg"][3:, i_node] = np.mean(self.experimental_data.grf_sorted[0, 0:3, idx_beginning:idx_end], axis=1)  # Forces
-            self.f_ext_exp_ocp["right_leg"][:3, i_node] = np.mean(self.experimental_data.grf_sorted[1, 3:6, idx_beginning:idx_end], axis=1)  # Moments
-            self.f_ext_exp_ocp["right_leg"][3:, i_node] = np.mean(self.experimental_data.grf_sorted[1, 0:3, idx_beginning:idx_end], axis=1)  # Forces
+            idx_beginning = (
+                int(
+                    this_sequence_markers[i_node]
+                    * self.experimental_data.markers_dt
+                    / self.experimental_data.analogs_dt
+                )
+                - 3
+            )
+            idx_end = (
+                int(
+                    this_sequence_markers[i_node]
+                    * self.experimental_data.markers_dt
+                    / self.experimental_data.analogs_dt
+                )
+                + 3
+            )
+            self.f_ext_exp_ocp["left_leg"][:3, i_node] = np.mean(
+                self.experimental_data.grf_sorted[0, 3:6, idx_beginning:idx_end], axis=1
+            )  # Moments
+            self.f_ext_exp_ocp["left_leg"][3:, i_node] = np.mean(
+                self.experimental_data.grf_sorted[0, 0:3, idx_beginning:idx_end], axis=1
+            )  # Forces
+            self.f_ext_exp_ocp["right_leg"][:3, i_node] = np.mean(
+                self.experimental_data.grf_sorted[1, 3:6, idx_beginning:idx_end], axis=1
+            )  # Moments
+            self.f_ext_exp_ocp["right_leg"][3:, i_node] = np.mean(
+                self.experimental_data.grf_sorted[1, 0:3, idx_beginning:idx_end], axis=1
+            )  # Forces
         self.markers_exp_ocp = self.experimental_data.markers_sorted[:, :, this_sequence_markers]
 
         self.n_shooting = self.q_exp_ocp.shape[1]
@@ -182,22 +212,10 @@ class OptimalEstimator:
             key="tau_joints",
             weight=1.0,
         )
+        objective_functions.add(objective=ObjectiveFcn.Lagrange.TRACK_MARKERS, weight=10.0, target=self.markers_exp_ocp)
+        objective_functions.add(objective=ObjectiveFcn.Lagrange.TRACK_STATE, key="q", weight=0.1, target=self.q_exp_ocp)
         objective_functions.add(
-            objective=ObjectiveFcn.Lagrange.TRACK_MARKERS,
-            weight=10.0,
-            target=self.markers_exp_ocp
-        )
-        objective_functions.add(
-            objective=ObjectiveFcn.Lagrange.TRACK_STATE,
-            key="q",
-            weight=0.1,
-            target=self.q_exp_ocp
-        )
-        objective_functions.add(
-            objective=ObjectiveFcn.Lagrange.TRACK_STATE,
-            key="qdot",
-            weight=0.01,
-            target=self.qdot_exp_ocp
+            objective=ObjectiveFcn.Lagrange.TRACK_STATE, key="qdot", weight=0.01, target=self.qdot_exp_ocp
         )
         objective_functions.add(
             objective=ObjectiveFcn.Lagrange.TRACK_CONTACT_FORCES,
@@ -225,7 +243,9 @@ class OptimalEstimator:
         dynamics.add(DynamicsFcn.TORQUE_DRIVEN, with_contact=True)
 
         dof_mappings = BiMappingList()
-        dof_mappings.add("tau", to_second=[None]*nb_root + list(range(nb_tau)), to_first=list(range(nb_root, nb_tau+nb_root)))
+        dof_mappings.add(
+            "tau", to_second=[None] * nb_root + list(range(nb_tau)), to_first=list(range(nb_root, nb_tau + nb_root))
+        )
 
         # TODO: Charbie
         x_bounds = BoundsList()
@@ -233,7 +253,9 @@ class OptimalEstimator:
 
         u_bounds = BoundsList()
         u_initial_guesses = InitialGuessList()
-        u_bounds.add("tau", min_bound=[-1000]*nb_tau, max_bound=[1000]*nb_tau, interpolation=InterpolationType.CONSTANT)
+        u_bounds.add(
+            "tau", min_bound=[-1000] * nb_tau, max_bound=[1000] * nb_tau, interpolation=InterpolationType.CONSTANT
+        )
 
         phase_transitions = PhaseTransitionList()
         phase_transitions.add(PhaseTransitionFcn.CYCLIC, phase_pre_idx=0)
@@ -257,7 +279,6 @@ class OptimalEstimator:
     def solve(self, show_online_optim: bool = False):
         solver = Solver.IPOPT(show_online_optim=show_online_optim)
         self.solution = self.ocp.solve(solver=solver)
-
 
     def extract_muscle_forces(self):
         # TODO: Charbie -> Extract muscle forces from the solution

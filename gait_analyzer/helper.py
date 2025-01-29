@@ -36,5 +36,3 @@ def helper(class_instance):
                         doc += "  " + line.strip() + "\n"
             print(f"\n- {method}{sig} -> {return_annotation}")
             print(f"{doc}\n")
-
-
