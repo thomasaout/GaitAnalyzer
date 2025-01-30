@@ -53,7 +53,11 @@ class Operator:
 
 class AnalysisPerformer:
     def __init__(
-        self, analysis_to_perform: callable, subjects_to_analyze: list[str], result_folder: str = "../results/"
+        self,
+        analysis_to_perform: callable,
+        subjects_to_analyze: list[str],
+        result_folder: str = "../results/",
+        skip_if_existing: bool = False,
     ):
         """
         Initialize the AnalysisPerformer.
@@ -66,6 +70,8 @@ class AnalysisPerformer:
             The list of subjects to analyze
         result_folder: str
             The folder where the results will be saved. It will look like result_folder/subject_name.
+        skip_if_existing: bool
+            If True, the analysis will not be performed if the results already exist.
         """
         # Checks:
         if not callable(analysis_to_perform):
@@ -85,6 +91,7 @@ class AnalysisPerformer:
         self.analysis_to_perform = analysis_to_perform
         self.subjects_to_analyze = subjects_to_analyze
         self.result_folder = result_folder
+        self.skip_if_existing = skip_if_existing
 
         # Run the analysis
         self.run_analysis()
@@ -189,14 +196,19 @@ class AnalysisPerformer:
 
             # Loop over all data files
             for data_file in os.listdir(f"../data/{subject_name}"):
-                if data_file.endswith("Statique.c3d"):  # TODO: Charbie -> add other "conditions_to_exclude" here
+                if data_file.endswith("Statique.c3d") or not data_file.endswith(
+                    ".c3d"
+                ):  # TODO: Charbie -> add other "conditions_to_exclude" here
                     continue
                 c3d_file_name = f"../data/{subject_name}/{data_file}"
-                # Perform the analysis
-                results = self.analysis_to_perform(subject_name, subject_mass, c3d_file_name)
-                # Save the results
                 result_folder = f"{self.result_folder}/{subject_name}"
                 if not os.path.exists(result_folder):
                     os.makedirs(result_folder)
                 result_file_name = f"{result_folder}/{data_file.replace('.c3d', '_results')}"
+
+                if self.skip_if_existing and os.path.exists(result_file_name + ".pkl"):
+                    print(f"Skipping {subject_name} - {data_file} because it already exists.")
+                    continue
+
+                results = self.analysis_to_perform(subject_name, subject_mass, c3d_file_name)
                 self.save_subject_results(results, result_file_name)
