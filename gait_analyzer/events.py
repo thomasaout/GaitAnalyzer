@@ -217,7 +217,7 @@ class Events:
         """
         Detect the swing phase when the vertical GRF is lower than a threshold
         """
-        minimal_vertical_force_threshold = 0.007
+        minimal_vertical_force_threshold = 0.05
         grf_right_z_filtered = Operator.moving_average(self.experimental_data.grf_sorted[0, 2, :], 21)
         grf_left_z_filtered = Operator.moving_average(self.experimental_data.grf_sorted[1, 2, :], 21)
         self.phases_left_leg["swing"][:] = np.abs(grf_right_z_filtered) < minimal_vertical_force_threshold
