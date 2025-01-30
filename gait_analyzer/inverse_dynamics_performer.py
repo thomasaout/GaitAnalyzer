@@ -66,7 +66,7 @@ class InverseDynamicsPerformer:
         tau = np.zeros_like(self.q)
         for i_node in range(self.q.shape[1]):
             f_ext = self.experimental_data.get_f_ext_at_frame(i_node)
-            tau[:, i_node] = self.biorbd_model.InverseDynamics(self.q[:, i_node], self.qdot[:, i_node], self.qddot[:, i_node], f_ext)
+            tau[:, i_node] = self.biorbd_model.InverseDynamics(self.q[:, i_node], self.qdot[:, i_node], self.qddot[:, i_node], f_ext).to_array()
         self.tau = tau
 
 

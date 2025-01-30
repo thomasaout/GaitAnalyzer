@@ -114,6 +114,7 @@ class ExperimentalData:
                 f_ext[1, i, :] = analogs[0, platform_2_idx, :]
             f_ext_sorted = np.zeros((2, 9, self.nb_analog_frames))
             f_ext_sorted[0, 3:, :] = np.vstack((f_ext[0, 3:6, :], f_ext[0, :3, :]))
+            f_ext_sorted[1, 3:, :] = np.vstack((f_ext[1, 3:6, :], f_ext[1, :3, :]))
 
             # Apply calibration matrix and zero
             # TODO: Charbie -> to be removed ! -------------------------------- # not the right order anymore !

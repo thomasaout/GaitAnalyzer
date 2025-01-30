@@ -50,16 +50,6 @@ class Operator:
                 x_averaged[i] = np.mean(x[i - window_size // 2 : i + window_size // 2 + 1])
         return x_averaged
 
-    @staticmethod
-    def from_analog_frame_to_marker_frame():
-        # TODO: Charbie
-        pass
-
-    @staticmethod
-    def from_marker_frame_to_analog_frame():
-        # TODO: Charbie
-        pass
-
 
 class AnalysisPerformer:
     def __init__(
@@ -150,6 +140,8 @@ class AnalysisPerformer:
         """
 
         result_dict = self.get_version()
+        result_dict["subject_name"] = results.subject_name
+        result_dict["subject_mass"] = results.subject_mass
         for attr_name in dir(results):
             attr = getattr(results, attr_name)
             if not callable(attr) and not attr_name.startswith("__"):
