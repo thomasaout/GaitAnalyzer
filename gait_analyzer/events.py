@@ -72,8 +72,8 @@ class Events:
         Detect the heel touch event when the antero-posterior GRF reaches a certain threshold after the swing phase
         """
         maximal_forward_force_threshold = 0.005
-        grf_left_y_filtered = Operator.moving_average(self.experimental_data.grf_sorted[0, 1, :], 21)
-        grf_right_y_filtered = Operator.moving_average(self.experimental_data.grf_sorted[1, 1, :], 21)
+        grf_left_y_filtered = Operator.moving_average(self.experimental_data.f_ext_sorted[0, 1, :], 21)
+        grf_right_y_filtered = Operator.moving_average(self.experimental_data.f_ext_sorted[1, 1, :], 21)
 
         # Left
         swing_timings = np.where(self.phases_left_leg["swing"])[0]
@@ -107,8 +107,8 @@ class Events:
         """
         Detect the toes touch event when the vertical GRF is maximal
         """
-        grf_left_z_filtered = Operator.moving_average(self.experimental_data.grf_sorted[0, 2, :], 35)
-        grf_right_z_filtered = Operator.moving_average(self.experimental_data.grf_sorted[1, 2, :], 35)
+        grf_left_z_filtered = Operator.moving_average(self.experimental_data.f_ext_sorted[0, 2, :], 35)
+        grf_right_z_filtered = Operator.moving_average(self.experimental_data.f_ext_sorted[1, 2, :], 35)
 
         swing_timings = np.where(self.phases_left_leg["swing"])[0]
         left_swing_sequence = np.array_split(swing_timings, np.flatnonzero(np.diff(swing_timings) > 1) + 1)
@@ -166,7 +166,7 @@ class Events:
             # plt.figure()
             # plt.plot((self.experimental_data.marker_time_vector[1:] + self.experimental_data.marker_time_vector[:-1]) / 2, left_cal_velocity, label="Left heel velocity")
             # plt.plot(self.experimental_data.marker_time_vector, self.experimental_data.markers_sorted[2, self.experimental_data.model_marker_names.index("LCAL"), :], label="Left heel height")
-            # plt.plot(self.experimental_data.analogs_time_vector, self.experimental_data.grf_sorted[0, 2, :], label="Vertical Left GRF")
+            # plt.plot(self.experimental_data.analogs_time_vector, self.experimental_data.f_ext_sorted[0, 2, :], label="Vertical Left GRF")
             # plt.plot(np.array([self.experimental_data.analogs_time_vector[0], self.experimental_data.analogs_time_vector[-1]]), np.array([0.1, 0.1]), '--k', label="Velocity  threshold")
             # plt.legend()
             # plt.show()
@@ -217,11 +217,17 @@ class Events:
         """
         Detect the swing phase when the vertical GRF is lower than a threshold
         """
-        minimal_vertical_force_threshold = 0.007
-        grf_right_z_filtered = Operator.moving_average(self.experimental_data.grf_sorted[0, 2, :], 21)
-        grf_left_z_filtered = Operator.moving_average(self.experimental_data.grf_sorted[1, 2, :], 21)
+        minimal_vertical_force_threshold = 0.01
+        grf_right_z_filtered = Operator.moving_average(self.experimental_data.f_ext_sorted[0, 2, :], 21)
+        grf_left_z_filtered = Operator.moving_average(self.experimental_data.f_ext_sorted[1, 2, :], 21)
         self.phases_left_leg["swing"][:] = np.abs(grf_right_z_filtered) < minimal_vertical_force_threshold
         self.phases_right_leg["swing"][:] = np.abs(grf_left_z_filtered) < minimal_vertical_force_threshold
+        # import matplotlib.pyplot as plt
+        # plt.figure()
+        # plt.plot(np.abs(grf_right_z_filtered))
+        # plt.plot(np.array([0, len(grf_right_z_filtered)]), np.array([minimal_vertical_force_threshold, minimal_vertical_force_threshold]), '--k')
+        # plt.savefig("GRF_test.png")
+        # plt.show()
         return
 
     def detect_leg_phases_between_events(self, phase_name, init_event_name, closing_event_name):
@@ -288,38 +294,38 @@ class Events:
 
         axs[0].plot(
             self.experimental_data.analogs_time_vector,
-            self.experimental_data.grf_sorted[0, 0, :],
+            self.experimental_data.f_ext_sorted[0, 0, :],
             "-r",
             label="Medio-lateral",
         )
         axs[0].plot(
             self.experimental_data.analogs_time_vector,
-            self.experimental_data.grf_sorted[0, 1, :],
+            self.experimental_data.f_ext_sorted[0, 1, :],
             "-g",
             label="Antero-posterior",
         )
         axs[0].plot(
             self.experimental_data.analogs_time_vector,
-            self.experimental_data.grf_sorted[0, 2, :],
+            self.experimental_data.f_ext_sorted[0, 2, :],
             "-b",
             label="Vertical",
         )
 
         axs[1].plot(
             self.experimental_data.analogs_time_vector,
-            self.experimental_data.grf_sorted[1, 0, :],
+            self.experimental_data.f_ext_sorted[1, 0, :],
             "-r",
             label="Medio-lateral",
         )
         axs[1].plot(
             self.experimental_data.analogs_time_vector,
-            self.experimental_data.grf_sorted[1, 1, :],
+            self.experimental_data.f_ext_sorted[1, 1, :],
             "-g",
             label="Antero-posterior",
         )
         axs[1].plot(
             self.experimental_data.analogs_time_vector,
-            self.experimental_data.grf_sorted[1, 2, :],
+            self.experimental_data.f_ext_sorted[1, 2, :],
             "-b",
             label="Vertical",
         )

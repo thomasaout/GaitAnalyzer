@@ -1,5 +1,6 @@
 from gait_analyzer.biomod_model_creator import BiomodModelCreator
 from gait_analyzer.experimental_data import ExperimentalData
+from gait_analyzer.inverse_dynamics_performer import InverseDynamicsPerformer
 from gait_analyzer.events import Events
 from gait_analyzer.kinematics_reconstructor import KinematicsReconstructor
 from gait_analyzer.optimal_estimator import OptimalEstimator
