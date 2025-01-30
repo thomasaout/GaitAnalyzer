@@ -1,10 +1,11 @@
+import os
 import biorbd
 import osim_to_biomod as otb
 
 
 class OsimModels:
     # TODO: Charbie -> Do we have the right to add the OpenSim models to a public repository?
-    # TODO: Charbie -> Otherwise, can Florian give the link to the OpenSim model?
+    # TODO: Charbie -> Otherwise, can Floethv give the link to the OpenSim model?
     @property
     def osim_model_name(self):
         raise RuntimeError(
@@ -107,7 +108,7 @@ class OsimModels:
 
 
 class BiomodModelCreator:
-    def __init__(self, subject_name: str, osim_model_type):
+    def __init__(self, subject_name: str, osim_model_type, skip_if_existing: bool):
         # Initial attributes
         self.subject_name = subject_name
         self.osim_model = osim_model_type
@@ -124,24 +125,27 @@ class BiomodModelCreator:
         self.biorbd_model_full_path = (
             biorbd_model_path + "/" + osim_model_type.osim_model_name + "_" + subject_name + ".bioMod"
         )
+        self.new_model_created = False
 
-        # Convert the osim model to a biorbd model
-        converter = otb.Converter(
-            self.biorbd_model_full_path,  # .bioMod file to export to
-            self.osim_model_full_path,  # .osim file to convert from
-            ignore_muscle_applied_tag=False,
-            ignore_fixed_dof_tag=False,
-            ignore_clamped_dof_tag=False,
-            mesh_dir=vtp_geometry_path,
-            muscle_type=otb.MuscleType.HILL,
-            state_type=otb.MuscleStateType.DEGROOTE,
-            print_warnings=True,
-            print_general_informations=True,
-            vtp_polygons_to_triangles=True,
-            muscles_to_ignore=osim_model_type.muscles_to_ignore,
-            markers_to_ignore=osim_model_type.markers_to_ignore,
-        )
-        converter.convert_file()
+        if not (skip_if_existing and os.path.isfile(self.biorbd_model_full_path)):
+            # Convert the osim model to a biorbd model
+            converter = otb.Converter(
+                self.biorbd_model_full_path,  # .bioMod file to export to
+                self.osim_model_full_path,  # .osim file to convert from
+                ignore_muscle_applied_tag=False,
+                ignore_fixed_dof_tag=False,
+                ignore_clamped_dof_tag=False,
+                mesh_dir=vtp_geometry_path,
+                muscle_type=otb.MuscleType.HILL,
+                state_type=otb.MuscleStateType.DEGROOTE,
+                print_warnings=True,
+                print_general_informations=False,
+                vtp_polygons_to_triangles=False,
+                muscles_to_ignore=osim_model_type.muscles_to_ignore,
+                markers_to_ignore=osim_model_type.markers_to_ignore,
+            )
+            converter.convert_file()
+            self.new_model_created = True
         self.biorbd_model = biorbd.Model(self.biorbd_model_full_path)
 
     def inputs(self):
@@ -155,4 +159,5 @@ class BiomodModelCreator:
         return {
             "biorbd_model_full_path": self.biorbd_model_full_path,
             "biorbd_model": self.biorbd_model,
+            "new_model_created": self.new_model_created,
         }

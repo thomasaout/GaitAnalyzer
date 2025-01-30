@@ -37,7 +37,7 @@ class ResultManager:
         self.kinematics_reconstructor = None
         self.optimal_estimator = None
 
-    def create_biorbd_model(self, osim_model_type):
+    def create_biorbd_model(self, osim_model_type, skip_if_existing: bool):
         """
         Create and add the biorbd model to the ResultManager
         """
@@ -47,7 +47,7 @@ class ResultManager:
             raise Exception("Biorbd model already added")
 
         # Add BiomodModelCreator
-        self.biorbd_model_creator = BiomodModelCreator(self.subject_name, osim_model_type)
+        self.biorbd_model_creator = BiomodModelCreator(self.subject_name, osim_model_type, skip_if_existing)
 
     def add_experimental_data(self, c3d_file_name: str, animate_c3d_flag: bool = False):
 

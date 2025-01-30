@@ -12,7 +12,7 @@ def analysis_to_perform(subject_name: str, subject_mass: float, c3d_file_name: s
     # --- Example of analysis --- #
     results = ResultManager(subject_name=subject_name, subject_mass=subject_mass)
     # Please note that the OpenSim model should already be scaled in the OpenSim GUI
-    results.create_biorbd_model(osim_model_type=OsimModels.WholeBody())
+    results.create_biorbd_model(osim_model_type=OsimModels.WholeBody(), skip_if_existing=True)
     results.add_experimental_data(c3d_file_name=c3d_file_name, animate_c3d_flag=False)
 
     results.add_events(plot_phases_flag=False)
@@ -33,4 +33,6 @@ if __name__ == "__main__":
     helper(Operator)
 
     # --- Example of how to run the analysis --- #
-    AnalysisPerformer(analysis_to_perform, subjects_to_analyze=["VIF_04"], result_folder="results")
+    AnalysisPerformer(
+        analysis_to_perform, subjects_to_analyze=["AOT_01"], result_folder="results", skip_if_existing=True
+    )
