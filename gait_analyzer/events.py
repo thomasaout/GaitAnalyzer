@@ -164,8 +164,8 @@ class Events:
             )[0]
             # if left_heel_moving.shape == (0,):
             # plt.figure()
-            # plt.plot((self.experimental_data.marker_time_vector[1:] + self.experimental_data.marker_time_vector[:-1]) / 2, left_cal_velocity, label="Left heel velocity")
-            # plt.plot(self.experimental_data.marker_time_vector, self.experimental_data.markers_sorted[2, self.experimental_data.model_marker_names.index("LCAL"), :], label="Left heel height")
+            # plt.plot((self.experimental_data.markers_time_vector[1:] + self.experimental_data.markers_time_vector[:-1]) / 2, left_cal_velocity, label="Left heel velocity")
+            # plt.plot(self.experimental_data.markers_time_vector, self.experimental_data.markers_sorted[2, self.experimental_data.model_marker_names.index("LCAL"), :], label="Left heel height")
             # plt.plot(self.experimental_data.analogs_time_vector, self.experimental_data.f_ext_sorted[0, 2, :], label="Vertical Left GRF")
             # plt.plot(np.array([self.experimental_data.analogs_time_vector[0], self.experimental_data.analogs_time_vector[-1]]), np.array([0.1, 0.1]), '--k', label="Velocity  threshold")
             # plt.legend()

@@ -40,7 +40,7 @@ class ExperimentalData:
         self.analogs_dt = None
         self.nb_analog_frames = None
         self.f_ext_sorted = None
-        self.marker_time_vector = None
+        self.markers_time_vector = None
         self.analogs_time_vector = None
 
         # Extract data from the c3d file
@@ -162,7 +162,7 @@ class ExperimentalData:
 
 
         def compute_time_vectors():
-            self.marker_time_vector = np.linspace(0, self.markers_dt * self.nb_marker_frames, self.nb_marker_frames)
+            self.markers_time_vector = np.linspace(0, self.markers_dt * self.nb_marker_frames, self.nb_marker_frames)
             self.analogs_time_vector = np.linspace(0, self.analogs_dt * self.nb_analog_frames, self.nb_analog_frames)
 
         # Perform the initial treatment
@@ -220,6 +220,6 @@ class ExperimentalData:
             "analogs_dt": self.analogs_dt,
             "nb_analog_frames": self.nb_analog_frames,
             "f_ext_sorted": self.f_ext_sorted,
-            "marker_time_vector": self.marker_time_vector,
+            "markers_time_vector": self.markers_time_vector,
             "analogs_time_vector": self.analogs_time_vector,
         }

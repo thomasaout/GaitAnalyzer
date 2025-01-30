@@ -105,7 +105,7 @@ def mean_cycles(data: list[np.ndarray], nb_frames_interp: int) -> tuple[np.ndarr
 
 
 def from_marker_frame_to_analog_frame(analogs_time_vector: np.ndarray,
-                                      marker_time_vector: np.ndarray,
+                                      markers_time_vector: np.ndarray,
                                       marker_idx: int | list[int]) -> int | list[int]:
     """
     This function converts a marker frame index into an analog frame index since the analogs are sampled at a higher frequency than the markers.
@@ -114,7 +114,7 @@ def from_marker_frame_to_analog_frame(analogs_time_vector: np.ndarray,
     ----------
     analogs_time_vector: np.ndarray
         The time vector of the analogs
-    marker_time_vector: np.ndarray
+    markers_time_vector: np.ndarray
         The time vector of the markers
     marker_idx: int | list[int]
         The analog frame index to convert
@@ -124,7 +124,7 @@ def from_marker_frame_to_analog_frame(analogs_time_vector: np.ndarray,
     analog_idx: int | list[int]
         The analog frame index
     """
-    analog_to_marker_ratio = int(round(analogs_time_vector.shape[0] / marker_time_vector.shape[0]))
+    analog_to_marker_ratio = int(round(analogs_time_vector.shape[0] / markers_time_vector.shape[0]))
     all_idx = list(range(0, len(marker_idx), analog_to_marker_ratio))
     if isinstance(marker_idx, int):
         analog_idx = all_idx[marker_idx]
@@ -136,7 +136,7 @@ def from_marker_frame_to_analog_frame(analogs_time_vector: np.ndarray,
 
 
 def from_analog_frame_to_marker_frame(analogs_time_vector: np.ndarray,
-                                      marker_time_vector: np.ndarray,
+                                      markers_time_vector: np.ndarray,
                                       analog_idx: int | list[int]) -> int | list[int]:
     """
     This function converts an analog frame index into a marker frame index since the analogs are sampled at a higher frequency than the markers.
@@ -145,7 +145,7 @@ def from_analog_frame_to_marker_frame(analogs_time_vector: np.ndarray,
     ----------
     analogs_time_vector: np.ndarray
         The time vector of the analogs
-    marker_time_vector: np.ndarray
+    markers_time_vector: np.ndarray
         The time vector of the markers
     analog_idx: int | list[int]
         The marker frame index to convert
@@ -155,7 +155,7 @@ def from_analog_frame_to_marker_frame(analogs_time_vector: np.ndarray,
     marker_idx: int | list[int]
         The marker frame index
     """
-    analog_to_marker_ratio = int(round(analogs_time_vector.shape[0] / marker_time_vector.shape[0]))
+    analog_to_marker_ratio = int(round(analogs_time_vector.shape[0] / markers_time_vector.shape[0]))
     if isinstance(analog_idx, int):
         marker_idx =  analog_idx // analog_to_marker_ratio
     elif isinstance(analog_idx, list):

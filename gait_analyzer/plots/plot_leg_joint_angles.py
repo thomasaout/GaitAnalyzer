@@ -51,7 +51,7 @@ class PlotLegData:
                         with open(file_in_sub_folder, "rb") as file:
                             data = pickle.load(file)
                         subject_name = data["subject_name"]
-                        cond = file_in_sub_folder.replace(subject_name, "").replace(".pkl", "")
+                        cond = file_in_sub_folder.replace(f"{self.result_folder}/{result_file}/", "").replace(subject_name, "").replace("_results.pkl", "")
                         event_idx = from_analog_frame_to_marker_frame(data["analogs_time_vector"],
                                                                       data["markers_time_vector"],
                                                                       data["events"]["right_leg_heel_touch"])
