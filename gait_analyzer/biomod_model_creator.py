@@ -127,7 +127,7 @@ class BiomodModelCreator:
         )
         self.new_model_created = False
 
-        if not(skip_if_existing and os.path.isfile(self.biorbd_model_full_path)):
+        if not (skip_if_existing and os.path.isfile(self.biorbd_model_full_path)):
             # Convert the osim model to a biorbd model
             converter = otb.Converter(
                 self.biorbd_model_full_path,  # .bioMod file to export to

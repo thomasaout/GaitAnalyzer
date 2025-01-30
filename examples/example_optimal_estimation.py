@@ -33,4 +33,6 @@ if __name__ == "__main__":
     helper(Operator)
 
     # --- Example of how to run the analysis --- #
-    AnalysisPerformer(analysis_to_perform, subjects_to_analyze=["AOT_01"], result_folder="results", skip_if_existing=True)
+    AnalysisPerformer(
+        analysis_to_perform, subjects_to_analyze=["AOT_01"], result_folder="results", skip_if_existing=True
+    )

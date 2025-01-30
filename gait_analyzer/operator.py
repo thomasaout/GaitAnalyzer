@@ -63,10 +63,11 @@ class Operator:
 
 class AnalysisPerformer:
     def __init__(
-        self, analysis_to_perform: callable,
-            subjects_to_analyze: list[str],
-            result_folder: str = "../results/",
-            skip_if_existing: bool = False
+        self,
+        analysis_to_perform: callable,
+        subjects_to_analyze: list[str],
+        result_folder: str = "../results/",
+        skip_if_existing: bool = False,
     ):
         """
         Initialize the AnalysisPerformer.
@@ -203,7 +204,9 @@ class AnalysisPerformer:
 
             # Loop over all data files
             for data_file in os.listdir(f"../data/{subject_name}"):
-                if data_file.endswith("Statique.c3d") or not data_file.endswith('.c3d'):  # TODO: Charbie -> add other "conditions_to_exclude" here
+                if data_file.endswith("Statique.c3d") or not data_file.endswith(
+                    ".c3d"
+                ):  # TODO: Charbie -> add other "conditions_to_exclude" here
                     continue
                 c3d_file_name = f"../data/{subject_name}/{data_file}"
                 result_folder = f"{self.result_folder}/{subject_name}"

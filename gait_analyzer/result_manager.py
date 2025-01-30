@@ -49,7 +49,6 @@ class ResultManager:
         # Add BiomodModelCreator
         self.biorbd_model_creator = BiomodModelCreator(self.subject_name, osim_model_type, skip_if_existing)
 
-
     def add_experimental_data(self, c3d_file_name: str, animate_c3d_flag: bool = False):
 
         # Checks
