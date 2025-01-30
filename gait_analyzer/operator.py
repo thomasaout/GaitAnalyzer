@@ -210,5 +210,6 @@ class AnalysisPerformer:
                     print(f"Skipping {subject_name} - {data_file} because it already exists.")
                     continue
 
+                print("Analyzing ", subject_name, " : ", data_file)
                 results = self.analysis_to_perform(subject_name, subject_mass, c3d_file_name)
                 self.save_subject_results(results, result_file_name)

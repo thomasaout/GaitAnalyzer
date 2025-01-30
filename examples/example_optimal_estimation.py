@@ -4,6 +4,9 @@ from gait_analyzer import (
     OsimModels,
     Operator,
     AnalysisPerformer,
+    PlotLegData,
+    LegToPlot,
+    PlotType,
 )
 
 
@@ -42,3 +45,13 @@ if __name__ == "__main__":
     AnalysisPerformer(
         analysis_to_perform, subjects_to_analyze=["AOT_01"], result_folder="results", skip_if_existing=True
     )
+
+    # --- Example of how to plot the results --- #
+    plot = PlotLegData(result_folder="results",
+                       leg_to_plot=LegToPlot.RIGHT,
+                       plot_type=PlotType.Q,
+                       conditions_to_compare=["_ManipStim_L400_F40_I20_results",
+                                              "_ManipStim_L400_F40_I40_results",
+                                              "_ManipStim_L400_F40_I60_results"])
+    plot.save("results/AOT_01_Q_plot_temporary.png")
+    plot.show()
