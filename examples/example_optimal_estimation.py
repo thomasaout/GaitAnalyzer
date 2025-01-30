@@ -30,8 +30,13 @@ def parameters_to_extract_for_statistical_analysis():
 
 if __name__ == "__main__":
 
-    #  --- Example of how to get help on a GaitAnalyzer class --- #
+    # --- Example of how to get help on a GaitAnalyzer class --- #
     helper(Operator)
 
+    # --- Steps to perform before running the analysis --- #
+    # 1. Placing the data in the folder "data/[subject_name]/"
+    # 2. Using the code in the folder c3d_to_trc to convert the static file (MATLAB: main.m, Python: convert_c3d_files.py)
+    # 3. Generating a scaled model in the OpenSim GUI (using the .trc file) and placing it in the folder "models/OpenSim_models/[model_name]_[subject_name].osim"
+
     # --- Example of how to run the analysis --- #
-    AnalysisPerformer(analysis_to_perform, subjects_to_analyze=["VIF_04"], result_folder="results")
+    AnalysisPerformer(analysis_to_perform, subjects_to_analyze=["AOT_01"], result_folder="results")
