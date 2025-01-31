@@ -55,7 +55,7 @@ def split_cycles(data: np.ndarray, event_idx: list[int]) -> list[np.ndarray]:
     return cycles
 
 
-def mean_cycles(data: list[np.ndarray], nb_frames_interp: int) -> tuple[np.ndarray, np.ndarray]:
+def mean_cycles(data: list[np.ndarray], index_to_keep: list[int], nb_frames_interp: int) -> tuple[np.ndarray, np.ndarray]:
     """
     This function computes the mean over cycles.
 
@@ -63,6 +63,8 @@ def mean_cycles(data: list[np.ndarray], nb_frames_interp: int) -> tuple[np.ndarr
     ----------
     data: list[np.ndarray] nb_cycles x (data_dim, frames_dim)
         The data to compute the mean of the cycles
+    index_to_keep: list[int]
+        The index of the data to perform the mean on
     nb_frames_interp: int
         The number of frames to interpolate the data on
 
@@ -81,17 +83,17 @@ def mean_cycles(data: list[np.ndarray], nb_frames_interp: int) -> tuple[np.ndarr
     if len(data) == 0:
         raise ValueError("data must not be empty.")
 
-
-    data_dim = data[0].shape[0]
+    data_dim = len(index_to_keep)
     interpolated_data_array = np.zeros((len(data), data_dim, nb_frames_interp))
-    for i_cycle, cycle in data:
-        if data_dim != cycle.shape[0]:
+    fir_data_dim = data[0].shape[0]
+    for i_cycle, cycle in enumerate(data):
+        if fir_data_dim != cycle.shape[0]:
             raise ValueError(f"Data dimension is inconsistant across cycles.")
         frames_dim = cycle.shape[1]
         # TODO: @ThomasAout -> How do you usually deal with the cycle length being variable ?
         x_to_interpolate_on = np.linspace(0, 1, num=nb_frames_interp)
-        for i_dim in range(data_dim):
-            y_data = cycle[i_dim, :]
+        for i_dim, dim in enumerate(index_to_keep):
+            y_data = cycle[dim, :]
             x_data = np.linspace(0, 1, num=frames_dim)
             y_data = y_data[~np.isnan(y_data)]
             x_data = x_data[~np.isnan(y_data)]
@@ -125,7 +127,7 @@ def from_marker_frame_to_analog_frame(analogs_time_vector: np.ndarray,
         The analog frame index
     """
     analog_to_marker_ratio = int(round(analogs_time_vector.shape[0] / markers_time_vector.shape[0]))
-    all_idx = list(range(0, len(marker_idx), analog_to_marker_ratio))
+    all_idx = list(range(0, len(markers_time_vector), analog_to_marker_ratio))
     if isinstance(marker_idx, int):
         analog_idx = all_idx[marker_idx]
     elif isinstance(marker_idx, list):
@@ -157,9 +159,9 @@ def from_analog_frame_to_marker_frame(analogs_time_vector: np.ndarray,
     """
     analog_to_marker_ratio = int(round(analogs_time_vector.shape[0] / markers_time_vector.shape[0]))
     if isinstance(analog_idx, int):
-        marker_idx =  analog_idx // analog_to_marker_ratio
+        marker_idx =  int(round(analog_idx / analog_to_marker_ratio))
     elif isinstance(analog_idx, list):
-        marker_idx =  [idx // analog_to_marker_ratio for idx in analog_idx]
+        marker_idx =  [int(round(idx / analog_to_marker_ratio)) for idx in analog_idx]
     else:
         raise ValueError("analog_idx must be an int or a list of int.")
     return marker_idx

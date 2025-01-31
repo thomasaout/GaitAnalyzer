@@ -53,5 +53,6 @@ if __name__ == "__main__":
                        conditions_to_compare=["_ManipStim_L400_F40_I20",
                                               "_ManipStim_L400_F40_I40",
                                               "_ManipStim_L400_F40_I60"])
+    plot.draw_plot()
     plot.save("results/AOT_01_Q_plot_temporary.png")
     plot.show()
