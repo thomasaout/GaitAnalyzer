@@ -157,7 +157,7 @@ class ExperimentalData:
 
             # from scipy import signal
             # b, a = signal.butter(2, 1/50, btype='low')
-            # y = signal.filtfilt(b, a, f_ext_sorted[0, 2, :], padlen=150)
+            # y = signal.filtfilt(b, a, f_ext_sorted[0, 8, :], padlen=150)
             # # 4th 6-10
 
 
