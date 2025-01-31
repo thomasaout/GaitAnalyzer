@@ -1,8 +1,9 @@
+from .analysis_performer import AnalysisPerformer
 from .biomod_model_creator import BiomodModelCreator, OsimModels
 from .experimental_data import ExperimentalData
 from .helper import helper
 from .kinematics_reconstructor import KinematicsReconstructor
-from .operator import Operator, AnalysisPerformer
+from .operator import Operator
 from .optimal_estimator import OptimalEstimator
 from .result_manager import ResultManager
 from .plots.plot_leg_joint_angles import PlotLegData, LegToPlot, PlotType
