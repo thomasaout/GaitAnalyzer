@@ -19,7 +19,7 @@ def analysis_to_perform(subject_name: str, subject_mass: float, c3d_file_name: s
     results.add_experimental_data(c3d_file_name=c3d_file_name, animate_c3d_flag=False)
 
     results.add_events(plot_phases_flag=False)
-    results.reconstruct_kinematics(animate_kinematics_flag=False)
+    results.reconstruct_kinematics(animate_kinematics_flag=True)
     results.perform_inverse_dynamics()
     # results.estimate_optimally()
 
@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     # --- Example of how to run the analysis --- #
     AnalysisPerformer(
-        analysis_to_perform, subjects_to_analyze=["AOT_01"], result_folder="results", skip_if_existing=True
+        analysis_to_perform, subjects_to_analyze=["AOT_01"], result_folder="results", skip_if_existing=False
     )
 
     # --- Example of how to plot the results --- #

@@ -91,7 +91,7 @@ class ResultManager:
         # Reconstruct kinematics
         self.kinematics_reconstructor = KinematicsReconstructor(
             self.experimental_data,
-            self.biorbd_model_creator.biorbd_model,
+            self.biorbd_model_creator,
             animate_kinematics_flag=animate_kinematics_flag,
         )
 

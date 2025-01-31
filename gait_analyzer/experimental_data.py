@@ -71,9 +71,10 @@ class ExperimentalData:
                 supplementary_marker_names = [name for name in self.model_marker_names if name not in exp_marker_names]
                 raise ValueError(f"The markers {supplementary_marker_names} are not in the c3d file, but are in the model.")
             markers_sorted = np.zeros((3, len(self.model_marker_names), self.nb_marker_frames))
-            for i_marker, name in enumerate(self.model_marker_names):
-                marker_idx = exp_marker_names.index(name)
-                markers_sorted[:, marker_idx, :] = markers[:3, marker_idx, :] * marker_units
+            markers_sorted[:, :, :] = np.nan
+            for i_marker, name in enumerate(exp_marker_names):
+                marker_idx = self.model_marker_names.index(name)
+                markers_sorted[:, marker_idx, :] = markers[:3, i_marker, :] * marker_units
             self.markers_sorted = markers_sorted
 
         def sort_analogs():

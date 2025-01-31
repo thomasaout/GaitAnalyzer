@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import biorbd
 import osim_to_biomod as otb
 
@@ -140,13 +141,96 @@ class BiomodModelCreator:
                 state_type=otb.MuscleStateType.DEGROOTE,
                 print_warnings=True,
                 print_general_informations=False,
-                vtp_polygons_to_triangles=False,
+                vtp_polygons_to_triangles=True,
                 muscles_to_ignore=osim_model_type.muscles_to_ignore,
                 markers_to_ignore=osim_model_type.markers_to_ignore,
             )
             converter.convert_file()
+            self.sketchy_replace_biomod_lines()
             self.new_model_created = True
         self.biorbd_model = biorbd.Model(self.biorbd_model_full_path)
+
+
+    def sketchy_replace_biomod_lines(self):
+        """
+        This method is a temporary fix to replace the lines in the bioMod file.
+        It should be done with the read feature of biorbd.model_creator.
+        """
+
+        with open(self.biorbd_model_full_path, "r+") as file:
+            file_lines = file.readlines()
+
+        with open(self.biorbd_model_full_path, "w") as file:
+            for i_line, line in enumerate(file_lines):
+                if i_line + 1 == 42:  # Translation X
+                    file.write(line.replace("-10 10", "-3 3"))
+                elif i_line + 1 == 43:  # Translation Y
+                    file.write(line.replace("-6 6", "-3 3"))
+                elif i_line + 1 == 44:  # Translation Z
+                    file.write(line.replace("-5 5", "-3 3"))
+                elif i_line + 1 == 59:  # Pelvis Rotation X
+                    file.write(line.replace("-3.1415999999999999 3.1415999999999999",
+                                            f"{-np.pi/4} {np.pi/4}"))
+                elif i_line + 1 == 60:  # Pelvis Rotation Y
+                    file.write(line.replace("-3.1415999999999999 3.1415999999999999",
+                                            f"{-np.pi/4} {np.pi/4}"))
+                elif i_line + 1 == 177:  # Hip Rotation X
+                    file.write(line.replace("-2.6179999999999999 2.0943950999999998",
+                                            f"{-40*np.pi/180} {120*np.pi/180}"))
+                elif i_line + 1 == 178:  # Hip Rotation Y
+                    file.write(line.replace("-2.0943950999999998 2.0943950999999998",
+                                            f"{-60*np.pi/180} {30*np.pi/180}"))
+                elif i_line + 1 == 179:  # Hip Rotation Z
+                    file.write(line.replace("-2.0943950999999998 2.0943950999999998",
+                                            f"{-30 * np.pi / 180} {30 * np.pi / 180}"))
+                elif i_line + 1 == 262:  # Knee Rotation X
+                    file.write(line.replace("-3.1415999999999999 0.34910000000000002",
+                                            f"{-150 * np.pi / 180} {0.0}"))
+                elif i_line + 1 == 358:  # Ankle Flexion
+                    file.write(line.replace("-1.5707963300000001 1.5707963300000001",
+                                            f"{-50 * np.pi / 180} {30 * np.pi / 180}"))
+                elif i_line + 1 == 451:  # Ankle Inversion
+                    file.write(line.replace("-1.5707963300000001 1.5707963300000001",
+                                            f"{-15 * np.pi / 180} {15 * np.pi / 180}"))
+                elif i_line + 1 == 560:  # Toes Flexion
+                    file.write(line.replace("-1.5707963300000001 1.5707963300000001",
+                                            f"{-50 * np.pi / 180} {60 * np.pi / 180}"))
+                elif i_line + 1 == 633:  # Hip Rotation X
+                    file.write(line.replace("-2.6179999999999999 2.0943950999999998",
+                                            f"{-40 * np.pi / 180} {120 * np.pi / 180}"))
+                elif i_line + 1 == 634:  # Hip Rotation Y
+                    file.write(line.replace("-2.0943950999999998 2.0943950999999998",
+                                            f"{-60 * np.pi / 180} {30 * np.pi / 180}"))
+                elif i_line + 1 == 635:  # Hip Rotation Z
+                    file.write(line.replace("-2.0943950999999998 2.0943950999999998",
+                                            f"{-30 * np.pi / 180} {30 * np.pi / 180}"))
+                elif i_line + 1 == 718: # Knee Rotation X
+                    file.write(line.replace("-3.1415999999999999 0.34910000000000002",
+                                            f"{-150 * np.pi / 180} {0.0}"))
+                elif i_line + 1 == 814: # Ankle Flexion
+                    file.write(line.replace("-1.5707963300000001 1.5707963300000001",
+                                            f"{-50 * np.pi / 180} {30 * np.pi / 180}"))
+                elif i_line + 1 == 907: # Ankle Inversion
+                    file.write(line.replace("-1.5707963300000001 1.5707963300000001",
+                                            f"{-15 * np.pi / 180} {15 * np.pi / 180}"))
+                elif i_line + 1 == 1016: # Toes Flexion
+                    file.write(line.replace("-1.5707963300000001 1.5707963300000001",
+                                            f"{-50 * np.pi / 180} {60 * np.pi / 180}"))
+                elif i_line + 1 == 1089: # Torso Rotation X
+                    file.write(line.replace("-1.5707963300000001 1.5707963300000001",
+                                            f"{-90 * np.pi / 180} {45 * np.pi / 180}"))
+                elif i_line + 1 == 1090:  # Torso Rotation Y
+                    file.write(line.replace("-1.5707963300000001 1.5707963300000001",
+                                            f"{-35 * np.pi / 180} {35 * np.pi / 180}"))
+                elif i_line + 1 == 1091:  # Torso Rotation Z
+                    file.write(line.replace("-1.5707963300000001 1.5707963300000001",
+                                            f"{-45 * np.pi / 180} {45 * np.pi / 180}"))
+                elif i_line + 1 == 1203:  # Head and neck Rotation X
+                    file.write(line.replace("-1.74533 1.0471975499999999",
+                                            f"{-50 * np.pi / 180} {45 * np.pi / 180}"))
+                else:
+                    file.write(line)
+
 
     def inputs(self):
         return {
