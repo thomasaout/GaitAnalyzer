@@ -85,6 +85,8 @@ class ResultManager:
             raise Exception("Please add the biorbd model first by running ResultManager.create_biorbd_model()")
         if self.experimental_data is None:
             raise Exception("Please add the experimental data first by running ResultManager.add_experimental_data()")
+        if self.events is None:
+            raise Exception("Please run the events detection first by running ResultManager.add_events()")
         if self.kinematics_reconstructor is not None:
             raise Exception("kinematics_reconstructor already added")
 
@@ -92,6 +94,7 @@ class ResultManager:
         self.kinematics_reconstructor = KinematicsReconstructor(
             self.experimental_data,
             self.biorbd_model_creator,
+            self.events,
             animate_kinematics_flag=animate_kinematics_flag,
         )
 

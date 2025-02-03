@@ -8,6 +8,10 @@ from pyomeca import Markers
 
 from gait_analyzer.experimental_data import ExperimentalData
 from gait_analyzer.biomod_model_creator import BiomodModelCreator
+from gait_analyzer.events import Events
+
+
+# TODO: Charbie -> See if we keep the virtual markers and if we impose this way of reconstructing
 
 
 class KinematicsReconstructor:
@@ -15,7 +19,11 @@ class KinematicsReconstructor:
     This class reconstruct the kinematics based on the marker position and the model predefined.
     """
 
-    def __init__(self, experimental_data: ExperimentalData, biorbd_model_creator: BiomodModelCreator, animate_kinematics_flag: bool = False):
+    def __init__(self, 
+                 experimental_data: ExperimentalData, 
+                 biorbd_model_creator: BiomodModelCreator, 
+                 events: Events,
+                 animate_kinematics_flag: bool = False):
         """
         Initialize the KinematicsReconstructor.
         .
@@ -25,6 +33,8 @@ class KinematicsReconstructor:
             The experimental data from the trial
         biorbd_model_creator: BiomodModelCreator
             The biorbd model to use for the kinematics reconstruction
+        events: Events
+            The events to use for the kinematics reconstruction since we exploit the fact that the movement is cyclic.
         animate_kinematics_flag: bool
             If True, the kinematics will be animated through pyorerun
         """
@@ -38,12 +48,18 @@ class KinematicsReconstructor:
             raise ValueError(
                 "biorbd_model_creator must be an instance of BiomodModelCreator."
             )
+        if not isinstance(events, Events):
+            raise ValueError(
+                "events must be an instance of Events."
+            )
 
         # Initial attributes
         self.experimental_data = experimental_data
         self.biorbd_model_creator = biorbd_model_creator
+        self.events = events
 
         # Extended attributes
+        self.biorbd_model = None
         self.t = None
         self.q = None
         self.qdot = None
@@ -58,8 +74,11 @@ class KinematicsReconstructor:
 
     def extended_kalman_filter(self):
 
-        model = self.biorbd_model_creator.biorbd_model
-        markers = self.experimental_data.markers_sorted
+        print("Performing kinematics reconstruction using Extended Kalman Filter...")
+
+        model = biorbd.Model(self.biorbd_model_creator.biorbd_model_virtual_markers_full_path)
+        self.biorbd_model = model
+        markers = self.experimental_data.markers_sorted_with_virtual
 
         # Dispatch markers in biorbd structure so EKF can use it
         markers_over_frames = []
@@ -68,7 +87,7 @@ class KinematicsReconstructor:
 
         # Create a Kalman filter structure
         params = biorbd.KalmanParam(frequency=self.experimental_data.marker_sampling_frequency,
-                                    noiseFactor=1e-3,
+                                    noiseFactor=1e-8,
                                     errorFactor=1e-2)
         kalman = biorbd.KalmanReconsMarkers(model, params)
 
@@ -88,9 +107,11 @@ class KinematicsReconstructor:
 
 
     def constrained_optimization_reconstruction(self):
-
-        model = biorbd_casadi.Model(self.biorbd_model_creator.biorbd_model_full_path)
-        markers = self.experimental_data.markers_sorted
+        """
+        Sliding window version
+        """
+        model = biorbd_casadi.Model(self.biorbd_model_creator.biorbd_model_virtual_markers_full_path)
+        markers = self.experimental_data.markers_sorted_with_virtual
         nb_markers = markers.shape[1]
         nb_frames = markers.shape[2]
         nb_frames_window = 30  # Number of frames to consider for the optimization (must be odd)
@@ -108,7 +129,7 @@ class KinematicsReconstructor:
                 if len(segment.QRanges()) > 0:
                     for dof in segment.QRanges():
                         lbx += [dof.min()]
-                        ubx += [dof.min()]
+                        ubx += [dof.max()]
         lbx += [-10] * model.nbQ() * nb_frames_window
         ubx += [10] * model.nbQ() * nb_frames_window
         lbx += [-100] * model.nbQ() * nb_frames_window
@@ -168,9 +189,103 @@ class KinematicsReconstructor:
 
 
 
+    def constrained_optimization_reconstruction_cyclic(self):
+        """
+        Cyclic version
+        """
+        model = biorbd_casadi.Model(self.biorbd_model_creator.biorbd_model_virtual_markers_full_path)
+        markers = self.experimental_data.markers_sorted_with_virtual
+        nb_markers = markers.shape[1]
+        dt = self.experimental_data.markers_dt
+
+        q_mx, qdot_mx, qddot_mx, x, obj = None, None, None, None, None
+        q_recons = np.zeros((model.nbQ(), markers.shape[2]))
+        qdot_recons = np.zeros((model.nbQ(), markers.shape[2]))
+        qddot_recons = np.zeros((model.nbQ(), markers.shape[2]))
+        
+        heel_touch_idx = self.events.events["right_leg_heel_touch"]
+        for i_cycle in range(5):  # range(len(heel_touch_idx)-1):
+            start_idx = heel_touch_idx[i_cycle]
+            end_idx = heel_touch_idx[i_cycle+1]
+            nb_frames = end_idx - start_idx
+
+            # Min max bounds (constant for each window)
+            lbx = []
+            ubx = []
+            for i_frame in range(nb_frames):
+                for segment in model.segments():
+                    if len(segment.QRanges()) > 0:
+                        for dof in segment.QRanges():
+                            lbx += [dof.min()]
+                            ubx += [dof.max()]
+            lbx += [-10] * model.nbQ() * nb_frames
+            ubx += [10] * model.nbQ() * nb_frames
+            lbx += [-100] * model.nbQ() * nb_frames
+            ubx += [100] * model.nbQ() * nb_frames
+            
+            # Initialization
+            x0 = np.zeros((model.nbQ() * nb_frames * 3))
+            if i_cycle > 0:
+                last_start_idx = heel_touch_idx[i_cycle-1]
+                for i_frame in range(nb_frames):
+                    x0[i_frame * model.nbQ() : (i_frame + 1) * model.nbQ()] = q_recons[:, last_start_idx+i_frame]
+                    x0[model.nbQ() * nb_frames + i_frame * model.nbQ() : model.nbQ() * nb_frames + model.nbQ() * (i_frame+1)] = qdot_recons[:, last_start_idx+i_frame]
+                    x0[model.nbQ() * nb_frames * 2 + i_frame * model.nbQ() : model.nbQ() * nb_frames * 2 + model.nbQ() * (i_frame+1)] = qddot_recons[:, last_start_idx+i_frame]
+
+            # Initialize variables
+            del q_mx, qdot_mx, qddot_mx, x, obj
+            x = cas.MX.sym("x", model.nbQ() * nb_frames * 3)
+            q_mx = cas.MX.zeros(model.nbQ(), nb_frames)
+            qdot_mx = cas.MX.zeros(model.nbQ(), nb_frames)
+            qddot_mx = cas.MX.zeros(model.nbQ(), nb_frames)
+            for i_frame in range(nb_frames):
+                q_mx[:, i_frame] = x[i_frame * model.nbQ() : (i_frame + 1) * model.nbQ()]
+                qdot_mx[:, i_frame] = x[model.nbQ() * nb_frames + i_frame * model.nbQ() : model.nbQ() * nb_frames + (i_frame + 1) * model.nbQ()]
+                qddot_mx[:, i_frame] = x[model.nbQ() * nb_frames * 2 + i_frame * model.nbQ() : model.nbQ() * nb_frames * 2 + (i_frame + 1) * model.nbQ()]
+
+            obj = 0
+            g = []
+            lbg = []
+            ubg = []
+            for i_frame in range(nb_frames):
+                i_data = start_idx + i_frame
+                biorbd_markers = model.markers(q_mx[:, i_frame])
+                for i_marker in range(nb_markers):
+                    obj += cas.sumsqr(markers[:, i_marker, i_data] - biorbd_markers[i_marker].to_mx())
+                obj += cas.sumsqr((q_mx[:, i_frame] - q_mx[:, i_frame - 1]) - dt * qdot_mx[:, i_frame])
+                # g += [q_mx[:, i] - q_mx[:, i - 1] - dt * qdot_mx[:, i]]
+                # lbg += [0] * model.nbQ()
+                # ubg += [0] * model.nbQ()
+                if 0 < i_frame < nb_frames - 1:
+                    dq = (q_mx[:, i_frame] - q_mx[:, i_frame - 1]) / dt
+                    g += [dq - qdot_mx[:, i_frame]]
+                    lbg += [0] * model.nbQ()
+                    ubg += [0] * model.nbQ()
+                if 2 < i_frame < nb_frames - 2:
+                    ddq = (qdot_mx[:, i_frame] - qdot_mx[:, i_frame - 1]) / dt
+                    g += [ddq - qddot_mx[:, i_frame]]
+                    lbg += [0] * model.nbQ()
+                    ubg += [0] * model.nbQ()
+                # TODO: Charbie -> add Kalman update minimization here if estimation is bad
+
+            nlp = {"x": x, "f": obj, "g": cas.vertcat(*g)}
+            opts = {}
+            solver = cas.nlpsol("solver", "ipopt", nlp, opts)
+            res = solver(x0=x0, lbx=cas.vertcat(*lbx), ubx=cas.vertcat(*ubx), lbg=cas.vertcat(*lbg), ubg=cas.vertcat(*ubg))
+
+            # Keep the middle frame
+            for i_frame in range(nb_frames):
+                q_recons[:, start_idx+i_frame] = np.reshape(res["x"][model.nbQ() * i_frame : model.nbQ() * (i_frame+1)], (model.nbQ(), ))
+                qdot_recons[:, start_idx+i_frame] = np.reshape(res["x"][model.nbQ() * nb_frames + model.nbQ() * i_frame : model.nbQ() * nb_frames + model.nbQ() * (i_frame+1)], (model.nbQ(), ))
+                qddot_recons[:, start_idx+i_frame] = np.reshape(res["x"][model.nbQ() * nb_frames * 2 + model.nbQ() * i_frame : model.nbQ() * nb_frames * 2 + model.nbQ() * (i_frame+1)], (model.nbQ(), ))
+        
+        return q_recons, qdot_recons, qddot_recons
+
+
     def perform_kinematics_reconstruction(self):
         # self.q, self.qdot, self.qddot = self.extended_kalman_filter()
-        self.q, self.qdot, self.qddot = self.constrained_optimization_reconstruction()
+        # self.q, self.qdot, self.qddot = self.constrained_optimization_reconstruction()
+        self.q, self.qdot, self.qddot = self.constrained_optimization_reconstruction_cyclic()
         self.t = self.experimental_data.markers_time_vector
 
         # import matplotlib.pyplot as plt
@@ -193,7 +308,7 @@ class KinematicsReconstructor:
 
         # Markers
         marker_names = [m.to_string() for m in self.biorbd_model.markerNames()]
-        markers = Markers(data=self.experimental_data.markers_sorted, channels=marker_names)
+        markers = Markers(data=self.experimental_data.markers_sorted_with_virtual, channels=marker_names)
 
         # Visualization
         viz = PhaseRerun(self.t)
