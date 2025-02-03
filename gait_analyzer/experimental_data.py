@@ -2,13 +2,15 @@ import ezc3d
 import biorbd
 import numpy as np
 
+from gait_analyzer.biomod_model_creator import BiomodModelCreator
+
 
 class ExperimentalData:
     """
     This class contains all the experimental data from a trial (markers, EMG, force plates data, gait parameters).
     """
 
-    def __init__(self, c3d_file_name: str, biorbd_model: biorbd.Model, animate_c3d_flag: bool):
+    def __init__(self, c3d_file_name: str, biorbd_model_creator: BiomodModelCreator, animate_c3d_flag: bool):
         """
         Initialize the ExperimentalData.
         .
@@ -16,7 +18,7 @@ class ExperimentalData:
         ----------
         c3d_file_name: str
             The name of the trial's c3d file.
-        biorbd_model: biorbd.Model
+        biorbd_model_creator: BiomodModelCreator
             The subject's personalized biorbd model.
         animate_c3d: bool
             If True, the c3d file will be animated.
@@ -28,7 +30,7 @@ class ExperimentalData:
         # Initial attributes
         self.c3d_file_name = c3d_file_name
         self.c3d_full_file_path = "../data/" + c3d_file_name
-        self.biorbd_model = biorbd_model
+        self.biorbd_model_creator = biorbd_model_creator
 
         # Extended attributes
         self.model_marker_names = None
@@ -36,6 +38,7 @@ class ExperimentalData:
         self.markers_dt = None
         self.nb_marker_frames = None
         self.markers_sorted = None
+        self.markers_sorted_with_virtual = None
         self.analogs_sampling_frequency = None
         self.analogs_dt = None
         self.nb_analog_frames = None
@@ -54,8 +57,8 @@ class ExperimentalData:
         Extract important information and sort the data
         """
         def load_model():
-            self.model_marker_names = [m.to_string() for m in self.biorbd_model.markerNames()]
-            # model_muscle_names = [m.to_string() for m in self.biorbd_model.muscleNames()]
+            self.model_marker_names = [m.to_string() for m in self.biorbd_model_creator.biorbd_model.markerNames()]
+            # model_muscle_names = [m.to_string() for m in self.biorbd_model_creator.biorbd_model.muscleNames()]
 
         def sort_markers():
             self.c3d = ezc3d.c3d(self.c3d_full_file_path)
@@ -76,6 +79,20 @@ class ExperimentalData:
                 marker_idx = self.model_marker_names.index(name)
                 markers_sorted[:, marker_idx, :] = markers[:3, i_marker, :] * marker_units
             self.markers_sorted = markers_sorted
+
+        def add_virtual_markers():
+            """
+            This function augments the marker set with virtual markers to improve the extended Kalman filter kinematics reconstruction.
+            """
+            markers_for_virtual = self.biorbd_model_creator.markers_for_virtual
+            markers_sorted_with_virtual = np.zeros((3, len(self.model_marker_names) + len(markers_for_virtual.keys()), self.nb_marker_frames))
+            markers_sorted_with_virtual[:, :len(self.model_marker_names), :] = self.markers_sorted[:, :, :]
+            for i_marker, name in enumerate(markers_for_virtual.keys()):
+                exp_marker_position = np.zeros((3, len(markers_for_virtual[name]), self.nb_marker_frames))
+                for i in range(len(markers_for_virtual[name])):
+                    exp_marker_position[:, i, :] = self.markers_sorted[:, self.model_marker_names.index(markers_for_virtual[name][i]), :]
+                markers_sorted_with_virtual[:, len(self.model_marker_names) + i_marker, :] = np.mean(exp_marker_position, axis=1)
+            self.markers_sorted_with_virtual = markers_sorted_with_virtual
 
         def sort_analogs():
             # Get an array of the experimental muscle activity
@@ -169,6 +186,7 @@ class ExperimentalData:
         # Perform the initial treatment
         load_model()
         sort_markers()
+        add_virtual_markers()
         analog_names, analogs = sort_analogs()
         extract_force_platform_data(analog_names, analogs)
         compute_time_vectors()
@@ -188,7 +206,7 @@ class ExperimentalData:
         f_ext_set: biorbd externalForceSet
             The external forces set at the frame.
         """
-        f_ext_set = self.biorbd_model.externalForceSet()
+        f_ext_set = self.biorbd_model_creator.biorbd_model.externalForceSet()
         f_ext_set.add("calcn_l", self.f_ext_sorted[0, 3:, i_node], self.f_ext_sorted[0, :3, i_node])
         f_ext_set.add("calcn_r", self.f_ext_sorted[1, 3:, i_node], self.f_ext_sorted[1, :3, i_node])
         return f_ext_set
@@ -207,7 +225,7 @@ class ExperimentalData:
     def inputs(self):
         return {
             "c3d_full_file_path": self.c3d_full_file_path,
-            "biorbd_model": self.biorbd_model,
+            "biorbd_model_creator": self.biorbd_model_creator,
         }
 
     def outputs(self):

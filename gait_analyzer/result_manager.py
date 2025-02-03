@@ -62,7 +62,7 @@ class ResultManager:
         # Add experimental data
         self.experimental_data = ExperimentalData(
             c3d_file_name=c3d_file_name,
-            biorbd_model=self.biorbd_model_creator.biorbd_model,
+            biorbd_model_creator=self.biorbd_model_creator,
             animate_c3d_flag=animate_c3d_flag,
         )
 

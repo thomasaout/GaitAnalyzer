@@ -1,4 +1,5 @@
 import os
+import shutil
 import numpy as np
 import biorbd
 import osim_to_biomod as otb
@@ -126,6 +127,9 @@ class BiomodModelCreator:
         self.biorbd_model_full_path = (
             biorbd_model_path + "/" + osim_model_type.osim_model_name + "_" + subject_name + ".bioMod"
         )
+        self.biorbd_model_virtual_markers_full_path = (
+            biorbd_model_path + "/" + osim_model_type.osim_model_name + "_" + subject_name + "_virtual_markers.bioMod"
+        )
         self.new_model_created = False
 
         if not (skip_if_existing and os.path.isfile(self.biorbd_model_full_path)):
@@ -149,6 +153,9 @@ class BiomodModelCreator:
             self.sketchy_replace_biomod_lines()
             self.new_model_created = True
         self.biorbd_model = biorbd.Model(self.biorbd_model_full_path)
+
+        if not (skip_if_existing and os.path.isfile(self.biorbd_model_full_path)):
+            self.extended_model_for_EKF()
 
 
     def sketchy_replace_biomod_lines(self):
@@ -231,6 +238,64 @@ class BiomodModelCreator:
                 else:
                     file.write(line)
 
+    @property
+    def markers_for_virtual(self):
+        return {"pelvis-V1": ["RASIS", "LASIS", "LPSIS", "RPSIS"],  # Close to pelvis center
+                                    "femur_r-V1": ["RLFE", "RMFE"],  # Close to knee center
+                                    "femur_r-V2": ["RLFE", "RMFE", "RGT"],  # Close to femur center
+                                    "tibia_r-V1": ["RSPH", "RLM"],  # Close to ankle center
+                                    "tibia_r-V2": ["RSPH", "RLM", "RATT"],  # Close to tibia center
+                                    "calcn_r-V1": ["RMFH1", "RMFH1"],  # Close to forefoot center
+                                    "calcn_r-V2": ["RMFH1", "RMFH1", "RCAL"],  # Close to foot center
+                                    "femur_l-V1": ["LLFE", "LMFE"],  # Close to knee center
+                                    "femur_l-V2": ["LLFE", "LMFE", "LGT"],  # Close to femur center
+                                    "tibia_l-V1": ["LSPH", "LLM"],  # Close to ankle center
+                                    "tibia_l-V2": ["LSPH", "LLM", "LATT"],  # Close to tibia center
+                                    "calcn_l-V1": ["LMFH1", "LMFH1"],  # Close to forefoot center
+                                    "calcn_l-V2": ["LMFH1", "LMFH1", "LCAL"],  # Close to foot center
+                                    "torso-V1": ["STR", "C7", "T10",  "SUP"],  # Close to torso center
+                                    "humerus_r-V1": ["RLHE", "RMHE"],  # Close to elbow center
+                                    "radius_r-V1": ["RUS", "RRS"],  # Close to wrist center
+                                    "hand_r-V1": ["RHMH5", "RHMH2"],  # Close to forehand center
+                                    "humerus_l-V1": ["LLHE", "LMHE"],  # Close to elbow center
+                                    "radius_l-V1": ["LUS", "LRS"],  # Close to wrist center
+                                    "hand_l-V1": ["LHMH5", "LHMH2"],  # Close to forehand center
+                                    }
+
+    def extended_model_for_EKF(self):
+        """
+        This function adds virtual markers to the original biomod to improve the kinematic reconstruction.
+        First, joint markers are added between the bone landmark markers.
+        Second, mid-segment markers are added between the joint markers.
+        """
+        # Copy the biomod file
+        shutil.copy2(self.biorbd_model_full_path, self.biorbd_model_virtual_markers_full_path)
+
+        all_marker_names = [m.to_string() for m in self.biorbd_model.markerNames()]
+        for marker in all_marker_names:
+            if '-' in marker:
+                raise ValueError(f"Marker {marker} contains a dash. Please avoid this character as the virtual marker system uses this separator to identify parents.")
+
+        # When no Q are provided to biorbd.markers, the makers are expressed in the local reference frame
+        all_marker_positions = [m.to_array() for m in self.biorbd_model.markers()]
+
+        # Extend the new biomod file with the virtual markers
+        with open(self.biorbd_model_virtual_markers_full_path, "a+") as file:
+            file.write("\n\n/*-------------- VIRTUAL MARKERS --------------- \n*/\n")
+            for i_jcs, key in enumerate(self.markers_for_virtual):
+                # Fid the virtual marker position
+                marker_positions = np.zeros((3, len(self.markers_for_virtual[key])))
+                for i_marker, marker_name in enumerate(self.markers_for_virtual[key]):
+                    if marker_name not in all_marker_names:
+                        raise ValueError(f"Marker {marker_name} not found in the model.")
+                    marker_positions[:, i_marker] = all_marker_positions[all_marker_names.index(marker_name)]
+                virtual_marker_position_in_local = np.mean(marker_positions, axis=1)
+                # Write the virtual marker to the biomod file
+                file.write(f"marker\t{key}JC\n")
+                file.write(f"\tparent\t{key.split("-")[0]}\n")
+                file.write(f"\tposition\t{virtual_marker_position_in_local[0]}\t{virtual_marker_position_in_local[1]}\t{virtual_marker_position_in_local[2]}\n")
+                file.write("endmarker\n")
+
 
     def inputs(self):
         return {
@@ -244,4 +309,6 @@ class BiomodModelCreator:
             "biorbd_model_full_path": self.biorbd_model_full_path,
             "biorbd_model": self.biorbd_model,
             "new_model_created": self.new_model_created,
+            "biorbd_model_virtual_markers_full_path": self.biorbd_model_virtual_markers_full_path,
+            "markers_for_virtual": self.markers_for_virtual,
         }
