@@ -111,6 +111,7 @@ class KinematicsReconstructor:
         Sliding window version
         """
         model = biorbd_casadi.Model(self.biorbd_model_creator.biorbd_model_virtual_markers_full_path)
+        self.biorbd_model = model
         markers = self.experimental_data.markers_sorted_with_virtual
         nb_markers = markers.shape[1]
         nb_frames = markers.shape[2]
@@ -138,7 +139,7 @@ class KinematicsReconstructor:
 
         q_mx, qdot_mx, qddot_mx, x, obj = None, None, None, None, None
 
-        for current_index in range(int(nb_frames_window / 2), nb_frames - int(nb_frames_window / 2)):
+        for current_index in range(int(nb_frames_window / 2), int(nb_frames_window / 2) + 5):  # nb_frames - int(nb_frames_window / 2)):
 
             # Initialize variables
             del q_mx, qdot_mx, qddot_mx, x, obj
@@ -194,6 +195,7 @@ class KinematicsReconstructor:
         Cyclic version
         """
         model = biorbd_casadi.Model(self.biorbd_model_creator.biorbd_model_virtual_markers_full_path)
+        self.biorbd_model = model
         markers = self.experimental_data.markers_sorted_with_virtual
         nb_markers = markers.shape[1]
         dt = self.experimental_data.markers_dt
@@ -208,6 +210,7 @@ class KinematicsReconstructor:
             start_idx = heel_touch_idx[i_cycle]
             end_idx = heel_touch_idx[i_cycle+1]
             nb_frames = end_idx - start_idx
+            print(f"Reconstructing optimally frames {start_idx} to {end_idx}...")
 
             # Min max bounds (constant for each window)
             lbx = []
@@ -284,8 +287,8 @@ class KinematicsReconstructor:
 
     def perform_kinematics_reconstruction(self):
         # self.q, self.qdot, self.qddot = self.extended_kalman_filter()
-        # self.q, self.qdot, self.qddot = self.constrained_optimization_reconstruction()
-        self.q, self.qdot, self.qddot = self.constrained_optimization_reconstruction_cyclic()
+        self.q, self.qdot, self.qddot = self.constrained_optimization_reconstruction()
+        # self.q, self.qdot, self.qddot = self.constrained_optimization_reconstruction_cyclic()
         self.t = self.experimental_data.markers_time_vector
 
         # import matplotlib.pyplot as plt
