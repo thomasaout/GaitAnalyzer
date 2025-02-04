@@ -10,7 +10,7 @@ class ExperimentalData:
     This class contains all the experimental data from a trial (markers, EMG, force plates data, gait parameters).
     """
 
-    def __init__(self, c3d_file_name: str, biorbd_model_creator: BiomodModelCreator, animate_c3d_flag: bool):
+    def __init__(self, c3d_file_name: str, subject_name: str, result_folder:str, biorbd_model_creator: BiomodModelCreator, animate_c3d_flag: bool):
         """
         Initialize the ExperimentalData.
         .
@@ -18,6 +18,10 @@ class ExperimentalData:
         ----------
         c3d_file_name: str
             The name of the trial's c3d file.
+        subject_name: str
+            The name of the subject.
+        result_folder: str
+            The folder where the results will be saved. It will look like result_folder/subject_name.
         biorbd_model_creator: BiomodModelCreator
             The subject's personalized biorbd model.
         animate_c3d: bool
@@ -26,11 +30,17 @@ class ExperimentalData:
         # Checks
         if not isinstance(c3d_file_name, str):
             raise ValueError("c3d_file_name must be a string")
+        if not isinstance(subject_name, str):
+            raise ValueError("subject_name must be a string")
+        if not isinstance(result_folder, str):
+            raise ValueError("result_folder must be a string")
 
         # Initial attributes
         self.c3d_file_name = c3d_file_name
         self.c3d_full_file_path = "../data/" + c3d_file_name
         self.biorbd_model_creator = biorbd_model_creator
+        self.subject_name = subject_name
+        self.result_folder = result_folder
 
         # Extended attributes
         self.model_marker_names = None

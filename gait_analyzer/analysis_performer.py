@@ -51,7 +51,7 @@ class AnalysisPerformer:
         self.skip_if_existing = skip_if_existing
 
         # Run the analysis
-        self.run_analysis()
+        self.run_analysis(result_folder=result_folder)
 
     @staticmethod
     def get_version():
@@ -128,7 +128,7 @@ class AnalysisPerformer:
         # For matlab analysis
         savemat(result_file_name + ".mat", result_dict)
 
-    def run_analysis(self):
+    def run_analysis(self, result_folder: str):
         """
         Loops over the data files and perform the analysis specified by the user (on the subjects specified by the user).
         """
@@ -170,5 +170,5 @@ class AnalysisPerformer:
                     continue
 
                 print("Analyzing ", subject_name, " : ", data_file)
-                results = self.analysis_to_perform(subject_name, subject_mass, c3d_file_name)
+                results = self.analysis_to_perform(subject_name, subject_mass, c3d_file_name, result_folder)
                 self.save_subject_results(results, result_file_name)
