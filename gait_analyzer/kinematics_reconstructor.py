@@ -185,6 +185,83 @@ class KinematicsReconstructor:
         return q_recons, qdot_recons, qddot_recons
 
 
+    def markers_jacobian(self):
+        # kalman = CustomConstrainedKalmanFilter(
+        #     model = self.biorbd_model,
+        #     initial_state = np.zeros((nb_q, )),
+        #     initial_covariance = np.eye(self.biorbd_model.nbQ()) * 1e-5,
+        #     process_noise = np.eye(self.biorbd_model.nbQ()) * 1e-5,
+        #     measurement_noise = np.eye(self.biorbd_model.nbQ()) * 1e-5
+        # )
+
+        self.biorbd_model = biorbd.Model(self.biorbd_model_creator.biorbd_model_virtual_markers_full_path)
+        nb_frames = self.experimental_data.markers_sorted_with_virtual.shape[2]
+        nb_markers = self.experimental_data.markers_sorted_with_virtual.shape[1]
+        nb_q = self.biorbd_model.nbQ()
+        kalman = ConstrainedKalmanRecons(self.biorbd_model,
+                                         nb_frames = nb_frames,
+                                         nb_markers = nb_markers,
+                                         noise_factor = 1e-10,
+                                         error_factor = 1e-5)
+
+        q_recons = np.zeros((nb_q, 10))
+        for i in range(10):
+            q_recons[:, i] = kalman.get_optimal_states(self.biorbd_model_creator, self.experimental_data.markers_sorted_with_virtual[:, :, i])
+        qdot_recons = None
+        qddot_recons = None
+        #
+        #
+        # # Perform the kalman filter for each frame (the first frame is much longer than the next)
+        # q_recons = np.zeros((nb_q, self.experimental_data.markers_sorted_with_virtual.shape[2]))
+        # qdot_recons = np.zeros((nb_q, self.experimental_data.markers_sorted_with_virtual.shape[2]))
+        # qddot_recons = np.zeros((nb_q, self.experimental_data.markers_sorted_with_virtual.shape[2]))
+        #
+        # for i_frame in range(nb_frames):
+        #
+        #     # Get current experimental markers (nb_markers x 3)
+        #     current_markers = self.experimental_data.markers_sorted_with_virtual[:, :, i_frame]
+        #     occlusion = [i for i, marker in enumerate(current_markers) if np.all(np.isnan(marker))]
+        #
+        #     # If this is not the first frame, use previous q as initial guess
+        #     if i_frame == 0:
+        #         q_init, qdot_init, qddot_init = kalman.set_initial_states(current_markers)
+        #         # q_init, qdot_init, qddot_init = kalman.set_optimal_initial_states(current_markers)
+        #     else:
+        #         q_init = q_recons[:, i_frame - 1]
+        #         qdot_init = qdot_recons[:, i_frame - 1]
+        #         qddot_init = qddot_recons[:, i_frame - 1]
+        #     kalman.set_states(q_init = q_init,
+        #                       qdot_init = qdot_init,
+        #                       qddot_init = qddot_init)
+        #
+        #     # Get current state estimate
+        #     q_current = kalman.xp[:kalman.nb_dof]
+        #
+        #     # Calculate expected marker positions and Jacobian
+        #     markers_projected = np.zeros((3 * nb_markers))
+        #     H = np.zeros((3 * nb_markers, 3 * self.biorbd_model.nbQ()))
+        #     for i_marker in range(nb_markers):
+        #         if i_marker not in occlusion:
+        #             markers_projected[3 * i_marker:3 * (i_marker + 1)] = self.biorbd_model.markers(q_current)[i_marker].to_array()
+        #             H[3 * i_marker:3 * (i_marker + 1), :nb_q] = self.biorbd_model.markersJacobian(q_current)[i_marker].to_array()
+        #
+        #     # Perform Kalman iteration
+        #     q, qdot, qddot = kalman.iteration(
+        #         measure=current_markers.T.flatten(),  # Flatten to 3*nb_markers vector
+        #         projected_measure=markers_projected,
+        #         hessian=H,
+        #         occlusion=occlusion  # Add occluded marker indices if needed
+        #     )
+        #     if np.all(np.abs(q) > 5*np.pi):
+        #         break
+        #
+        #     # Store results
+        #     q_recons[:, i_frame] = q
+        #     qdot_recons[:, i_frame] = qdot
+        #     qddot_recons[:, i_frame] = qddot
+
+        return q_recons, qdot_recons, qddot_recons
+
     def constrained_optimization_reconstruction(self):
         """
         Sliding window version
@@ -366,7 +443,8 @@ class KinematicsReconstructor:
 
     def perform_kinematics_reconstruction(self):
         # self.q, self.qdot, self.qddot = self.extended_kalman_filter()
-        self.q, self.qdot, self.qddot = self.constrained_extended_kalman_filter()
+        # self.q, self.qdot, self.qddot = self.constrained_extended_kalman_filter()
+        self.q, self.qdot, self.qddot = self.marker_jacobian()
         # self.q, self.qdot, self.qddot = self.constrained_optimization_reconstruction()
         # self.q, self.qdot, self.qddot = self.constrained_optimization_reconstruction_cyclic()
         # self.t = self.experimental_data.markers_time_vector
@@ -839,3 +917,220 @@ class ConstrainedKalmanRecons:
         qddot = self.xp[2 * self.nb_dof:3 * self.nb_dof]
 
         return q, qdot, qddot
+
+class JacobianThing:
+    def __init__(self,
+                 model: biorbd.Model,
+                 nb_frames: int,
+                 nb_markers: int,
+                 noise_factor: float = 1e-3,
+                 error_factor: float = 1e-3):
+        self.noise_factor = noise_factor
+        self.error_factor = error_factor
+        self.model = model
+        self.nb_dof = self.model.nbQ()
+        self.nb_frames = nb_frames
+        self.nb_markers = nb_markers
+        self.Pp_initial = self._init_covariance()  # Store initial covariance
+
+        # State vector contains [Q, Qdot, Qddot]
+        self.xp = np.zeros(3 * self.nb_dof)
+
+        # Initialize matrices
+        self.A = self._evolution_matrix()
+        self.Q = self._process_noise_matrix()
+        self.R = self._measurement_noise_matrix()
+        self.Pp = self._init_covariance()
+
+        # Initialize joint constraints
+        self._constraints = {}  # Dictionary to store joint bounds
+
+    def set_joint_constraints(self):
+        """
+        Set joint angle constraints in the for "segment_name_dof_index": (min, max)
+        """
+        for segment in self.model.segments():
+            if len(segment.QRanges()) > 0:
+                for i_dof, dof in enumerate(segment.QRanges()):
+                    self._constraints[f"{segment.name()}_{i_dof}"] += (dof.min(), dof.max())
+
+    def _evolution_matrix(self) -> np.ndarray:
+        """Create evolution matrix (equivalent to biorbd's evolutionMatrix)"""
+        n = 2  # Order of Taylor development + 1 (position, velocity, acceleration)
+        A = np.eye(self.nb_dof * (n + 1))
+        c = 1.0
+
+        for i in range(2, n + 2):
+            j = (i - 1) * self.nb_dof
+            c = c / (i - 1)
+
+            for cmp in range(self.nb_dof * (n + 1) - j):
+                A[cmp, j + cmp] += c * self.dt ** (i - 1)
+
+        return A
+
+    def _process_noise_matrix(self) -> np.ndarray:
+        """Create process noise matrix (equivalent to biorbd's processNoiseMatrix)"""
+        dt = self.dt
+        c1 = 1 / 20.0 * dt ** 5
+        c2 = 1 / 8.0 * dt ** 4
+        c3 = 1 / 6.0 * dt ** 3
+        c4 = 1 / 3.0 * dt ** 3
+        c5 = 1 / 2.0 * dt ** 2
+        c6 = dt
+
+        q = np.zeros((3 * self.nb_dof, 3 * self.nb_dof))
+        for j in range(self.nb_dof):
+            q[j, j] = c1
+            q[j, self.nb_dof + j] = c2
+            q[j, 2 * self.nb_dof + j] = c3
+            q[self.nb_dof + j, j] = c2
+            q[self.nb_dof + j, self.nb_dof + j] = c4
+            q[self.nb_dof + j, 2 * self.nb_dof + j] = c5
+            q[2 * self.nb_dof + j, j] = c3
+            q[2 * self.nb_dof + j, self.nb_dof + j] = c5
+            q[2 * self.nb_dof + j, 2 * self.nb_dof + j] = c6
+
+        return q
+
+    def _measurement_noise_matrix(self) -> np.ndarray:
+        """Create measurement noise matrix"""
+        return np.eye(3 * self.nb_markers) * self.noise_factor
+
+    def _init_covariance(self) -> np.ndarray:
+        """Initialize covariance matrix"""
+        return np.eye(3 * self.nb_dof) * self.error_factor
+
+    def _apply_constraints(self):
+        """Apply joint angle constraints"""
+        for joint_idx, (min_bound, max_bound) in self._constraints.items():
+            self.xp[joint_idx] = np.clip(self.xp[joint_idx], min_bound, max_bound)
+
+            # If position is constrained, set velocity to 0 at bounds
+            if self.xp[joint_idx] in (min_bound, max_bound):
+                self.xp[self.nb_dof + joint_idx] = 0
+                self.xp[2 * self.nb_dof + joint_idx] = 0
+
+    def iteration(self, measure: np.ndarray,
+                  projected_measure: np.ndarray,
+                  hessian: np.ndarray,
+                  occlusion=None):
+        """
+        Perform one iteration of the constrained Kalman filter
+        Args:
+            measure: Actual marker positions
+            projected_measure: Expected marker positions from model
+            hessian: Jacobian of marker positions with respect to joint angles
+            occlusion: List of occluded marker indices
+        """
+        # Prediction
+        xkm = self.A @ self.xp
+        Pkm = self.A @ self.Pp @ self.A.T  # + self.Q  TODO: Charbie -> see why Q is detrimental
+
+        # Handle occlusions
+        if occlusion:
+            for idx in occlusion:
+                measure[idx:idx + 3] = 0
+                self.R[idx:idx + 3, idx:idx + 3] = np.inf * np.eye(3)
+
+        # Innovation
+        S = hessian @ Pkm @ hessian.T + self.R
+        K = Pkm @ hessian.T @ np.linalg.inv(S)
+
+        # Update
+        self.xp = xkm + K @ (measure - projected_measure)
+        temp = np.eye(3 * self.nb_dof) - K @ hessian
+        self.Pp = temp @ Pkm @ temp.T + K @ self.R @ K.T
+
+        # Apply constraints
+        self._apply_constraints()
+
+        # Get state estimates
+        q, qdot, qddot = self.get_states()
+
+        return q, qdot, qddot
+
+
+    def set_initial_states(self, markers):
+        """
+        Initialize state using the strategy from biorbd:
+        1. First estimate root position using only root markers (50 iterations)
+        2. Then estimate full body position using all markers (50 iterations)
+
+        Args:
+            markers: Marker positions (3 x nb_markers)
+        """
+        markers_flat = markers.T.flatten()
+
+        # First phase: root estimation
+        nb_root_markers = 6
+        markers_root = markers_flat.copy()
+
+        # Zero out all non-root markers
+        markers_root[3 * nb_root_markers:] = 0
+
+        # Store original Pp
+        Pp_original = self.Pp.copy()
+
+        # First phase: estimate root position
+        for _ in range(50):
+            # Get current state estimate
+            q_current = self.xp
+
+            # Create Hessian matrix and projected markers
+            H = np.zeros((3 * self.nb_markers, self.nb_dof))
+            markers_projected = np.zeros(3 * self.nb_markers)
+
+            # Fill only for root markers
+            for i_marker in range(nb_root_markers):
+                markers_projected[3 * i_marker:3 * (i_marker + 1)] = self.model.markers(q_current)[
+                    i_marker].to_array()
+                H[3 * i_marker:3 * (i_marker + 1), :] = self.model.markersJacobian(q_current)[
+                    i_marker].to_array()
+
+            # Perform Kalman iteration
+            self.iteration(
+                measure=markers_root,
+                projected_measure=markers_projected,
+                hessian=H,
+                occlusion=[]
+            )
+
+            # Reset Pp and velocities/accelerations
+            self.Pp = self.Pp_initial.copy()
+
+        # Second phase: full body estimation
+        for _ in range(50):
+            # Get current state estimate
+            q_current = self.xp
+
+            # Create Hessian matrix and projected markers
+            H = np.zeros((3 * self.nb_markers, self.nb_dof))
+            markers_projected = np.zeros(3 * self.nb_markers)
+
+            # Fill for all markers
+            for i_marker in range(self.nb_markers):
+                marker_pos = self.model.markers(q_current)[i_marker].to_array()
+                marker_jacobian = self.model.markersJacobian(q_current)[i_marker].to_array()
+
+                H[3 * i_marker:3 * (i_marker + 1), :] = marker_jacobian
+                markers_projected[3 * i_marker:3 * (i_marker + 1)] = marker_pos
+
+            # Perform Kalman iteration
+            self.iteration(
+                measure=markers_flat,
+                projected_measure=markers_projected,
+                hessian=H,
+                occlusion=[]
+            )
+
+            # Reset Pp and velocities/accelerations
+            self.Pp = self.Pp_initial.copy()
+
+        # Restore original Pp
+        self.Pp = Pp_original
+
+        # Return the states
+        q = self.xp
+
+        return q
