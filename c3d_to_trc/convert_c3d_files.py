@@ -2,7 +2,7 @@
 import opensim as osim
 # This code necessitates to install the OpenSim Python API. You can do it by running the following command:
 # conda install opensim-org::opensim
-# However, please note that your python version must be python=3.11
+# However, please note that your python version must be python=3.10 / opensim=4.5.1 / numpy 1.26.0
 
 
 def convert_c3d_files(file_path: str):
