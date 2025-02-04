@@ -145,11 +145,13 @@ class AnalysisPerformer:
                 tempo_subject_path = os.path.abspath(f"../data/{subject_name}/Sujet_{subject_name}.xlsx")
                 raise FileNotFoundError(f"Please put the participant information file here {tempo_subject_path}")
 
-            # Get the subject's information
-            subject_path = f"../data/{subject_name}/Sujet_{subject_name}.xlsx"
-            dfs = pd.read_excel(subject_path, sheet_name=None)
-            mass_column_idx = list(dfs["Subject presentation"]["Information Sujet "]).index("Masse")
-            subject_mass = float(dfs["Subject presentation"]["Value"][mass_column_idx])
+            # TODO: Thomas -> Generalize this part
+            # # Get the subject's information
+            # subject_path = f"../data/{subject_name}/Sujet_{subject_name}.xlsx"
+            # dfs = pd.read_excel(subject_path, sheet_name=None)
+            # mass_column_idx = list(dfs["Subject presentation"]["Information Sujet "]).index("Masse")
+            # subject_mass = float(dfs["Subject presentation"]["Value"][mass_column_idx])
+            subject_mass = 0.0
 
             # Loop over all data files
             for data_file in os.listdir(f"../data/{subject_name}"):
