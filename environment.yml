@@ -1,0 +1,14 @@
+name: environment
+channels:
+  - conda-forge
+dependencies:
+  - numpy
+  - matplotlib
+  - biorbd>=1.11.2
+  - bioptim>=3.2.1
+  - ezc3d>=1.5.17
+  - scipy
+  - lxml
+  - pandas
+  - openpyxl
+  - gitpython

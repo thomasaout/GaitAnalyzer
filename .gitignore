@@ -171,3 +171,21 @@ cython_debug/
 .pypirc
 
 .DS_Store
+
+.idea/
+
+data/
+
+results/
+
+examples/sandbox/
+
+models/biorbd_models/Geometry/
+
+models/biorbd_models/Geometry_cleaned/
+
+models/biorbd_models/
+
+models/OpenSim_models/
+
+*.png

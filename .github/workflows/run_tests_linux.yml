@@ -1,0 +1,46 @@
+name: Run the tests
+
+on: [pull_request]
+
+env:
+  PREFIX_LINUX: /usr/share/miniconda3/envs/gait_analyzer
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+    name: Tests on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Set prefix Linux
+        run: echo "PREFIX=${{ env.PREFIX_LINUX }}" >> $GITHUB_ENV
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: gait_analyzer
+          environment-file: environment.yml
+
+      - name: Install extra dependencies
+        run: | 
+          conda install pytest-cov black pytest packaging -cconda-forge
+          sudo apt install -y librhash-dev
+
+      - name: Test installed version of gait_analyzer
+        run: |
+          python setup.py install
+          cd
+          python -c "import gait_analyzer"
+        if: matrix.shard == 1
+
+      - name: Run tests without code coverage
+        run: pytest -v --color=yes tests
