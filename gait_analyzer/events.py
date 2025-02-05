@@ -1,3 +1,4 @@
+import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
@@ -25,6 +26,11 @@ class Events:
             raise ValueError(
                 "experimental_data must be an instance of ExperimentalData. You can declare it by running ExperimentalData(file_path)."
             )
+
+        # Parameters of the detection algorithm
+        self.minimal_vertical_force_threshold = 20  # TODO: Charbie -> cite article and make it weight dependent
+        self.minimal_forward_force_threshold = 5  # TODO: Charbie -> cite article and make it weight dependent
+        self.heel_velocity_threshold = 0.05
 
         # Initial attributes
         self.experimental_data = experimental_data
@@ -71,9 +77,8 @@ class Events:
         """
         Detect the heel touch event when the antero-posterior GRF reaches a certain threshold after the swing phase
         """
-        maximal_forward_force_threshold = 0.005
-        grf_left_y_filtered = Operator.moving_average(self.experimental_data.grf_sorted[0, 1, :], 21)
-        grf_right_y_filtered = Operator.moving_average(self.experimental_data.grf_sorted[1, 1, :], 21)
+        grf_left_y_filtered = Operator.moving_average(self.experimental_data.f_ext_sorted[0, 7, :], 21)
+        grf_right_y_filtered = Operator.moving_average(self.experimental_data.f_ext_sorted[1, 7, :], 21)
 
         # Left
         swing_timings = np.where(self.phases_left_leg["swing"])[0]
@@ -82,7 +87,7 @@ class Events:
             idx = swing_phase[-1] - 5
             while (
                 idx < self.experimental_data.nb_analog_frames - 1
-                and np.abs(grf_left_y_filtered[idx]) < maximal_forward_force_threshold
+                and np.abs(grf_left_y_filtered[idx]) < self.minimal_forward_force_threshold
             ):
                 idx += 1
             if idx <= self.experimental_data.nb_analog_frames - 1:
@@ -96,7 +101,7 @@ class Events:
             idx = swing_phase[-1] - 5
             while (
                 idx < self.experimental_data.nb_analog_frames - 1
-                and np.abs(grf_right_y_filtered[idx]) < maximal_forward_force_threshold
+                and np.abs(grf_right_y_filtered[idx]) < self.minimal_forward_force_threshold
             ):
                 idx += 1
             if idx <= self.experimental_data.nb_analog_frames - 1:
@@ -107,8 +112,8 @@ class Events:
         """
         Detect the toes touch event when the vertical GRF is maximal
         """
-        grf_left_z_filtered = Operator.moving_average(self.experimental_data.grf_sorted[0, 2, :], 35)
-        grf_right_z_filtered = Operator.moving_average(self.experimental_data.grf_sorted[1, 2, :], 35)
+        grf_left_z_filtered = Operator.moving_average(self.experimental_data.f_ext_sorted[0, 8, :], 35)
+        grf_right_z_filtered = Operator.moving_average(self.experimental_data.f_ext_sorted[1, 8, :], 35)
 
         swing_timings = np.where(self.phases_left_leg["swing"])[0]
         left_swing_sequence = np.array_split(swing_timings, np.flatnonzero(np.diff(swing_timings) > 1) + 1)
@@ -150,7 +155,7 @@ class Events:
             )
             / self.experimental_data.markers_dt
         )
-        # left_cal_velocity = np.abs(left_cal_velocity)
+        left_cal_velocity = np.abs(left_cal_velocity)
         swing_timings = np.where(self.phases_left_leg["swing"])[0]
         left_swing_sequence = np.array_split(swing_timings, np.flatnonzero(np.diff(swing_timings) > 1) + 1)
         # TODO: Flo -> Visiblement, ces données sont filtrées. Est-ce que je pourrais avoir les raw data avec les bons marqueurs svp ?
@@ -160,17 +165,17 @@ class Events:
                 left_cal_velocity[
                     int(mid_swing_idx * self.experimental_data.analogs_dt / self.experimental_data.markers_dt) :
                 ]
-                > 0.1
+                > self.heel_velocity_threshold
             )[0]
-            # if left_heel_moving.shape == (0,):
-            # plt.figure()
-            # plt.plot((self.experimental_data.marker_time_vector[1:] + self.experimental_data.marker_time_vector[:-1]) / 2, left_cal_velocity, label="Left heel velocity")
-            # plt.plot(self.experimental_data.marker_time_vector, self.experimental_data.markers_sorted[2, self.experimental_data.model_marker_names.index("LCAL"), :], label="Left heel height")
-            # plt.plot(self.experimental_data.analogs_time_vector, self.experimental_data.grf_sorted[0, 2, :], label="Vertical Left GRF")
-            # plt.plot(np.array([self.experimental_data.analogs_time_vector[0], self.experimental_data.analogs_time_vector[-1]]), np.array([0.1, 0.1]), '--k', label="Velocity  threshold")
-            # plt.legend()
-            # plt.show()
-            # raise RuntimeError("The left heel marker (LCAL) is not moving, please double check the data.")
+            if left_heel_moving.shape == (0,):
+                plt.figure()
+                plt.plot((self.experimental_data.markers_time_vector[1:] + self.experimental_data.markers_time_vector[:-1]) / 2, left_cal_velocity, label="Left heel velocity")
+                plt.plot(self.experimental_data.markers_time_vector, self.experimental_data.markers_sorted[2, self.experimental_data.model_marker_names.index("LCAL"), :], label="Left heel height")
+                plt.plot(self.experimental_data.analogs_time_vector, self.experimental_data.f_ext_sorted[0, 8, :], label="Vertical Left GRF")
+                plt.plot(np.array([self.experimental_data.analogs_time_vector[0], self.experimental_data.analogs_time_vector[-1]]), np.array([self.heel_velocity_threshold, self.heel_velocity_threshold]), '--k', label="Velocity  threshold")
+                plt.legend()
+                plt.show()
+                raise RuntimeError("The left heel marker (LCAL) is not moving, please double check the data.")
             left_heel_moving = left_heel_moving[0] + mid_swing_idx
             self.events["left_leg_heel_off"] += [
                 int(left_heel_moving * self.experimental_data.markers_dt / self.experimental_data.analogs_dt)
@@ -178,17 +183,34 @@ class Events:
         # Right
         right_cal_velocity = (
             np.diff(
-                self.experimental_data.markers_sorted[2, self.experimental_data.model_marker_names.index("RCAL"), :]
+                self.experimental_data.markers_sorted[2, self.experimental_data.model_marker_names.index("LCAL"), :]
             )
             / self.experimental_data.markers_dt
         )
-        right_heel_moving = np.where(right_cal_velocity > 0.1)[0]
-        right_heel_moving_sequence = np.array_split(
-            right_heel_moving, np.flatnonzero(np.diff(right_heel_moving) > 1) + 1
-        )
-        for sequence in right_heel_moving_sequence:
+        right_cal_velocity = np.abs(right_cal_velocity)
+        swing_timings = np.where(self.phases_right_leg["swing"])[0]
+        right_swing_sequence = np.array_split(swing_timings, np.flatnonzero(np.diff(swing_timings) > 1) + 1)
+        # TODO: Flo -> Visiblement, ces données sont filtrées. Est-ce que je pourrais avoir les raw data avec les bons marqueurs svp ?
+        for i_swing, swing_phase in enumerate(right_swing_sequence):
+            mid_swing_idx = int((swing_phase[-1] + swing_phase[0]) / 2)
+            right_heel_moving = np.where(
+                right_cal_velocity[
+                    int(mid_swing_idx * self.experimental_data.analogs_dt / self.experimental_data.markers_dt) :
+                ]
+                > self.heel_velocity_threshold
+            )[0]
+            if right_heel_moving.shape == (0,):
+                plt.figure()
+                plt.plot((self.experimental_data.markers_time_vector[1:] + self.experimental_data.markers_time_vector[:-1]) / 2, left_cal_velocity, label="Left heel velocity")
+                plt.plot(self.experimental_data.markers_time_vector, self.experimental_data.markers_sorted[2, self.experimental_data.model_marker_names.index("LCAL"), :], label="Left heel height")
+                plt.plot(self.experimental_data.analogs_time_vector, self.experimental_data.f_ext_sorted[0, 8, :], label="Vertical Left GRF")
+                plt.plot(np.array([self.experimental_data.analogs_time_vector[0], self.experimental_data.analogs_time_vector[-1]]), np.array([self.heel_velocity_threshold, self.heel_velocity_threshold]), '--k', label="Velocity  threshold")
+                plt.legend()
+                plt.show()
+                raise RuntimeError("The right heel marker (RCAL) is not moving, please double check the data.")
+            right_heel_moving = right_heel_moving[0] + mid_swing_idx
             self.events["right_leg_heel_off"] += [
-                int(sequence[0] * self.experimental_data.markers_dt / self.experimental_data.analogs_dt)
+                int(right_heel_moving * self.experimental_data.markers_dt / self.experimental_data.analogs_dt)
             ]
 
     def detect_toes_off(self):
@@ -217,11 +239,16 @@ class Events:
         """
         Detect the swing phase when the vertical GRF is lower than a threshold
         """
-        minimal_vertical_force_threshold = 0.05
-        grf_right_z_filtered = Operator.moving_average(self.experimental_data.grf_sorted[0, 2, :], 21)
-        grf_left_z_filtered = Operator.moving_average(self.experimental_data.grf_sorted[1, 2, :], 21)
-        self.phases_left_leg["swing"][:] = np.abs(grf_right_z_filtered) < minimal_vertical_force_threshold
-        self.phases_right_leg["swing"][:] = np.abs(grf_left_z_filtered) < minimal_vertical_force_threshold
+        grf_right_z_filtered = Operator.moving_average(self.experimental_data.f_ext_sorted[0, 8, :], 21)
+        grf_left_z_filtered = Operator.moving_average(self.experimental_data.f_ext_sorted[1, 8, :], 21)
+        self.phases_left_leg["swing"][:] = np.abs(grf_right_z_filtered) < self.minimal_vertical_force_threshold
+        self.phases_right_leg["swing"][:] = np.abs(grf_left_z_filtered) < self.minimal_vertical_force_threshold
+        # import matplotlib.pyplot as plt
+        # plt.figure()
+        # plt.plot(np.abs(grf_right_z_filtered))
+        # plt.plot(np.array([0, len(grf_right_z_filtered)]), np.array([self.minimal_vertical_force_threshold, self.minimal_vertical_force_threshold]), '--k')
+        # plt.savefig("GRF_test.png")
+        # plt.show()
         return
 
     def detect_leg_phases_between_events(self, phase_name, init_event_name, closing_event_name):
@@ -280,6 +307,7 @@ class Events:
         self.detect_phases_both_legs("toesL_heelR", "toes_only", "heel_only")
         self.detect_phases_both_legs("toesL_heelR_toesR", "toes_only", "flat_foot")
 
+
     def plot_events(self):
         """
         Plot the GRF and the detected phases
@@ -288,38 +316,38 @@ class Events:
 
         axs[0].plot(
             self.experimental_data.analogs_time_vector,
-            self.experimental_data.grf_sorted[0, 0, :],
+            self.experimental_data.f_ext_sorted[0, 6, :],
             "-r",
             label="Medio-lateral",
         )
         axs[0].plot(
             self.experimental_data.analogs_time_vector,
-            self.experimental_data.grf_sorted[0, 1, :],
+            self.experimental_data.f_ext_sorted[0, 7, :],
             "-g",
             label="Antero-posterior",
         )
         axs[0].plot(
             self.experimental_data.analogs_time_vector,
-            self.experimental_data.grf_sorted[0, 2, :],
+            self.experimental_data.f_ext_sorted[0, 8, :],
             "-b",
             label="Vertical",
         )
 
         axs[1].plot(
             self.experimental_data.analogs_time_vector,
-            self.experimental_data.grf_sorted[1, 0, :],
+            self.experimental_data.f_ext_sorted[1, 6, :],
             "-r",
             label="Medio-lateral",
         )
         axs[1].plot(
             self.experimental_data.analogs_time_vector,
-            self.experimental_data.grf_sorted[1, 1, :],
+            self.experimental_data.f_ext_sorted[1, 7, :],
             "-g",
             label="Antero-posterior",
         )
         axs[1].plot(
             self.experimental_data.analogs_time_vector,
-            self.experimental_data.grf_sorted[1, 2, :],
+            self.experimental_data.f_ext_sorted[1, 8, :],
             "-b",
             label="Vertical",
         )
@@ -431,8 +459,27 @@ class Events:
         axs[0].set_ylabel("Left leg GRF")
         axs[1].set_ylabel("Right leg GRF")
         axs[2].set_ylabel("Phases both legs")
-        plt.savefig("GRF.png")
+
+        result_file_full_path = self.get_result_file_full_path()
+        plt.savefig(result_file_full_path)
         plt.show()
+
+
+    def get_result_file_full_path(self):
+        result_folder = self.experimental_data.result_folder
+        trial_name = self.experimental_data.c3d_file_name.split('/')[-1][:-4]
+        result_file_full_path = f"{result_folder}/events_{trial_name}.pkl"
+        return result_file_full_path
+
+
+    def save_events(self):
+        """
+        Save the events detected.
+        """
+        result_file_full_path = self.get_result_file_full_path()
+        with open(result_file_full_path, "wb") as file:
+            pickle.dump(self.outputs(), file)
+
 
     def inputs(self):
         return {

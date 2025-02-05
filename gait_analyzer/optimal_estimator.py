@@ -168,7 +168,7 @@ class OptimalEstimator:
                     * self.experimental_data.markers_dt
                     / self.experimental_data.analogs_dt
                 )
-                - 3
+                - 5
             )
             idx_end = (
                 int(
@@ -176,20 +176,14 @@ class OptimalEstimator:
                     * self.experimental_data.markers_dt
                     / self.experimental_data.analogs_dt
                 )
-                + 3
+                + 5
             )
-            self.f_ext_exp_ocp["left_leg"][:3, i_node] = np.mean(
-                self.experimental_data.grf_sorted[0, 3:6, idx_beginning:idx_end], axis=1
-            )  # Moments
-            self.f_ext_exp_ocp["left_leg"][3:, i_node] = np.mean(
-                self.experimental_data.grf_sorted[0, 0:3, idx_beginning:idx_end], axis=1
-            )  # Forces
-            self.f_ext_exp_ocp["right_leg"][:3, i_node] = np.mean(
-                self.experimental_data.grf_sorted[1, 3:6, idx_beginning:idx_end], axis=1
-            )  # Moments
-            self.f_ext_exp_ocp["right_leg"][3:, i_node] = np.mean(
-                self.experimental_data.grf_sorted[1, 0:3, idx_beginning:idx_end], axis=1
-            )  # Forces
+            self.f_ext_exp_ocp["left_leg"][:, i_node] = np.mean(
+                self.experimental_data.f_ext_sorted[0, 3:, idx_beginning:idx_end], axis=1
+            )
+            self.f_ext_exp_ocp["right_leg"][:, i_node] = np.mean(
+                self.experimental_data.f_ext_sorted[1, 3:, idx_beginning:idx_end], axis=1
+            )
         self.markers_exp_ocp = self.experimental_data.markers_sorted[:, :, this_sequence_markers]
 
         self.n_shooting = self.q_exp_ocp.shape[1]
