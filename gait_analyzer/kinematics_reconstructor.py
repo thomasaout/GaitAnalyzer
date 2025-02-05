@@ -2,10 +2,12 @@ import os
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.signal import savgol_filter
 import biorbd
 from pyorerun import BiorbdModel, PhaseRerun
 from pyomeca import Markers
 
+from gait_analyzer.operator import Operator
 from gait_analyzer.experimental_data import ExperimentalData
 from gait_analyzer.biomod_model_creator import BiomodModelCreator
 from gait_analyzer.events import Events
@@ -145,7 +147,9 @@ class KinematicsReconstructor:
         self.biorbd_model = None
         self.t = None
         self.q = None
-        # self.q_filtered = None
+        self.q_filtered = None
+        self.qdot_filtered = None
+        self.qddot_filtered = None
         self.is_loaded_kinematics = False
 
         if skip_if_existing and self.check_if_existing():
@@ -161,13 +165,6 @@ class KinematicsReconstructor:
 
         if plot_kinematics_flag:
             self.plot_kinematics()
-
-
-    def get_result_file_full_path(self):
-        result_folder = self.experimental_data.result_folder
-        trial_name = self.experimental_data.c3d_file_name.split('/')[-1][:-4]
-        result_file_full_path = f"{result_folder}/inv_kin_{trial_name}.pkl"
-        return result_file_full_path
 
 
     def check_if_existing(self):
@@ -186,18 +183,13 @@ class KinematicsReconstructor:
                 data = pickle.load(file)
                 self.t = data["t"]
                 self.q = data["q"]
+                self.q_filtered = data["q_filtered"]
+                self.qdot_filtered = data["qdot_filtered"]
+                self.qddot_filtered = data["qddot_filtered"]
+                self.biorbd_model = self.biorbd_model_creator.biorbd_model
             return True
         else:
             return False
-
-
-    def save_kinematics_reconstruction(self):
-        """
-        Save the kinematics reconstruction.
-        """
-        result_file_full_path = self.get_result_file_full_path()
-        with open(result_file_full_path, "wb") as file:
-            pickle.dump({"t": self.t, "q": self.q}, file)
 
 
     def perform_kinematics_reconstruction(self):
@@ -217,13 +209,76 @@ class KinematicsReconstructor:
         self.q = q_recons
         self.t = self.experimental_data.markers_time_vector[:self.max_frames]
 
+
     def filter_kinematics(self):
         """
         Unwrap and filter the joint angles.
         """
-        # TODO: Guys -> Do we need filtering ? and reinterpretation of pelvis orientation ?
-        q_unwrapped = np.unwrap(self.q, axis=0)
-        # self.q_filtered = q_unwrapped
+        def unwrap_kinematics(biorbd_model: biorbd.Model, q: np.ndarray):
+            """
+            Performs unwrap on the kinematics from which it re-expressed in terms of matrix rotation before
+            (which makes it more likely to be in the same quadrant)
+
+            Returns
+            -------
+
+            """
+            dof_names = [n.to_string() for n in biorbd_model.nameDof()]
+            for i_segment, segment_name in enumerate(segment_dict):
+                rotation_sequence = ""
+                rot_idx = []
+                for dof in segment_dict[segment_name]["dof_idx"]:
+                    if dof_names[dof][-6:-1] != "Trans":  # Skip translations
+                        rotation_sequence += dof_names[dof][-1]
+                        rot_idx += [dof]
+                if rotation_sequence != "XX":
+                    rotation_sequence = rotation_sequence.lower()
+                    for i_frame in range(q.shape[0]):
+                        rot = q[i_frame, rot_idx]
+                        rotation_matrix = biorbd.Rotation.fromEulerAngles(rot, rotation_sequence)
+                        q[i_frame, rot_idx] = biorbd.Rotation.toEulerAngles(rotation_matrix, rotation_sequence).to_array()
+                    q[:, rot_idx] = np.unwrap(q[:, rot_idx], axis=0)
+            return q
+
+
+        def filter_kinematics(q_unwrapped):
+            filter_type = "savgol",  # "filtfilt"
+
+            # Filter q
+            sampling_rate = 1 / (self.t[1] - self.t[0])
+            if filter_type == "savgol":
+                q_filtered = Operator.apply_savgol(q_unwrapped, window_length=31, polyorder=3)
+            elif filter_type == "filtfilt":
+                q_filtered = Operator.apply_filtfilt(q_unwrapped, order=4, sampling_rate=sampling_rate, cutoff_freq=6)
+            else:
+                raise NotImplementedError(f"filter_type {filter_type} nopt implemented. It must be 'savgol' or 'filtfilt'.")
+
+            # Compute and filter qdot
+            qdot = np.zeros_like(q_unwrapped)
+            for i_data in range(qdot.shape[1]):
+                qdot[0, i_data] = (q_filtered[1, i_data] - q_filtered[0, i_data]) / (self.t[1] - self.t[0])  # Forward finite diff
+                qdot[1:-1, i_data] = (q_filtered[2:, i_data] - q_filtered[:-2, i_data]) / (self.t[2:] - self.t[:-2])  # Centered finite diff
+                qdot[-1, i_data] = (q_filtered[-1, i_data] - q_filtered[-2, i_data]) / (self.t[-1] - self.t[-2])  # Backward finite diff
+            if filter_type == "savgol":
+                qdot_filtered = Operator.apply_savgol(qdot, window_length=31, polyorder=3)
+            else:
+                qdot_filtered = Operator.apply_filtfilt(qdot, order=4, sampling_rate=sampling_rate, cutoff_freq=6)
+
+            # Compute and filter qddot
+            qddot = np.zeros_like(q_unwrapped)
+            for i_data in range(qddot.shape[1]):
+                qddot[0, i_data] = (qdot_filtered[1, i_data] - qdot_filtered[0, i_data]) / (self.t[1] - self.t[0])
+                qddot[1:-1, i_data] = (qdot_filtered[2:, i_data] - qdot_filtered[:-2, i_data]) / (self.t[2:] - self.t[:-2])
+                qddot[-1, i_data] = (qdot_filtered[-1, i_data] - qdot_filtered[-2, i_data]) / (self.t[-1] - self.t[-2])
+            if filter_type == "savgol":
+                qddot_filtered = Operator.apply_savgol(qddot, window_length=31, polyorder=3)
+            else:
+                qddot_filtered = Operator.apply_filtfilt(qddot, order=4, sampling_rate=sampling_rate, cutoff_freq=6)
+
+            return q_filtered, qdot_filtered, qddot_filtered
+
+        q_unwrapped = unwrap_kinematics(self.biorbd_model, self.q)
+        self.q_filtered, self.qdot_filtered, self.qddot_filtered = filter_kinematics(q_unwrapped)
 
 
     def plot_kinematics(self):
@@ -278,6 +333,21 @@ class KinematicsReconstructor:
         viz.rerun_by_frame("Kinematics reconstruction")
 
 
+    def get_result_file_full_path(self):
+        result_folder = self.experimental_data.result_folder
+        trial_name = self.experimental_data.c3d_file_name.split('/')[-1][:-4]
+        result_file_full_path = f"{result_folder}/inv_kin_{trial_name}.pkl"
+        return result_file_full_path
+
+
+    def save_kinematics_reconstruction(self):
+        """
+        Save the kinematics reconstruction.
+        """
+        result_file_full_path = self.get_result_file_full_path()
+        with open(result_file_full_path, "wb") as file:
+            pickle.dump(self.outputs(), file)
+
     def inputs(self):
         return {
             "biorbd_model": self.biorbd_model,
@@ -288,7 +358,9 @@ class KinematicsReconstructor:
         return {
             "t": self.t,
             "q": self.q,
-            # "q_filtered": self.q_filtered,
+            "q_filtered": self.q_filtered,
+            "qdot_filtered": self.qdot_filtered,
+            "qddot_filtered": self.qddot_filtered,
             "is_loaded_kinematics": self.is_loaded_kinematics,
         }
 

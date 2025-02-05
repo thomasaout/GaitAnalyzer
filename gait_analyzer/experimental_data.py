@@ -163,8 +163,8 @@ class ExperimentalData:
                 platform_origin[i_platform, :, 0] = np.mean(platforms[i_platform]['corners'] * units, axis=1)
                 for i_frame in range(self.nb_analog_frames):
                     r = platform_origin[i_platform, :, 0] - cop_filtered[i_platform, :, i_frame]
-                    moment_offset = np.cross(r, force[i_frame])
-                    moment_adjusted[i_platform, :, i_frame] = moment[i_frame] + moment_offset
+                    moment_offset = np.cross(r, force[:, i_frame])
+                    moment_adjusted[i_platform, :, i_frame] = moment[:, i_frame] + moment_offset
 
                 # Filter forces and moments
                 force_filtered[i_platform, :, :] = Operator.apply_filtfilt(force, order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10)
@@ -172,11 +172,11 @@ class ExperimentalData:
                 moment_adjusted_filtered[i_platform, :, :] = Operator.apply_filtfilt(moment_adjusted[i_platform, :, :], order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10)
 
                 # Store output in a biorbd compatible format
-                f_ext_sorted[i_platform, :3, :] = cop[i_platform, :, :]
+                f_ext_sorted[i_platform, :3, :] = cop[:, :]
                 f_ext_sorted_filtered[i_platform, :3, :] = cop_filtered[i_platform, :, :]
                 f_ext_sorted[i_platform, 3:6, :] = moment_adjusted[i_platform, :, :]
                 f_ext_sorted_filtered[i_platform, 3:6, :] = moment_adjusted_filtered[i_platform, :, :]
-                f_ext_sorted[i_platform, 6:9, :] = force[i_platform, :, :]
+                f_ext_sorted[i_platform, 6:9, :] = force[:, :]
                 f_ext_sorted_filtered[i_platform, 6:9, :] = force_filtered[i_platform, :, :]
 
             self.f_ext_sorted = f_ext_sorted
@@ -187,6 +187,7 @@ class ExperimentalData:
             self.markers_time_vector = np.linspace(0, self.markers_dt * self.nb_marker_frames, self.nb_marker_frames)
             self.analogs_time_vector = np.linspace(0, self.analogs_dt * self.nb_analog_frames, self.nb_analog_frames)
 
+
         # Perform the initial treatment
         load_model()
         sort_markers()
@@ -194,26 +195,6 @@ class ExperimentalData:
         sort_analogs()
         extract_force_platform_data()
         compute_time_vectors()
-
-
-    def get_f_ext_at_frame(self, i_node: int):
-        """
-        Constructs a biorbd external forces set object at a specific frame.
-        .
-        Parameters
-        ----------
-        i_node: int
-            The frame index.
-        .
-        Returns
-        -------
-        f_ext_set: biorbd externalForceSet
-            The external forces set at the frame.
-        """
-        f_ext_set = self.biorbd_model_creator.biorbd_model.externalForceSet()
-        f_ext_set.add("calcn_l", self.f_ext_sorted[0, 3:, i_node], self.f_ext_sorted[0, :3, i_node])
-        f_ext_set.add("calcn_r", self.f_ext_sorted[1, 3:, i_node], self.f_ext_sorted[1, :3, i_node])
-        return f_ext_set
 
 
     def animate_c3d(self):

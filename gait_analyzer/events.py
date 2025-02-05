@@ -1,3 +1,4 @@
+import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
@@ -27,8 +28,8 @@ class Events:
             )
 
         # Parameters of the detection algorithm
-        self.minimal_vertical_force_threshold = 0.025  # TODO: Charbie -> cite article and make it weight dependent
-        self.minimal_forward_force_threshold = 0.05  # TODO: Charbie -> cite article and make it weight dependent
+        self.minimal_vertical_force_threshold = 20  # TODO: Charbie -> cite article and make it weight dependent
+        self.minimal_forward_force_threshold = 5  # TODO: Charbie -> cite article and make it weight dependent
         self.heel_velocity_threshold = 0.05
 
         # Initial attributes
@@ -306,6 +307,7 @@ class Events:
         self.detect_phases_both_legs("toesL_heelR", "toes_only", "heel_only")
         self.detect_phases_both_legs("toesL_heelR_toesR", "toes_only", "flat_foot")
 
+
     def plot_events(self):
         """
         Plot the GRF and the detected phases
@@ -457,8 +459,27 @@ class Events:
         axs[0].set_ylabel("Left leg GRF")
         axs[1].set_ylabel("Right leg GRF")
         axs[2].set_ylabel("Phases both legs")
-        plt.savefig("GRF.png")
+
+        result_file_full_path = self.get_result_file_full_path()
+        plt.savefig(result_file_full_path)
         plt.show()
+
+
+    def get_result_file_full_path(self):
+        result_folder = self.experimental_data.result_folder
+        trial_name = self.experimental_data.c3d_file_name.split('/')[-1][:-4]
+        result_file_full_path = f"{result_folder}/events_{trial_name}.pkl"
+        return result_file_full_path
+
+
+    def save_events(self):
+        """
+        Save the events detected.
+        """
+        result_file_full_path = self.get_result_file_full_path()
+        with open(result_file_full_path, "wb") as file:
+            pickle.dump(self.outputs(), file)
+
 
     def inputs(self):
         return {

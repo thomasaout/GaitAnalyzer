@@ -124,9 +124,9 @@ class ResultManager:
         self.inverse_dynamics_performer = InverseDynamicsPerformer(
             self.experimental_data,
             self.biorbd_model_creator.biorbd_model,
-            self.kinematics_reconstructor.q,
-            self.kinematics_reconstructor.qdot,
-            self.kinematics_reconstructor.qddot,
+            self.kinematics_reconstructor.q_filtered,
+            self.kinematics_reconstructor.qdot_filtered,
+            self.kinematics_reconstructor.qddot_filtered,
         )
 
 

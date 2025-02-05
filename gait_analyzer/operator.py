@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.signal import butter, filtfilt
+from scipy.signal import butter, filtfilt, savgol_filter
 
 
 class Operator:
@@ -77,3 +77,95 @@ class Operator:
             filtered_data[i_data, non_nan_idx] = filtfilt(b, a,  data[i_data, non_nan_idx], axis=0)
         return filtered_data
 
+
+    @staticmethod
+    def apply_savgol(data: np.ndarray, window_length: int, polyorder: int):
+        """
+        TODO: @ophlariviere -> This was taken from biomechanics tools, could you provide a ref for it ?
+        .
+        Apply a low-pass Savitzky-Golay filter to the data using scipy.savgol_filter
+        .
+        Parameters
+        ----------
+        data: np.ndarray
+            The data to be filtered (for now, this can only be a nb_data x nb_frames array)
+        window_length: int
+            The length of the filter window
+        polyorder: int
+            The order of the polynomial to fit
+        .
+        Returns
+        -------
+        filtered_data: np.ndarray
+            The filtered data
+        """
+        filtered_data = np.zeros_like(data)
+        filtered_data[:, :] = np.nan
+        for i_data in range(data.shape[0]):
+            non_nan_idx = ~np.isnan(data[i_data, :])
+            filtered_data[i_data, non_nan_idx] = savgol_filter(data[i_data, non_nan_idx],
+                                                               window_length=window_length,
+                                                                polyorder=polyorder,
+                                                               axis=0)
+        return filtered_data
+
+    @staticmethod
+    def from_marker_frame_to_analog_frame(analogs_time_vector: np.ndarray,
+                                          markers_time_vector: np.ndarray,
+                                          marker_idx: int | list[int]) -> int | list[int]:
+        """
+        This function converts a marker frame index into an analog frame index since the analogs are sampled at a higher frequency than the markers.
+        .
+        Parameters
+        ----------
+        analogs_time_vector: np.ndarray
+            The time vector of the analogs
+        markers_time_vector: np.ndarray
+            The time vector of the markers
+        marker_idx: int | list[int]
+            The analog frame index to convert
+        .
+        Returns
+        -------
+        analog_idx: int | list[int]
+            The analog frame index
+        """
+        analog_to_marker_ratio = int(round(analogs_time_vector.shape[0] / markers_time_vector.shape[0]))
+        all_idx = list(range(0, len(analogs_time_vector), analog_to_marker_ratio))
+        if isinstance(marker_idx, int):
+            analog_idx = all_idx[marker_idx]
+        elif isinstance(marker_idx, list):
+            analog_idx = [all_idx[idx] for idx in marker_idx]
+        else:
+            raise ValueError("marker_idx must be an int or a list of int.")
+        return analog_idx
+
+    @staticmethod
+    def from_analog_frame_to_marker_frame(analogs_time_vector: np.ndarray,
+                                          markers_time_vector: np.ndarray,
+                                          analog_idx: int | list[int]) -> int | list[int]:
+        """
+        This function converts an analog frame index into a marker frame index since the analogs are sampled at a higher frequency than the markers.
+        .
+        Parameters
+        ----------
+        analogs_time_vector: np.ndarray
+            The time vector of the analogs
+        markers_time_vector: np.ndarray
+            The time vector of the markers
+        analog_idx: int | list[int]
+            The marker frame index to convert
+        .
+        Returns
+        -------
+        marker_idx: int | list[int]
+            The marker frame index
+        """
+        analog_to_marker_ratio = int(round(analogs_time_vector.shape[0] / markers_time_vector.shape[0]))
+        if isinstance(analog_idx, int):
+            marker_idx =  int(round(analog_idx / analog_to_marker_ratio))
+        elif isinstance(analog_idx, list):
+            marker_idx =  [int(round(idx / analog_to_marker_ratio)) for idx in analog_idx]
+        else:
+            raise ValueError("analog_idx must be an int or a list of int.")
+        return marker_idx

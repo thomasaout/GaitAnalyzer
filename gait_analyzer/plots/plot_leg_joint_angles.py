@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
 
-from gait_analyzer.plots.plot_utils import split_cycles, mean_cycles, LegToPlot, PlotType, from_analog_frame_to_marker_frame
+from gait_analyzer.plots.plot_utils import split_cycles, mean_cycles, LegToPlot, PlotType
 
 
 class PlotLegData:

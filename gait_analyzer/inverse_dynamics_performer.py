@@ -1,6 +1,7 @@
 import numpy as np
 import biorbd
 
+from gait_analyzer import Operator
 from gait_analyzer.experimental_data import ExperimentalData
 
 
@@ -12,9 +13,9 @@ class InverseDynamicsPerformer:
     def __init__(self, 
                  experimental_data: ExperimentalData, 
                  biorbd_model: biorbd.Model, 
-                 q: np.ndarray, 
-                 qdot: np.ndarray, 
-                 qddot: np.ndarray):
+                 q_filtered: np.ndarray,
+                 qdot_filtered: np.ndarray,
+                 qddot_filtered: np.ndarray):
         """
         Initialize the InverseDynamicsPerformer.
         .
@@ -24,11 +25,11 @@ class InverseDynamicsPerformer:
             The experimental data from the trial
         biorbd_model: biorbd.Model
             The biorbd model to use for the inverse dynamics
-        q: np.ndarray()
+        q_filtered: np.ndarray()
             The generalized coordinates
-        qdot: np.ndarray()
+        qdot_filtered: np.ndarray()
             The generalized velocities
-        qddot: np.ndarray()
+        qddot_filtered: np.ndarray()
             The generalized accelerations
         """
         
@@ -45,9 +46,9 @@ class InverseDynamicsPerformer:
         # Initial attributes
         self.experimental_data = experimental_data
         self.biorbd_model = biorbd_model
-        self.q = q
-        self.qdot = qdot
-        self.qddot = qddot
+        self.q_filtered = q_filtered
+        self.qdot_filtered = qdot_filtered
+        self.qddot_filtered = qddot_filtered
 
         # Extended attributes
         self.tau = np.ndarray(())
@@ -57,26 +58,49 @@ class InverseDynamicsPerformer:
 
 
     def perform_inverse_dynamics(self):
-        """
-        Code adapted from ophlariviere's biomechanics_tools
-        Modifications:
-        - Do not filter q, qdot, qddot since the kalman filter should already do the job.
-        - Use only the force plate data at the frames where the marker positions were recorded (taking the mean of frames [i-5:i+5])
-        """
-        tau = np.zeros_like(self.q)
-        for i_node in range(self.q.shape[1]):
-            f_ext = self.experimental_data.get_f_ext_at_frame(i_node)
-            tau[:, i_node] = self.biorbd_model.InverseDynamics(self.q[:, i_node], self.qdot[:, i_node], self.qddot[:, i_node], f_ext).to_array()
+        print("Performing inverse dynamics...")
+        tau = np.zeros_like(self.q_filtered)
+        for i_node in range(self.q_filtered.shape[0]):
+            f_ext = self.get_f_ext_at_frame(i_node)
+            tau[i_node, :] = self.biorbd_model.InverseDynamics(self.q_filtered[i_node, :], self.qdot_filtered[i_node, :], self.qddot_filtered[i_node, :], f_ext).to_array()
         self.tau = tau
+
+
+    def get_f_ext_at_frame(self, i_marker_node: int):
+        """
+        Constructs a biorbd external forces set object at a specific frame.
+        .
+        Parameters
+        ----------
+        i_marker_node: int
+            The marker frame index.
+        .
+        Returns
+        -------
+        f_ext_set: biorbd externalForceSet
+            The external forces set at the frame.
+        """
+        f_ext_set = self.biorbd_model.externalForceSet()
+        i_analog_node = Operator.from_marker_frame_to_analog_frame(self.experimental_data.analogs_time_vector, self.experimental_data.markers_time_vector, i_marker_node)
+        analog_to_marker_ratio = int(round(self.experimental_data.analogs_time_vector.shape[0] / self.experimental_data.markers_time_vector.shape[0]))
+        frame_range = list(range(i_analog_node-(int(analog_to_marker_ratio/2)), i_analog_node+(int(analog_to_marker_ratio/2))))
+        # Average over the marker frame time lapse
+        f_ext_set.add("calcn_l",
+                      np.mean(self.experimental_data.f_ext_sorted[0, 3:, frame_range], axis=0),
+                      np.mean(self.experimental_data.f_ext_sorted[0, :3, frame_range], axis=0))
+        f_ext_set.add("calcn_r",
+                      np.mean(self.experimental_data.f_ext_sorted[1, 3:, frame_range], axis=0),
+                      np.mean(self.experimental_data.f_ext_sorted[1, :3, frame_range], axis=0))
+        return f_ext_set
 
 
     def inputs(self):
         return {
             "biorbd_model": self.biorbd_model,
             "experimental_data": self.experimental_data,
-            "q": self.q,
-            "qdot": self.qdot,
-            "qddot": self.qddot,
+            "q_filtered": self.q_filtered,
+            "qdot_filtered": self.qdot_filtered,
+            "qddot_filtered": self.qddot_filtered,
         }
 
     def outputs(self):
