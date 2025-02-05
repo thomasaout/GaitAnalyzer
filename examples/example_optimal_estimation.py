@@ -43,16 +43,31 @@ if __name__ == "__main__":
 
     # --- Example of how to run the analysis --- #
     AnalysisPerformer(
-        analysis_to_perform, subjects_to_analyze=["AOT_01"], result_folder="results", skip_if_existing=False
+        analysis_to_perform, subjects_to_analyze=["AOT_01"], result_folder="results", skip_if_existing=True
     )
 
-    # --- Example of how to plot the results --- #
+    # --- Example of how to plot the joint angles --- #
     plot = PlotLegData(result_folder="results",
                        leg_to_plot=LegToPlot.RIGHT,
                        plot_type=PlotType.Q,
                        conditions_to_compare=["_ManipStim_L400_F40_I20",
                                               "_ManipStim_L400_F40_I40",
-                                              "_ManipStim_L400_F40_I60"])
+                                              "_ManipStim_L400_F40_I60",
+                                              "_ManipStim_L200_F30_I20",
+                                              "_ManipStim_L300_F30_I60"])
+    plot.draw_plot()
+    plot.save("results/AOT_01_Q_plot_temporary.png")
+    plot.show()
+
+    # --- Example of how to plot the joint torques --- #
+    plot = PlotLegData(result_folder="results",
+                       leg_to_plot=LegToPlot.RIGHT,
+                       plot_type=PlotType.TAU,
+                       conditions_to_compare=["_ManipStim_L400_F40_I20",
+                                              "_ManipStim_L400_F40_I40",
+                                              "_ManipStim_L400_F40_I60",
+                                              "_ManipStim_L200_F30_I20",
+                                              "_ManipStim_L300_F30_I60"])
     plot.draw_plot()
     plot.save("results/AOT_01_Q_plot_temporary.png")
     plot.show()

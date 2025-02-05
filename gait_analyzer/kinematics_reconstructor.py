@@ -242,7 +242,7 @@ class KinematicsReconstructor:
 
 
         def filter_kinematics(q_unwrapped):
-            filter_type = "savgol",  # "filtfilt"
+            filter_type = "savgol"  # "filtfilt"
 
             # Filter q
             sampling_rate = 1 / (self.t[1] - self.t[0])
@@ -251,7 +251,7 @@ class KinematicsReconstructor:
             elif filter_type == "filtfilt":
                 q_filtered = Operator.apply_filtfilt(q_unwrapped, order=4, sampling_rate=sampling_rate, cutoff_freq=6)
             else:
-                raise NotImplementedError(f"filter_type {filter_type} nopt implemented. It must be 'savgol' or 'filtfilt'.")
+                raise NotImplementedError(f"filter_type {filter_type} not implemented. It must be 'savgol' or 'filtfilt'.")
 
             # Compute and filter qdot
             qdot = np.zeros_like(q_unwrapped)

@@ -5,7 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
 
-from gait_analyzer.plots.plot_utils import split_cycles, mean_cycles, LegToPlot, PlotType
+from gait_analyzer.operator import Operator
+from gait_analyzer.plots.plot_utils import split_cycles, mean_cycles, LegToPlot, PlotType, get_units
 
 
 class PlotLegData:
@@ -49,23 +50,23 @@ class PlotLegData:
             if os.path.isdir(os.path.join(self.result_folder, result_file)):
                 for file_in_sub_folder in os.listdir(os.path.join(self.result_folder, result_file)):
                     file_in_sub_folder = os.path.join(self.result_folder, result_file, file_in_sub_folder)
-                    if file_in_sub_folder.endswith(".pkl"):
+                    if file_in_sub_folder.endswith("results.pkl"):
                         with open(file_in_sub_folder, "rb") as file:
                             data = pickle.load(file)
                         subject_name = data["subject_name"]
                         cond = file_in_sub_folder.replace(f"{self.result_folder}/{result_file}/", "").replace(subject_name, "").replace("_results.pkl", "")
-                        event_idx = from_analog_frame_to_marker_frame(data["analogs_time_vector"],
+                        event_idx = Operator.from_analog_frame_to_marker_frame(data["analogs_time_vector"],
                                                                       data["markers_time_vector"],
                                                                       data["events"]["right_leg_heel_touch"])
                         if cond in self.conditions_to_compare:
                             cycles_data[cond] += split_cycles(data[self.plot_type.value], event_idx)
             else:
-                if result_file.endswith(".pkl"):
+                if result_file.endswith("results.pkl"):
                     with open(result_file, "rb") as file:
                         data = pickle.load(file)
                     subject_name = data["subject_name"]
                     cond = result_file.replace(subject_name, "").replace(".pkl", "")
-                    event_idx = from_analog_frame_to_marker_frame(data["analogs_time_vector"],
+                    event_idx = Operator.from_analog_frame_to_marker_frame(data["analogs_time_vector"],
                                                                   data["markers_time_vector"],
                                                                   data["events"]["right_leg_heel_touch"])
                     if cond in self.conditions_to_compare:
@@ -76,7 +77,7 @@ class PlotLegData:
         data_tempo = cycles_data["_ManipStim_L400_F40_I40"]
         for i in range(len(data_tempo)):
             print(data_tempo[i].shape)
-            plt.plot(data_tempo[i][3, :])
+            plt.plot(data_tempo[i][:, 6])
         plt.savefig("plottttt.png")
         plt.show()
 
@@ -114,37 +115,42 @@ class PlotLegData:
         # Store the mean ans std for further analysis
         all_mean_data = np.zeros((n_data_to_plot, len(self.plot_idx), nb_frames_interp))
         all_std_data = np.zeros((n_data_to_plot, len(self.plot_idx), nb_frames_interp))
-        all_labels = []
 
         # Plot the data
-        for i_cycle, key in enumerate(self.cycles_data):
+        unit_conversion, unit_str = get_units(self.plot_type)
+        lines_list = []
+        labels_list = []
+        for i_condition, key in enumerate(self.cycles_data):
             cycles = self.cycles_data[key]
             # Compute the mean over cycles
+            if len(cycles) == 0:
+                continue  # TODO: Charbie -> remove this when all data are available!
             mean_data, std_data = mean_cycles(cycles, index_to_keep=self.plot_idx, nb_frames_interp=nb_frames_interp)
-            mean_data = np.rad2deg(mean_data)
-            std_data = np.rad2deg(std_data)
-            all_mean_data[i_cycle, :, :] = mean_data
-            all_std_data[i_cycle, :, :] = std_data
-            all_labels.append(self.conditions_to_compare[i_cycle])
+            mean_data = mean_data * unit_conversion
+            std_data = std_data * unit_conversion
+            all_mean_data[i_condition, :, :] = mean_data
+            all_std_data[i_condition, :, :] = std_data
             for i_ax, ax in enumerate(axs):
                 ax.fill_between(normalized_time,
                                 mean_data[i_ax, :] - std_data[i_ax, :],
                                 mean_data[i_ax, :] + std_data[i_ax, :],
-                                color=colors[i_cycle], alpha=0.3)
-                ax.plot(normalized_time,
-                        mean_data[i_ax, :], label=f"{self.conditions_to_compare[i_cycle]}",
-                        color=colors[i_cycle])
-                if i_cycle == 0:
-                    if i_ax == len(axs) - 1:
-                        ax.set_xlabel("Normalized time [%]")
-                    ax.set_ylabel(f"{self.plot_labels[i_ax]} angle " + r"[$^\circ$]")
+                                color=colors[i_condition], alpha=0.3)
+                if i_ax == 0:
+                    lines_list += ax.plot(normalized_time, mean_data[i_ax, :], label=key, color=colors[i_condition])
+                    labels_list += [key]
+                else:
+                    ax.plot(normalized_time,
+                            mean_data[i_ax, :], label=key,
+                            color=colors[i_condition])
+                ax.set_ylabel(f"{self.plot_labels[i_ax]} " + unit_str)
+            axs[-1].set_xlabel("Normalized time [%]")
 
-        # Legend
-        for i_cycle, key in enumerate(self.cycles_data):
-            axs[0].fill_between([], [], [], color=colors[i_cycle], alpha=0.3, label=f"{self.conditions_to_compare[i_cycle]}")
-        axs[0].legend(bbox_to_anchor=(0.5, 1.1), loc='upper center', borderaxespad=0.)
-        fig.tight_layout()
-        fig.savefig("plot_Q_temporary.png")
+        axs[0].legend(lines_list,
+                      labels_list,
+                      bbox_to_anchor=(0.5, 1.6),
+                      loc='upper center')
+        fig.subplots_adjust(top=0.9)
+        fig.savefig(f"plot_conditions_{self.plot_type.value}.png")
         self.fig = fig
 
 

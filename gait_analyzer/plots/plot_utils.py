@@ -23,6 +23,45 @@ class DimentionsToPlot(Enum):
     TRIDIMENTIONAL = "3D"
 
 
+def get_units(plot_type) -> Tuple[float, str]:
+    """
+    This function returns the unit conversion and the unit string for the plot type.
+    .
+    Parameters
+    ----------
+    plot_type: PlotType
+        The type of plot to get the units for
+    .
+    Returns
+    -------
+    unit_conversion: float
+        The unit conversion factor tp multiply the data to plot with to get the right units
+    unit_str: str
+        The unit string to display on the plot
+    """
+    if plot_type == PlotType.Q:
+        unit_conversion = 180 / np.pi
+        unit_str = r"[$^\circ$]"
+    elif plot_type == PlotType.QDOT:
+        unit_conversion = 180 / np.pi
+        unit_str = r"[$^\circ/s$]"
+    elif plot_type == PlotType.QDDOT:
+        unit_conversion = 180 / np.pi
+        unit_str = r"[$^\circ/s^2$]"
+    elif plot_type == PlotType.TAU:
+        unit_conversion = 1
+        unit_str = r"[$Nm$]"
+    elif plot_type == PlotType.POWER:
+        unit_conversion = 1
+        unit_str = r"[$W$]"
+    elif plot_type == PlotType.ANGULAR_MOMENTUM:
+        unit_conversion = 1
+        unit_str = r"[$kg.m^2/s$]"
+    else:
+        raise ValueError("plot_type must be a PlotType.")
+    return unit_conversion, unit_str
+
+
 def split_cycles(data: np.ndarray, event_idx: list[int]) -> list[np.ndarray]:
     """
     This function splits the data into cycles at the event.
@@ -50,7 +89,7 @@ def split_cycles(data: np.ndarray, event_idx: list[int]) -> list[np.ndarray]:
     # Split the data into cycles (skipping everything before the first event and after the last event)
     cycles = []
     for i_event in range(len(event_idx)-1):
-        cycles += [data[:, event_idx[i_event]:event_idx[i_event+1]]]
+        cycles += [data[event_idx[i_event]:event_idx[i_event+1], :]]
 
     return cycles
 
@@ -85,15 +124,15 @@ def mean_cycles(data: list[np.ndarray], index_to_keep: list[int], nb_frames_inte
 
     data_dim = len(index_to_keep)
     interpolated_data_array = np.zeros((len(data), data_dim, nb_frames_interp))
-    fir_data_dim = data[0].shape[0]
+    fig_data_dim = data[0].shape[1]
     for i_cycle, cycle in enumerate(data):
-        if fir_data_dim != cycle.shape[0]:
+        if fig_data_dim != cycle.shape[1]:
             raise ValueError(f"Data dimension is inconsistant across cycles.")
-        frames_dim = cycle.shape[1]
+        frames_dim = cycle.shape[0]
         # TODO: @ThomasAout -> How do you usually deal with the cycle length being variable ?
         x_to_interpolate_on = np.linspace(0, 1, num=nb_frames_interp)
         for i_dim, dim in enumerate(index_to_keep):
-            y_data = cycle[dim, :]
+            y_data = cycle[:, dim]
             x_data = np.linspace(0, 1, num=frames_dim)
             y_data = y_data[~np.isnan(y_data)]
             x_data = x_data[~np.isnan(y_data)]
