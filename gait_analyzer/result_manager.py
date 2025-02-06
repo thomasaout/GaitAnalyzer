@@ -114,7 +114,7 @@ class ResultManager:
         )
 
 
-    def perform_inverse_dynamics(self):
+    def perform_inverse_dynamics(self, reintegrate_flag: bool = True, animate_dynamics_flag: bool = False):
         # Checks
         if self.biorbd_model_creator is None:
             raise Exception("Please add the biorbd model first by running ResultManager.create_biorbd_model()")
@@ -132,6 +132,8 @@ class ResultManager:
             self.kinematics_reconstructor.q_filtered,
             self.kinematics_reconstructor.qdot,
             self.kinematics_reconstructor.qddot,
+            reintegrate_flag=reintegrate_flag,
+            animate_dynamics_flag=animate_dynamics_flag,
         )
 
 

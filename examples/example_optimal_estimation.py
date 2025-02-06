@@ -20,7 +20,7 @@ def analysis_to_perform(subject_name: str, subject_mass: float, c3d_file_name: s
 
     results.add_events(plot_phases_flag=False)
     results.reconstruct_kinematics(animate_kinematics_flag=False, plot_kinematics_flag=True, skip_if_existing=False)
-    results.perform_inverse_dynamics(animate_dynamics_flag=True)
+    results.perform_inverse_dynamics(reintegrate_flag=True, animate_dynamics_flag=True)
     # results.estimate_optimally()
 
     return results
@@ -47,7 +47,7 @@ if __name__ == "__main__":
         subjects_to_analyze=["AOT_01"],
         result_folder="results",
         trails_to_analyze=["_ManipStim_L200_F30_I20"],
-        skip_if_existing=False
+        skip_if_existing=False,
     )
 
     # --- Example of how to plot the joint angles --- #

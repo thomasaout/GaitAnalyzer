@@ -83,8 +83,8 @@ class PlotLegData:
 
         # Prepare the plot
         if self.leg_to_plot == LegToPlot.RIGHT:
-            plot_idx = [20, 3, 6, 9, 11]
-            plot_labels = ["Torso", "Pelvis", "Femur", "Tibia", "Calcaneus"]
+            plot_idx = [20, 3, 6, 9, 10]
+            plot_labels = ["Torso", "Pelvis", "Hip", "Knee", "Ankle"]
             # plot_labels = ["Hip", "Knee", "Ankle"]  # TODO
         else:
             raise NotImplementedError("Only the right leg is implemented for now.")
