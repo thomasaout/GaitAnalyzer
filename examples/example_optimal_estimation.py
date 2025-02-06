@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     # --- Example of how to run the analysis --- #
     AnalysisPerformer(
-        analysis_to_perform, subjects_to_analyze=["AOT_01"], result_folder="results", skip_if_existing=True
+        analysis_to_perform, subjects_to_analyze=["AOT_01"], result_folder="results", skip_if_existing=False
     )
 
     # --- Example of how to plot the joint angles --- #

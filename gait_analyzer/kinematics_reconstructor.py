@@ -148,8 +148,8 @@ class KinematicsReconstructor:
         self.t = None
         self.q = None
         self.q_filtered = None
-        self.qdot_filtered = None
-        self.qddot_filtered = None
+        self.qdot = None
+        self.qddot = None
         self.is_loaded_kinematics = False
 
         if skip_if_existing and self.check_if_existing():
@@ -184,8 +184,8 @@ class KinematicsReconstructor:
                 self.t = data["t"]
                 self.q = data["q"]
                 self.q_filtered = data["q_filtered"]
-                self.qdot_filtered = data["qdot_filtered"]
-                self.qddot_filtered = data["qddot_filtered"]
+                self.qdot = data["qdot"]
+                self.qddot = data["qddot"]
                 self.biorbd_model = self.biorbd_model_creator.biorbd_model
             return True
         else:
@@ -259,26 +259,18 @@ class KinematicsReconstructor:
                 qdot[0, i_data] = (q_filtered[1, i_data] - q_filtered[0, i_data]) / (self.t[1] - self.t[0])  # Forward finite diff
                 qdot[1:-1, i_data] = (q_filtered[2:, i_data] - q_filtered[:-2, i_data]) / (self.t[2:] - self.t[:-2])  # Centered finite diff
                 qdot[-1, i_data] = (q_filtered[-1, i_data] - q_filtered[-2, i_data]) / (self.t[-1] - self.t[-2])  # Backward finite diff
-            if filter_type == "savgol":
-                qdot_filtered = Operator.apply_savgol(qdot, window_length=31, polyorder=3)
-            else:
-                qdot_filtered = Operator.apply_filtfilt(qdot, order=4, sampling_rate=sampling_rate, cutoff_freq=6)
 
             # Compute and filter qddot
             qddot = np.zeros_like(q_unwrapped)
             for i_data in range(qddot.shape[1]):
-                qddot[0, i_data] = (qdot_filtered[1, i_data] - qdot_filtered[0, i_data]) / (self.t[1] - self.t[0])
-                qddot[1:-1, i_data] = (qdot_filtered[2:, i_data] - qdot_filtered[:-2, i_data]) / (self.t[2:] - self.t[:-2])
-                qddot[-1, i_data] = (qdot_filtered[-1, i_data] - qdot_filtered[-2, i_data]) / (self.t[-1] - self.t[-2])
-            if filter_type == "savgol":
-                qddot_filtered = Operator.apply_savgol(qddot, window_length=31, polyorder=3)
-            else:
-                qddot_filtered = Operator.apply_filtfilt(qddot, order=4, sampling_rate=sampling_rate, cutoff_freq=6)
+                qddot[0, i_data] = (qdot[1, i_data] - qdot[0, i_data]) / (self.t[1] - self.t[0])
+                qddot[1:-1, i_data] = (qdot[2:, i_data] - qdot[:-2, i_data]) / (self.t[2:] - self.t[:-2])
+                qddot[-1, i_data] = (qdot[-1, i_data] - qdot[-2, i_data]) / (self.t[-1] - self.t[-2])
 
-            return q_filtered, qdot_filtered, qddot_filtered
+            return q_filtered, qdot, qddot
 
         q_unwrapped = unwrap_kinematics(self.biorbd_model, self.q)
-        self.q_filtered, self.qdot_filtered, self.qddot_filtered = filter_kinematics(q_unwrapped)
+        self.q_filtered, self.qdot, self.qddot = filter_kinematics(q_unwrapped)
 
 
     def plot_kinematics(self):
@@ -359,8 +351,8 @@ class KinematicsReconstructor:
             "t": self.t,
             "q": self.q,
             "q_filtered": self.q_filtered,
-            "qdot_filtered": self.qdot_filtered,
-            "qddot_filtered": self.qddot_filtered,
+            "qdot": self.qdot,
+            "qddot": self.qddot,
             "is_loaded_kinematics": self.is_loaded_kinematics,
         }
 
