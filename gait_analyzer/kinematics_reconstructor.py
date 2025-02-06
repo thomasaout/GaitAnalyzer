@@ -241,30 +241,30 @@ class KinematicsReconstructor:
         """
         Unwrap and filter the joint angles.
         """
-        def reinterpret_angles(biorbd_model: biorbd.Model, q: np.ndarray):
-            """
-            Performs unwrap on the kinematics from which it re-expressed in terms of matrix rotation before
-            (which makes it more likely to be in the same quadrant)
-
-            Returns
-            -------
-
-            """
-            dof_names = [n.to_string() for n in biorbd_model.nameDof()]
-            for i_segment, segment_name in enumerate(segment_dict):
-                rotation_sequence = ""
-                rot_idx = []
-                for dof in segment_dict[segment_name]["dof_idx"]:
-                    if dof_names[dof][-6:-1] != "Trans":  # Skip translations
-                        rotation_sequence += dof_names[dof][-1]
-                        rot_idx += [dof]
-                if rotation_sequence != "XX":
-                    rotation_sequence = rotation_sequence.lower()
-                    for i_frame in range(q.shape[0]):
-                        rot = q[i_frame, rot_idx]
-                        rotation_matrix = biorbd.Rotation.fromEulerAngles(rot, rotation_sequence)
-                        q[i_frame, rot_idx] = biorbd.Rotation.toEulerAngles(rotation_matrix, rotation_sequence).to_array()
-            return q
+        # def reinterpret_angles(biorbd_model: biorbd.Model, q: np.ndarray):
+        #     """
+        #     Performs unwrap on the kinematics from which it re-expressed in terms of matrix rotation before
+        #     (which makes it more likely to be in the same quadrant)
+        #
+        #     Returns
+        #     -------
+        #
+        #     """
+        #     dof_names = [n.to_string() for n in biorbd_model.nameDof()]
+        #     for i_segment, segment_name in enumerate(segment_dict):
+        #         rotation_sequence = ""
+        #         rot_idx = []
+        #         for dof in segment_dict[segment_name]["dof_idx"]:
+        #             if dof_names[dof][-6:-1] != "Trans":  # Skip translations
+        #                 rotation_sequence += dof_names[dof][-1]
+        #                 rot_idx += [dof]
+        #         if rotation_sequence != "XX":
+        #             rotation_sequence = rotation_sequence.lower()
+        #             for i_frame in range(q.shape[0]):
+        #                 rot = q[i_frame, rot_idx]
+        #                 rotation_matrix = biorbd.Rotation.fromEulerAngles(rot, rotation_sequence)
+        #                 q[i_frame, rot_idx] = biorbd.Rotation.toEulerAngles(rotation_matrix, rotation_sequence).to_array()
+        #     return q
 
 
         def filter(q):
@@ -295,10 +295,10 @@ class KinematicsReconstructor:
 
             return q_filtered, qdot, qddot
 
-        def wrap(q):
-            for i_dof in range(q.shape[0]):
-                q[i_dof, :] = (q[i_dof, :] + np.pi) % (2 * np.pi) - np.pi
-            return q
+        # def wrap(q):
+        #     for i_dof in range(q.shape[0]):
+        #         q[i_dof, :] = (q[i_dof, :] + np.pi) % (2 * np.pi) - np.pi
+        #     return q
 
         # q_from_rotation_matrix = reinterpret_angles(self.biorbd_model, self.q)
         self.q_filtered, self.qdot, self.qddot = filter(self.q)

@@ -8,6 +8,7 @@ from gait_analyzer import (
     LegToPlot,
     PlotType,
 )
+from gait_analyzer.kinematics_reconstructor import ReconstructionType
 
 
 def analysis_to_perform(subject_name: str, subject_mass: float, c3d_file_name: str, result_folder: str):
@@ -15,11 +16,14 @@ def analysis_to_perform(subject_name: str, subject_mass: float, c3d_file_name: s
     # --- Example of analysis --- #
     results = ResultManager(subject_name=subject_name, subject_mass=subject_mass, result_folder=result_folder)
     # Please note that the OpenSim model should already be scaled in the OpenSim GUI
-    results.create_biorbd_model(osim_model_type=OsimModels.WholeBody(), skip_if_existing=True)
+    results.create_biorbd_model(osim_model_type=OsimModels.WholeBody(), skip_if_existing=False)
     results.add_experimental_data(c3d_file_name=c3d_file_name, animate_c3d_flag=False)
 
     results.add_events(plot_phases_flag=False)
-    results.reconstruct_kinematics(animate_kinematics_flag=False, plot_kinematics_flag=True, skip_if_existing=False)
+    results.reconstruct_kinematics(reconstruction_type=ReconstructionType.ONLY_LM,  # TRF
+                                   animate_kinematics_flag=False,
+                                   plot_kinematics_flag=True,
+                                   skip_if_existing=False)
     results.perform_inverse_dynamics(reintegrate_flag=True, animate_dynamics_flag=True)
     # results.estimate_optimally()
 
