@@ -19,8 +19,8 @@ def analysis_to_perform(subject_name: str, subject_mass: float, c3d_file_name: s
     results.add_experimental_data(c3d_file_name=c3d_file_name, animate_c3d_flag=False)
 
     results.add_events(plot_phases_flag=False)
-    results.reconstruct_kinematics(animate_kinematics_flag=False, plot_kinematics_flag=True, skip_if_existing=True)
-    results.perform_inverse_dynamics()
+    results.reconstruct_kinematics(animate_kinematics_flag=False, plot_kinematics_flag=True, skip_if_existing=False)
+    results.perform_inverse_dynamics(animate_dynamics_flag=True)
     # results.estimate_optimally()
 
     return results
@@ -43,18 +43,22 @@ if __name__ == "__main__":
 
     # --- Example of how to run the analysis --- #
     AnalysisPerformer(
-        analysis_to_perform, subjects_to_analyze=["AOT_01"], result_folder="results", skip_if_existing=False
+        analysis_to_perform,
+        subjects_to_analyze=["AOT_01"],
+        result_folder="results",
+        trails_to_analyze=["_ManipStim_L200_F30_I20"],
+        skip_if_existing=False
     )
 
     # --- Example of how to plot the joint angles --- #
     plot = PlotLegData(result_folder="results",
                        leg_to_plot=LegToPlot.RIGHT,
                        plot_type=PlotType.Q,
-                       conditions_to_compare=["_ManipStim_L400_F40_I20",
+                       conditions_to_compare=["_ManipStim_L200_F30_I20",
+                                              "_ManipStim_L300_F30_I60",
+                                              "_ManipStim_L400_F30_I40",
                                               "_ManipStim_L400_F40_I40",
-                                              "_ManipStim_L400_F40_I60",
-                                              "_ManipStim_L200_F30_I20",
-                                              "_ManipStim_L300_F30_I60"])
+                                              "_ManipStim_L400_F50_I40"])
     plot.draw_plot()
     plot.save("results/AOT_01_Q_plot_temporary.png")
     plot.show()
@@ -63,11 +67,11 @@ if __name__ == "__main__":
     plot = PlotLegData(result_folder="results",
                        leg_to_plot=LegToPlot.RIGHT,
                        plot_type=PlotType.TAU,
-                       conditions_to_compare=["_ManipStim_L400_F40_I20",
+                       conditions_to_compare=["_ManipStim_L200_F30_I20",
+                                              "_ManipStim_L300_F30_I60",
+                                              "_ManipStim_L400_F30_I40",
                                               "_ManipStim_L400_F40_I40",
-                                              "_ManipStim_L400_F40_I60",
-                                              "_ManipStim_L200_F30_I20",
-                                              "_ManipStim_L300_F30_I60"])
+                                              "_ManipStim_L400_F50_I40"])
     plot.draw_plot()
     plot.save("results/AOT_01_Q_plot_temporary.png")
     plot.show()
