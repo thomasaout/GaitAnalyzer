@@ -87,7 +87,11 @@ class ResultManager:
         # Add events
         self.events = Events(experimental_data=self.experimental_data, plot_phases_flag=plot_phases_flag)
 
-    def reconstruct_kinematics(self, skip_if_existing: bool = False, animate_kinematics_flag: bool = False, plot_kinematics_flag: bool = False):
+    def reconstruct_kinematics(self,
+                               reconstruction_type = None,
+                               skip_if_existing: bool = False,
+                               animate_kinematics_flag: bool = False,
+                               plot_kinematics_flag: bool = False):
         # Checks
         if self.biorbd_model_creator is None:
             raise Exception("Please add the biorbd model first by running ResultManager.create_biorbd_model()")
@@ -103,6 +107,7 @@ class ResultManager:
             self.experimental_data,
             self.biorbd_model_creator,
             self.events,
+            reconstruction_type=reconstruction_type,
             skip_if_existing=skip_if_existing,
             animate_kinematics_flag=animate_kinematics_flag,
             plot_kinematics_flag=plot_kinematics_flag,
@@ -125,8 +130,8 @@ class ResultManager:
             self.experimental_data,
             self.biorbd_model_creator.biorbd_model,
             self.kinematics_reconstructor.q_filtered,
-            self.kinematics_reconstructor.qdot_filtered,
-            self.kinematics_reconstructor.qddot_filtered,
+            self.kinematics_reconstructor.qdot,
+            self.kinematics_reconstructor.qddot,
         )
 
 

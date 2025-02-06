@@ -170,6 +170,7 @@ class ExperimentalData:
                 force_filtered[i_platform, :, :] = Operator.apply_filtfilt(force, order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10)
                 moment_filtered[i_platform, :, :] = Operator.apply_filtfilt(moment, order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10)
                 moment_adjusted_filtered[i_platform, :, :] = Operator.apply_filtfilt(moment_adjusted[i_platform, :, :], order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10)
+                moment_adjusted_filtered[i_platform, :2, :] = 0  # Remove X and Y moments (as only Z reaction moments can be applied on the foot)
 
                 # Store output in a biorbd compatible format
                 f_ext_sorted[i_platform, :3, :] = cop[:, :]

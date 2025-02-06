@@ -14,8 +14,8 @@ class InverseDynamicsPerformer:
                  experimental_data: ExperimentalData, 
                  biorbd_model: biorbd.Model, 
                  q_filtered: np.ndarray,
-                 qdot_filtered: np.ndarray,
-                 qddot_filtered: np.ndarray):
+                 qdot: np.ndarray,
+                 qddot: np.ndarray):
         """
         Initialize the InverseDynamicsPerformer.
         .
@@ -27,9 +27,9 @@ class InverseDynamicsPerformer:
             The biorbd model to use for the inverse dynamics
         q_filtered: np.ndarray()
             The generalized coordinates
-        qdot_filtered: np.ndarray()
+        qdot: np.ndarray()
             The generalized velocities
-        qddot_filtered: np.ndarray()
+        qddot: np.ndarray()
             The generalized accelerations
         """
         
@@ -47,8 +47,8 @@ class InverseDynamicsPerformer:
         self.experimental_data = experimental_data
         self.biorbd_model = biorbd_model
         self.q_filtered = q_filtered
-        self.qdot_filtered = qdot_filtered
-        self.qddot_filtered = qddot_filtered
+        self.qdot = qdot
+        self.qddot = qddot
 
         # Extended attributes
         self.tau = np.ndarray(())
@@ -62,7 +62,7 @@ class InverseDynamicsPerformer:
         tau = np.zeros_like(self.q_filtered)
         for i_node in range(self.q_filtered.shape[0]):
             f_ext = self.get_f_ext_at_frame(i_node)
-            tau[i_node, :] = self.biorbd_model.InverseDynamics(self.q_filtered[i_node, :], self.qdot_filtered[i_node, :], self.qddot_filtered[i_node, :], f_ext).to_array()
+            tau[i_node, :] = self.biorbd_model.InverseDynamics(self.q_filtered[i_node, :], self.qdot[i_node, :], self.qddot[i_node, :], f_ext).to_array()
         self.tau = tau
 
 
@@ -99,8 +99,8 @@ class InverseDynamicsPerformer:
             "biorbd_model": self.biorbd_model,
             "experimental_data": self.experimental_data,
             "q_filtered": self.q_filtered,
-            "qdot_filtered": self.qdot_filtered,
-            "qddot_filtered": self.qddot_filtered,
+            "qdot": self.qdot,
+            "qddot": self.qddot,
         }
 
     def outputs(self):

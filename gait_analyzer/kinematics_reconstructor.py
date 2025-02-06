@@ -1,5 +1,6 @@
 import os
 import pickle
+from enum import Enum
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
@@ -13,7 +14,15 @@ from gait_analyzer.biomod_model_creator import BiomodModelCreator
 from gait_analyzer.events import Events
 
 
-# TODO: Charbie -> See if we keep the virtual markers and if we impose this way of reconstructing
+class ReconstructionType(Enum):
+    """
+    Type of reconstruction to perform
+    """
+    ONLY_LM = "only_lm"  # Levenberg-Marquardt with 0.0001 initialization
+    LM = "LM"  # Levenberg-Marquardt with mid-bounds initialization
+    TRF = "trf"  # Trust Region Reflective
+    EKF = "ekf"  # Extended Kalman Filter
+
 
 segment_dict = {"pelvis": {"dof_idx": [0, 1, 2, 3, 4, 5],
                            "markers_idx": [0, 1, 2, 3, 49],
@@ -102,6 +111,7 @@ class KinematicsReconstructor:
                  experimental_data: ExperimentalData, 
                  biorbd_model_creator: BiomodModelCreator, 
                  events: Events,
+                 reconstruction_type: ReconstructionType,
                  skip_if_existing: bool,
                  animate_kinematics_flag: bool,
                  plot_kinematics_flag: bool):
@@ -115,7 +125,9 @@ class KinematicsReconstructor:
         biorbd_model_creator: BiomodModelCreator
             The biorbd model to use for the kinematics reconstruction
         events: Events
-            The events to use for the kinematics reconstruction since we exploit the fact that the movement is cyclic.
+            The events to use for the kinematics reconstruction since we exploit the fact that the movement is cyclic
+        reconstruction_type: ReconstructionType
+            The type of algorithm to use to perform the reconstruction
         skip_if_existing: bool
             If True, the kinematics will not be reconstructed if the output file already exists
         animate_kinematics_flag: bool
@@ -123,6 +135,9 @@ class KinematicsReconstructor:
         plot_kinematics_flag: bool
             If True, the kinematics will be plotted and saved in a .png
         """
+        # Default value
+        if reconstruction_type is None:
+            reconstruction_type = ReconstructionType.ONLY_LM
 
         # Checks
         if not isinstance(experimental_data, ExperimentalData):
@@ -137,11 +152,16 @@ class KinematicsReconstructor:
             raise ValueError(
                 "events must be an instance of Events."
             )
+        if not isinstance(reconstruction_type, ReconstructionType):
+            raise ValueError(
+                "reconstruction_type must be an instance of ReconstructionType."
+            )
 
         # Initial attributes
         self.experimental_data = experimental_data
         self.biorbd_model_creator = biorbd_model_creator
         self.events = events
+        self.reconstruction_type = reconstruction_type
 
         # Extended attributes
         self.biorbd_model = None
@@ -187,6 +207,8 @@ class KinematicsReconstructor:
                 self.qdot = data["qdot"]
                 self.qddot = data["qddot"]
                 self.biorbd_model = self.biorbd_model_creator.biorbd_model
+                self.reconstruction_type = ReconstructionType(data["reconstruction_type"])
+                self.is_loaded_kinematics = True
             return True
         else:
             return False
@@ -203,8 +225,14 @@ class KinematicsReconstructor:
         self.max_frames = nb_frames  # TODO: add the possibility to chose the frame range to reconstruct
 
         q_recons = np.ndarray((nb_frames, model.nbQ()))
-        ik = biorbd.InverseKinematics(model, markers[:, :, :self.max_frames])
-        q_recons[:self.max_frames, :] = ik.solve(method="only_lm").T
+
+        if self.reconstruction_type in [ReconstructionType.ONLY_LM, ReconstructionType.LM, ReconstructionType.TRF]:
+            ik = biorbd.InverseKinematics(model, markers[:, :, :self.max_frames])
+            q_recons[:self.max_frames, :] = ik.solve(method=self.reconstruction_type.value).T
+        elif self.reconstruction_type == ReconstructionType.EKF:
+            q_recons[:self.max_frames, :] = biorbd.extended_kalman_filter(model, self.experimental_data.c3d_full_file_path)
+        else:
+            raise NotImplementedError(f"The reconstruction_type {self.reconstruction_type} is not implemented yet.")
 
         self.q = q_recons
         self.t = self.experimental_data.markers_time_vector[:self.max_frames]
@@ -354,5 +382,6 @@ class KinematicsReconstructor:
             "qdot": self.qdot,
             "qddot": self.qddot,
             "is_loaded_kinematics": self.is_loaded_kinematics,
+            "reconstruction_type": self.reconstruction_type.value,
         }
 

@@ -169,7 +169,9 @@ class BiomodModelCreator:
 
         with open(self.biorbd_model_full_path, "w") as file:
             for i_line, line in enumerate(file_lines):
-                if i_line + 1 == 42:  # Translation X
+                if i_line + 1 == 27:  # Turn the model so it is not alignes with the gimbal lock
+                    file.write(line.replace("\t\tRT\t0 0 0\txyz\t0 0 0\n", "\t\tRT\t0 0 1.5707963\txyz\t0 0 0\n"))
+                elif i_line + 1 == 42:  # Translation X
                     file.write(line.replace("-10 10", "-3 3"))
                 elif i_line + 1 == 43:  # Translation Y
                     file.write(line.replace("-6 6", "-3 3"))
