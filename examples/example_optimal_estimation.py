@@ -54,11 +54,12 @@ if __name__ == "__main__":
     plot = PlotLegData(result_folder="results",
                        leg_to_plot=LegToPlot.RIGHT,
                        plot_type=PlotType.Q,
-                       conditions_to_compare=["_ManipStim_L200_F30_I20",
-                                              "_ManipStim_L300_F30_I60",
-                                              "_ManipStim_L400_F30_I40",
-                                              "_ManipStim_L400_F40_I40",
-                                              "_ManipStim_L400_F50_I40"])
+                       conditions_to_compare=["_ManipStim_L200_F30_I20"])
+                       # conditions_to_compare=["_ManipStim_L200_F30_I20",
+                       #                        "_ManipStim_L300_F30_I60",
+                       #                        "_ManipStim_L400_F30_I40",
+                       #                        "_ManipStim_L400_F40_I40",
+                       #                        "_ManipStim_L400_F50_I40"])
     plot.draw_plot()
     plot.save("results/AOT_01_Q_plot_temporary.png")
     plot.show()
@@ -67,11 +68,12 @@ if __name__ == "__main__":
     plot = PlotLegData(result_folder="results",
                        leg_to_plot=LegToPlot.RIGHT,
                        plot_type=PlotType.TAU,
-                       conditions_to_compare=["_ManipStim_L200_F30_I20",
-                                              "_ManipStim_L300_F30_I60",
-                                              "_ManipStim_L400_F30_I40",
-                                              "_ManipStim_L400_F40_I40",
-                                              "_ManipStim_L400_F50_I40"])
+                       conditions_to_compare=["_ManipStim_L200_F30_I20"])
+                       # conditions_to_compare=["_ManipStim_L200_F30_I20",
+                       #                        "_ManipStim_L300_F30_I60",
+                       #                        "_ManipStim_L400_F30_I40",
+                       #                        "_ManipStim_L400_F40_I40",
+                       #                        "_ManipStim_L400_F50_I40"])
     plot.draw_plot()
     plot.save("results/AOT_01_Q_plot_temporary.png")
     plot.show()

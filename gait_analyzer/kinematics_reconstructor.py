@@ -242,7 +242,7 @@ class KinematicsReconstructor:
         """
         Unwrap and filter the joint angles.
         """
-        def unwrap_kinematics(biorbd_model: biorbd.Model, q: np.ndarray):
+        def reinterpret_angles(biorbd_model: biorbd.Model, q: np.ndarray):
             """
             Performs unwrap on the kinematics from which it re-expressed in terms of matrix rotation before
             (which makes it more likely to be in the same quadrant)
@@ -265,11 +265,10 @@ class KinematicsReconstructor:
                         rot = q[i_frame, rot_idx]
                         rotation_matrix = biorbd.Rotation.fromEulerAngles(rot, rotation_sequence)
                         q[i_frame, rot_idx] = biorbd.Rotation.toEulerAngles(rotation_matrix, rotation_sequence).to_array()
-                    q[:, rot_idx] = np.unwrap(q[:, rot_idx], axis=0)
             return q
 
 
-        def filter_kinematics(q_unwrapped):
+        def filter(q_unwrapped):
             filter_type = "savgol"  # "filtfilt"
 
             # Filter q
@@ -297,8 +296,8 @@ class KinematicsReconstructor:
 
             return q_filtered, qdot, qddot
 
-        q_unwrapped = unwrap_kinematics(self.biorbd_model, self.q)
-        self.q_filtered, self.qdot, self.qddot = filter_kinematics(q_unwrapped)
+        q_from_rotation_matrix = reinterpret_angles(self.biorbd_model, self.q)
+        self.q_filtered, self.qdot, self.qddot = filter(q_from_rotation_matrix)
 
 
     def plot_kinematics(self):

@@ -74,7 +74,7 @@ class PlotLegData:
 
         # TODO: remove ------------------------
         plt.figure()
-        data_tempo = cycles_data["_ManipStim_L400_F40_I40"]
+        data_tempo = cycles_data[list(cycles_data.keys())[0]]
         for i in range(len(data_tempo)):
             print(data_tempo[i].shape)
             plt.plot(data_tempo[i][:, 5])
