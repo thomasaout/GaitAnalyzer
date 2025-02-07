@@ -62,7 +62,11 @@ class ResultManager:
             raise Exception("Biorbd model already added")
 
         # Add ModelCreator
-        self.model_creator = ModelCreator(self.subject_name, self.subject_mass, self.static_trial, osim_model_type, skip_if_existing)
+        self.model_creator = ModelCreator(subject_name=self.subject_name,
+                                          subject_mass=self.subject_mass,
+                                          static_trial=self.static_trial,
+                                          osim_model_type=osim_model_type,
+                                          skip_if_existing=skip_if_existing)
 
 
     def add_experimental_data(self, c3d_file_name: str, animate_c3d_flag: bool = False):

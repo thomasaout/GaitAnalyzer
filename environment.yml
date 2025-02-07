@@ -4,7 +4,7 @@ channels:
 dependencies:
   - numpy
   - matplotlib
-  - biorbd>=1.11.2
+  - biorbd>=1.10.0
   - bioptim>=3.2.1
   - ezc3d>=1.5.17
   - scipy
@@ -12,3 +12,6 @@ dependencies:
   - pandas
   - openpyxl
   - gitpython
+  - pyorerun
+  - pyomeca
+  - opensim-org::opensim=4.5.1

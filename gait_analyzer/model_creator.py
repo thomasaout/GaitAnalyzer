@@ -134,10 +134,6 @@ class ModelCreator:
             raise ValueError("subject_name must be a string.")
         if not isinstance(subject_mass, float):
             raise ValueError("subject_mass must be a float.")
-        if not isinstance(osim_model_type, OsimModels):
-            raise ValueError(
-                "osim_model_type must be an instance of OsimModels. You can declare it by running OsimModels.WholeBody()."
-            )
         if not isinstance(static_trial, str):
             raise ValueError("static_trial must be a string.")
         if not isinstance(skip_if_existing, bool):
@@ -169,10 +165,13 @@ class ModelCreator:
 
         # Create the models
         if not (skip_if_existing and os.path.isfile(self.biorbd_model_full_path)):
+            print(f"The model {self.biorbd_model_full_path} is being created...")
             self.convert_c3d_to_trc()
             self.personalize_xml_file()
             self.scale_opensim_model()
             self.create_biorbd_model()
+        else:
+            print(f"The model {self.biorbd_model_full_path} already exists, so it is being used.")
         self.biorbd_model = biorbd.Model(self.biorbd_model_full_path)
 
         if not (skip_if_existing and os.path.isfile(self.biorbd_model_full_path)):
@@ -376,7 +375,8 @@ class ModelCreator:
                 virtual_marker_position_in_local = np.mean(marker_positions, axis=1)
                 # Write the virtual marker to the biomod file
                 file.write(f"marker\t{key}JC\n")
-                file.write(f"\tparent\t{key.split("-")[0]}\n")
+                parent_name = key.split("-")[0]
+                file.write(f"\tparent\t{parent_name}\n")
                 file.write(f"\tposition\t{virtual_marker_position_in_local[0]}\t{virtual_marker_position_in_local[1]}\t{virtual_marker_position_in_local[2]}\n")
                 file.write("endmarker\n")
 

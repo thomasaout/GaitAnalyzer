@@ -11,7 +11,7 @@ class ExperimentalData:
     This class contains all the experimental data from a trial (markers, EMG, force plates data, gait parameters).
     """
 
-    def __init__(self, c3d_file_name: str, subject_name: str, result_folder:str, model_creator: BiomodModelCreator, animate_c3d_flag: bool):
+    def __init__(self, c3d_file_name: str, subject_name: str, result_folder:str, model_creator: ModelCreator, animate_c3d_flag: bool):
         """
         Initialize the ExperimentalData.
         .
@@ -23,7 +23,7 @@ class ExperimentalData:
             The name of the subject.
         result_folder: str
             The folder where the results will be saved. It will look like result_folder/subject_name.
-        model_creator: BiomodModelCreator
+        model_creator: ModelCreator
             The subject's personalized biorbd model.
         animate_c3d: bool
             If True, the c3d file will be animated.

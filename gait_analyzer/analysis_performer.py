@@ -36,8 +36,8 @@ class AnalysisPerformer:
         model_result_folder = result_folder + "/model"
         if not callable(analysis_to_perform):
             raise ValueError("analysis_to_perform must be a callable")
-        if not isinstance(subjects_to_analyze, list):
-            raise ValueError("subjects_to_analyze must be a list")
+        if not isinstance(subjects_to_analyze, dict):
+            raise ValueError("subjects_to_analyze must be a dictionary")
         for subject in subjects_to_analyze:
             if not isinstance(subject, str):
                 raise ValueError("All elements of subjects_to_analyze must be strings")
@@ -152,6 +152,10 @@ class AnalysisPerformer:
 
             subject_data_folder = f"../data/{subject_name}"
             subject_mass = self.subjects_to_analyze[subject_name]
+            if not isinstance(subject_mass, float):
+                raise ValueError(f"Mass of subject {subject_name} must be a float.")
+            if subject_mass < 30 or subject_mass > 100:
+                raise ValueError(f"Mass of subject {subject_name} must be a expressed in [30, 100] kg.")
 
             # Checks
             if not os.path.exists(subject_data_folder):
@@ -160,10 +164,6 @@ class AnalysisPerformer:
                 raise RuntimeError(
                     f"Data folder for subject {subject_name} does not exist. I have created it here {tempo_subject_path}, please put the data files in here."
                 )
-            if not os.path.exists(f"../data/{subject_name}/Sujet_{subject_name}.xlsx"):
-                tempo_subject_path = os.path.abspath(f"../data/{subject_name}/Sujet_{subject_name}.xlsx")
-                raise FileNotFoundError(f"Please put the participant information file here {tempo_subject_path}")
-
 
             # Loop over files to find the static trial
             static_trial_full_file_path = None
@@ -174,7 +174,6 @@ class AnalysisPerformer:
             if not static_trial_full_file_path:
                 raise FileNotFoundError(f"Please put the static trial file here {os.path.abspath(subject_data_folder)} and name it [...]_static.c3d")
 
-
             # Loop over all data files
             for data_file in os.listdir(subject_data_folder):
                 if data_file.endswith("Statique.c3d") or not data_file.endswith(".c3d"):
@@ -183,6 +182,7 @@ class AnalysisPerformer:
                 result_folder = f"{self.result_folder}/{subject_name}"
                 if not os.path.exists(result_folder):
                     os.makedirs(result_folder)
+                    print("The results folder was created here: ", os.path.abspath(result_folder))
                 result_file_name = f"{result_folder}/{data_file.replace('.c3d', '_results')}"
 
                 if self.skip_if_existing and os.path.exists(result_file_name + ".pkl"):

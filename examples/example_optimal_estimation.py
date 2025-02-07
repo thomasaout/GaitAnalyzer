@@ -10,16 +10,17 @@ from gait_analyzer import (
 )
 
 
-def analysis_to_perform(subject_name: str, subject_mass: float, static_trial_full_file_path: str, c3d_file_name: str, result_folder: str):
+def analysis_to_perform(subject_name: str, subject_mass: float, static_trial: str, c3d_file_name: str, result_folder: str):
 
-    # --- Example of analysis --- #
+    # --- Example of analysis that must be performed in order --- #
     results = ResultManager(subject_name=subject_name, subject_mass=subject_mass, static_trial=static_trial, result_folder=result_folder)
-    results.create_model(osim_model_type=OsimModels.WholeBody(), skip_if_existing=True)
+    results.create_model(osim_model_type=OsimModels.WholeBody(), skip_if_existing=False)
     results.add_experimental_data(c3d_file_name=c3d_file_name, animate_c3d_flag=False)
-
     results.add_events(plot_phases_flag=False)
     results.reconstruct_kinematics(animate_kinematics_flag=False, plot_kinematics_flag=True, skip_if_existing=False)
     results.perform_inverse_dynamics()
+
+    # --- Example of analysis that can be performed in any order --- #
     # results.estimate_optimally()
 
     return results
@@ -33,12 +34,7 @@ def parameters_to_extract_for_statistical_analysis():
 if __name__ == "__main__":
 
     # --- Example of how to get help on a GaitAnalyzer class --- #
-    helper(Operator)
-
-    # --- Steps to perform before running the analysis --- #
-    # 1. Placing the data in the folder "data/[subject_name]/"
-    # 2. Using the code in the folder c3d_to_trc to convert the static file (MATLAB: main.m, Python: convert_c3d_files.py)
-    # 3. Generating a scaled model in the OpenSim GUI (using the .trc file) and placing it in the folder "models/OpenSim_models/[model_name]_[subject_name].osim"
+    # helper(Operator)
 
     # --- Example of how to run the analysis --- #
     AnalysisPerformer(
