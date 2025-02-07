@@ -32,8 +32,6 @@ class AnalysisPerformer:
         """
 
         # Checks:
-        figures_result_folder = result_folder + "/figures"
-        model_result_folder = result_folder + "/model"
         if not callable(analysis_to_perform):
             raise ValueError("analysis_to_perform must be a callable")
         if not isinstance(subjects_to_analyze, dict):
@@ -45,13 +43,7 @@ class AnalysisPerformer:
             raise ValueError("result_folder must be a string")
         if not os.path.exists(result_folder):
             os.makedirs(result_folder)
-            os.makedirs(figures_result_folder)
-            os.makedirs(model_result_folder)
             print(f"Result folder did not exist, I have created it here {os.path.abspath(result_folder)}")
-        if not os.path.exists(figures_result_folder):
-            os.makedirs(figures_result_folder)
-        if not os.path.exists(model_result_folder):
-            os.makedirs(model_result_folder)
 
         # Initial attributes
         self.analysis_to_perform = analysis_to_perform
@@ -59,10 +51,10 @@ class AnalysisPerformer:
         self.result_folder = result_folder
         self.skip_if_existing = skip_if_existing
 
-        # Extended attributes
-        self.figures_result_folder = result_folder + "/figures"
-        self.model_result_folder = result_folder + "/model"
-
+        # Extended attributes 
+        self.figures_result_folder = None
+        self.models_result_folder = None
+        
         # Run the analysis
         self.run_analysis()
 
@@ -174,21 +166,33 @@ class AnalysisPerformer:
             if not static_trial_full_file_path:
                 raise FileNotFoundError(f"Please put the static trial file here {os.path.abspath(subject_data_folder)} and name it [...]_static.c3d")
 
+            # Define subject specific paths
+            result_folder = f"{self.result_folder}/{subject_name}"
+            self.figures_result_folder = f"{result_folder}/figures"
+            self.models_result_folder = f"{result_folder}/models"
+            if not os.path.exists(result_folder):
+                os.makedirs(result_folder)
+                os.makedirs(self.figures_result_folder)
+                os.makedirs(self.models_result_folder)
+                print("The results folder was created here: ", os.path.abspath(result_folder))
+            if not os.path.exists(self.figures_result_folder):
+                os.makedirs(self.figures_result_folder)
+            if not os.path.exists(self.models_result_folder):
+                os.makedirs(self.models_result_folder)
+                
             # Loop over all data files
             for data_file in os.listdir(subject_data_folder):
                 if data_file.endswith("Statique.c3d") or not data_file.endswith(".c3d"):
                     continue
                 c3d_file_name = f"../data/{subject_name}/{data_file}"
-                result_folder = f"{self.result_folder}/{subject_name}"
-                if not os.path.exists(result_folder):
-                    os.makedirs(result_folder)
-                    print("The results folder was created here: ", os.path.abspath(result_folder))
                 result_file_name = f"{result_folder}/{data_file.replace('.c3d', '_results')}"
 
+                # Skip if already exists
                 if self.skip_if_existing and os.path.exists(result_file_name + ".pkl"):
                     print(f"Skipping {subject_name} - {data_file} because it already exists.")
                     continue
 
+                # Actually perform the analysis
                 print("Analyzing ", subject_name, " : ", data_file)
                 results = self.analysis_to_perform(subject_name, subject_mass, static_trial_full_file_path, c3d_file_name, result_folder)
                 self.save_subject_results(results, result_file_name)

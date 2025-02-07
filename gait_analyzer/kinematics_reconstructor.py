@@ -292,7 +292,7 @@ class KinematicsReconstructor:
                     plt.plot(self.t, self.q_filtered[:, i_dof] * 180 / np.pi, label=f"{self.biorbd_model.nameDof()[i_dof].to_string()} [" + r"$^\circ$" + "]")
             plt.legend()
             fig.tight_layout()
-            result_file_full_path = self.get_result_file_full_path()
+            result_file_full_path = self.get_result_file_full_path(self.experimental_data.result_folder + "figures/")
             fig.savefig(result_file_full_path.replace(".pkl", "_ALL_IN_ONE.png"))
         else:
             fig, axs = plt.subplots(7, 6, figsize=(10, 10))
@@ -305,7 +305,7 @@ class KinematicsReconstructor:
                     axs[i_dof].plot(self.t, self.q_filtered[:, i_dof] * 180 / np.pi)
                     axs[i_dof].set_title(f"{self.biorbd_model.nameDof()[i_dof].to_string()} [" + r"$^\circ$" + "]")
             fig.tight_layout()
-            result_file_full_path = self.get_result_file_full_path()
+            result_file_full_path = self.get_result_file_full_path(self.experimental_data.result_folder + "figures/")
             fig.savefig(result_file_full_path.replace(".pkl", ".png"))
 
 
@@ -333,8 +333,9 @@ class KinematicsReconstructor:
         viz.rerun_by_frame("Kinematics reconstruction")
 
 
-    def get_result_file_full_path(self):
-        result_folder = self.experimental_data.result_folder
+    def get_result_file_full_path(self, result_folder=None):
+        if result_folder is None:
+            result_folder = self.experimental_data.result_folder
         trial_name = self.experimental_data.c3d_file_name.split('/')[-1][:-4]
         result_file_full_path = f"{result_folder}/inv_kin_{trial_name}.pkl"
         return result_file_full_path

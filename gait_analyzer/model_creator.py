@@ -17,9 +17,9 @@ class OsimModels:
         )
 
     @property
-    def osim_model_full_path(self):
+    def original_osim_model_full_path(self):
         raise RuntimeError(
-            "This method is implemented in the child class. You should call OsimModels.[mode type name].osim_model_full_path."
+            "This method is implemented in the child class. You should call OsimModels.[mode type name].original_osim_model_full_path."
         )
 
     @property
@@ -57,12 +57,12 @@ class OsimModels:
             return "wholebody"
 
         @property
-        def osim_model_full_path(self):
-            return "models/OpenSim_models/wholebody.osim"
+        def original_osim_model_full_path(self):
+            return "../models/OpenSim_models/wholebody.osim"
 
         @property
         def xml_setup_file(self):
-            return "models/OpenSim_models/wholebody.xml"
+            return "../models/OpenSim_models/wholebody.xml"
 
         @property
         def muscles_to_ignore(self):
@@ -126,6 +126,7 @@ class ModelCreator:
                  subject_name: str,
                  subject_mass: float,
                  static_trial: str,
+                 models_result_folder: str,
                  osim_model_type,
                  skip_if_existing: bool):
 
@@ -136,6 +137,8 @@ class ModelCreator:
             raise ValueError("subject_mass must be a float.")
         if not isinstance(static_trial, str):
             raise ValueError("static_trial must be a string.")
+        if not isinstance(models_result_folder, str):
+            raise ValueError("models_result_folder must be a string.")
         if not isinstance(skip_if_existing, bool):
             raise ValueError("skip_if_existing must be a boolean.")
 
@@ -144,22 +147,21 @@ class ModelCreator:
         self.subject_mass = subject_mass
         self.osim_model_type = osim_model_type
         self.static_trial = static_trial
+        self.models_result_folder = models_result_folder
 
         # Extended attributes
-        osim_model_path = "../models/OpenSim_models"
-        biorbd_model_path = "../models/biorbd_models"
         self.trc_file_path = None
         self.new_xml_path = None
         # TODO: Charbie -> can we point to the Opensim folder where all opensim's vtp files are stored
         self.vtp_geometry_path = "../../Geometry"
         self.osim_model_full_path = (
-            osim_model_path + "/" + osim_model_type.osim_model_name + "_" + subject_name + ".osim"
+            self.models_result_folder + "/" + osim_model_type.osim_model_name + "_" + subject_name + ".osim"
         )
         self.biorbd_model_full_path = (
-            biorbd_model_path + "/" + osim_model_type.osim_model_name + "_" + subject_name + ".bioMod"
+            self.models_result_folder + "/" + osim_model_type.osim_model_name + "_" + subject_name + ".bioMod"
         )
         self.biorbd_model_virtual_markers_full_path = (
-            biorbd_model_path + "/" + osim_model_type.osim_model_name + "_" + subject_name + "_virtual_markers.bioMod"
+            self.models_result_folder + "/" + osim_model_type.osim_model_name + "_" + subject_name + "_virtual_markers.bioMod"
         )
         self.new_model_created = False
 
@@ -185,14 +187,42 @@ class ModelCreator:
         """
         self.trc_file_path = self.static_trial.replace(".c3d", ".trc")
 
-        # Read the c3d file
-        c3d_adapter = osim.C3DFileAdapter()
-        tables = c3d_adapter.read(self.static_trial)
-        markers_table = c3d_adapter.getMarkersTable(tables)
+        # # Read the c3d file
+        # c3d_adapter = osim.C3DFileAdapter()
+        # tables = c3d_adapter.read(self.static_trial)
+        # markers_table = c3d_adapter.getMarkersTable(tables)
+        #
+        # # Write the trc file
+        # sto_adapter = osim.STOFileAdapter()
+        # sto_adapter.write(markers_table.flatten(), self.trc_file_path)
 
-        # Write the trc file
-        sto_adapter = osim.STOFileAdapter()
-        sto_adapter.write(markers_table.flatten(), self.trc_file_path)
+        # Read the c3d file
+        import ezc3d
+        c3d = ezc3d.c3d(self.static_trial)
+        labels = c3d["parameters"]["POINT"]["LABELS"]["value"]
+        frame_rate = c3d["header"]["points"]["frame_rate"]
+        marker_data = c3d["data"]["points"][:3, :, :] / 1000  # Convert in meters
+        # marker_data = marker_data[[0, 2, 1], :, :]  # Rotation
+        # marker_data[2, :, :] *= -1
+
+        with open(self.trc_file_path, "w") as f:
+            trc_file_name = os.path.basename(self.trc_file_path)
+            f.write(f"PathFileType\t4\t(X/Y/Z)\t{trc_file_name}\n")
+            f.write("DataRate\tCameraRate\tNumFrames\tNumMarkers\tUnits\tOrigDataRate\tOrigDataStartFrame\tOrigNumFrames\n")
+            f.write("{:.2f}\t{:.2f}\t{}\t{}\tm\t{:.2f}\t{}\t{}\n".format(
+                frame_rate, frame_rate, c3d["header"]["points"]["last_frame"], len(labels),
+                frame_rate, c3d["header"]["points"]["first_frame"], c3d["header"]["points"]["last_frame"]
+            ))
+            f.write("Frame#\tTime\t" + "\t".join(labels) + "\n")
+            f.write("\t\t" + "\t".join([f"X{i + 1}\tY{i + 1}\tZ{i + 1}" for i in range(len(labels))]) + "\n")
+            for frame in range(marker_data.shape[2]):
+                time = frame / frame_rate
+                frame_data = [f"{frame + 1}\t{time:.5f}"]
+                for marker_idx in range(len(labels)):
+                    pos = marker_data[:, marker_idx, frame]
+                    frame_data.extend([f"{pos[0]:.5f}", f"{pos[1]:.5f}", f"{pos[2]:.5f}"])
+                f.write("\t".join(frame_data) + "\n")
+
 
 
     def personalize_xml_file(self):
@@ -204,19 +234,32 @@ class ModelCreator:
         root = tree.getroot()
         for elem in root.iter():
             if elem.tag == "model_file":
-                elem.text = self.osim_model_type.osim_model_full_path
-            if elem.tag == "output_model_file":
-                elem.text = self.osim_model_full_path,
-            if elem.tag == "mass":
+                elem.text = os.path.abspath(self.osim_model_type.original_osim_model_full_path)
+            elif elem.tag == "output_model_file":
+                # Due to OpenSim, this path must be relative to xml
+                rel_path = os.path.relpath(self.osim_model_full_path, os.path.dirname(self.new_xml_path))
+                elem.text = rel_path
+            elif elem.tag == "mass":
                 elem.text = f"{self.subject_mass}"
-            if elem.tag == "marker_file":
-                elem.text = os.path.abspath(self.trc_file_path)
+            elif elem.tag == "marker_file":
+                # Due to OpenSim, this path must be relative to original_osim_model_full_path
+                trc_file_relative_path = os.path.relpath(self.trc_file_path,
+                                                         os.path.abspath(
+                                                             self.osim_model_type.original_osim_model_full_path))[
+                                         3:]
+                elem.text = trc_file_relative_path
         tree.write(self.new_xml_path)
 
 
     def scale_opensim_model(self):
         tool = osim.ScaleTool(self.new_xml_path)
         tool.run()
+
+        # Move the model to the right place
+        os.rename(
+            self.osim_model_type.osim_model_name + "_" + self.subject_name + ".osim",
+            self.osim_model_full_path,
+        )
 
 
     def create_biorbd_model(self):
@@ -385,12 +428,12 @@ class ModelCreator:
         return {
             "subject_name": self.subject_name,
             "osim_model_type": self.osim_model_type,
-            "osim_model_full_path": self.osim_model_full_path,
         }
 
     def outputs(self):
         return {
             "biorbd_model_full_path": self.biorbd_model_full_path,
+            "open_sim_model_full_path": self.osim_model_full_path,
             "biorbd_model": self.biorbd_model,
             "new_model_created": self.new_model_created,
             "biorbd_model_virtual_markers_full_path": self.biorbd_model_virtual_markers_full_path,

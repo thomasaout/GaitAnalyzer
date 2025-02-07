@@ -65,6 +65,7 @@ class ResultManager:
         self.model_creator = ModelCreator(subject_name=self.subject_name,
                                           subject_mass=self.subject_mass,
                                           static_trial=self.static_trial,
+                                          models_result_folder=f"{self.result_folder}/models",
                                           osim_model_type=osim_model_type,
                                           skip_if_existing=skip_if_existing)
 
