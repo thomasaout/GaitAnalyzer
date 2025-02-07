@@ -10,12 +10,11 @@ from gait_analyzer import (
 )
 
 
-def analysis_to_perform(subject_name: str, subject_mass: float, c3d_file_name: str, result_folder: str):
+def analysis_to_perform(subject_name: str, subject_mass: float, static_trial_full_file_path: str, c3d_file_name: str, result_folder: str):
 
     # --- Example of analysis --- #
-    results = ResultManager(subject_name=subject_name, subject_mass=subject_mass, result_folder=result_folder)
-    # Please note that the OpenSim model should already be scaled in the OpenSim GUI
-    results.create_biorbd_model(osim_model_type=OsimModels.WholeBody(), skip_if_existing=True)
+    results = ResultManager(subject_name=subject_name, subject_mass=subject_mass, static_trial=static_trial, result_folder=result_folder)
+    results.create_model(osim_model_type=OsimModels.WholeBody(), skip_if_existing=True)
     results.add_experimental_data(c3d_file_name=c3d_file_name, animate_c3d_flag=False)
 
     results.add_events(plot_phases_flag=False)
@@ -43,7 +42,10 @@ if __name__ == "__main__":
 
     # --- Example of how to run the analysis --- #
     AnalysisPerformer(
-        analysis_to_perform, subjects_to_analyze=["AOT_01"], result_folder="results", skip_if_existing=True
+        analysis_to_perform,
+        subjects_to_analyze={"AOT_01": 69.2},
+        result_folder="results",
+        skip_if_existing=True
     )
 
     # --- Example of how to plot the joint angles --- #

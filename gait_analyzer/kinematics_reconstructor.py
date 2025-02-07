@@ -9,7 +9,7 @@ from pyomeca import Markers
 
 from gait_analyzer.operator import Operator
 from gait_analyzer.experimental_data import ExperimentalData
-from gait_analyzer.biomod_model_creator import BiomodModelCreator
+from gait_analyzer.model_creator import ModelCreator
 from gait_analyzer.events import Events
 
 
@@ -100,7 +100,7 @@ class KinematicsReconstructor:
 
     def __init__(self, 
                  experimental_data: ExperimentalData, 
-                 biorbd_model_creator: BiomodModelCreator, 
+                 model_creator: ModelCreator,
                  events: Events,
                  skip_if_existing: bool,
                  animate_kinematics_flag: bool,
@@ -112,7 +112,7 @@ class KinematicsReconstructor:
         ----------
         experimental_data: ExperimentalData
             The experimental data from the trial
-        biorbd_model_creator: BiomodModelCreator
+        model_creator: ModelCreator
             The biorbd model to use for the kinematics reconstruction
         events: Events
             The events to use for the kinematics reconstruction since we exploit the fact that the movement is cyclic.
@@ -129,9 +129,9 @@ class KinematicsReconstructor:
             raise ValueError(
                 "experimental_data must be an instance of ExperimentalData. You can declare it by running ExperimentalData(file_path)."
             )
-        if not isinstance(biorbd_model_creator, BiomodModelCreator):
+        if not isinstance(model_creator, ModelCreator):
             raise ValueError(
-                "biorbd_model_creator must be an instance of BiomodModelCreator."
+                "model_creator must be an instance of ModelCreator."
             )
         if not isinstance(events, Events):
             raise ValueError(
@@ -140,7 +140,7 @@ class KinematicsReconstructor:
 
         # Initial attributes
         self.experimental_data = experimental_data
-        self.biorbd_model_creator = biorbd_model_creator
+        self.model_creator = model_creator
         self.events = events
 
         # Extended attributes
@@ -186,7 +186,7 @@ class KinematicsReconstructor:
                 self.q_filtered = data["q_filtered"]
                 self.qdot_filtered = data["qdot_filtered"]
                 self.qddot_filtered = data["qddot_filtered"]
-                self.biorbd_model = self.biorbd_model_creator.biorbd_model
+                self.biorbd_model = self.model_creator.biorbd_model
             return True
         else:
             return False
@@ -196,7 +196,7 @@ class KinematicsReconstructor:
 
         print("Performing inverse kinematics reconstruction using 'only_lm'")
 
-        model = biorbd.Model(self.biorbd_model_creator.biorbd_model_virtual_markers_full_path)
+        model = biorbd.Model(self.model_creator.biorbd_model_virtual_markers_full_path)
         self.biorbd_model = model
         markers = self.experimental_data.markers_sorted_with_virtual
         nb_frames = markers.shape[2]
@@ -316,7 +316,7 @@ class KinematicsReconstructor:
 
         # Model
         # model = BiorbdModel.from_biorbd_object(self.biorbd_model)
-        model = BiorbdModel(self.biorbd_model_creator.biorbd_model_virtual_markers_full_path)
+        model = BiorbdModel(self.model_creator.biorbd_model_virtual_markers_full_path)
         model.options.transparent_mesh = False
 
         # Markers

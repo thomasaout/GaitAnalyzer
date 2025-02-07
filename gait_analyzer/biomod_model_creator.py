@@ -3,6 +3,8 @@ import shutil
 import numpy as np
 import biorbd
 import osim_to_biomod as otb
+import opensim as osim
+from xml.etree import ElementTree as ET
 
 
 class OsimModels:
@@ -18,6 +20,12 @@ class OsimModels:
     def osim_model_full_path(self):
         raise RuntimeError(
             "This method is implemented in the child class. You should call OsimModels.[mode type name].osim_model_full_path."
+        )
+
+    @property
+    def xml_setup_file(self):
+        raise RuntimeError(
+            "This method is implemented in the child class. You should call OsimModels.[mode type name].xml_setup_file."
         )
 
     @property
@@ -51,6 +59,10 @@ class OsimModels:
         @property
         def osim_model_full_path(self):
             return "models/OpenSim_models/wholebody.osim"
+
+        @property
+        def xml_setup_file(self):
+            return "models/OpenSim_models/wholebody.xml"
 
         @property
         def muscles_to_ignore(self):
@@ -109,18 +121,41 @@ class OsimModels:
             return ["LHJC", "RHJC", "RKJC", "RAJC", "LKJC", "LAJC", "REJC", "RSJC", "RWJC", "LSJC", "LEJC", "LWJC"]
 
 
-class BiomodModelCreator:
-    def __init__(self, subject_name: str, osim_model_type, skip_if_existing: bool):
+class ModelCreator:
+    def __init__(self,
+                 subject_name: str,
+                 subject_mass: float,
+                 static_trial: str,
+                 osim_model_type,
+                 skip_if_existing: bool):
+
+        # Checks
+        if not isinstance(subject_name, str):
+            raise ValueError("subject_name must be a string.")
+        if not isinstance(subject_mass, float):
+            raise ValueError("subject_mass must be a float.")
+        if not isinstance(osim_model_type, OsimModels):
+            raise ValueError(
+                "osim_model_type must be an instance of OsimModels. You can declare it by running OsimModels.WholeBody()."
+            )
+        if not isinstance(static_trial, str):
+            raise ValueError("static_trial must be a string.")
+        if not isinstance(skip_if_existing, bool):
+            raise ValueError("skip_if_existing must be a boolean.")
+
         # Initial attributes
         self.subject_name = subject_name
-        self.osim_model = osim_model_type
+        self.subject_mass = subject_mass
+        self.osim_model_type = osim_model_type
+        self.static_trial = static_trial
 
         # Extended attributes
         osim_model_path = "../models/OpenSim_models"
         biorbd_model_path = "../models/biorbd_models"
-        vtp_geometry_path = (
-            "Geometry"  # TODO: Charbie -> can we point to the Opensim folder where all opensim's vtp files are stored
-        )
+        self.trc_file_path = None
+        self.new_xml_path = None
+        # TODO: Charbie -> can we point to the Opensim folder where all opensim's vtp files are stored
+        self.vtp_geometry_path = "../../Geometry"
         self.osim_model_full_path = (
             osim_model_path + "/" + osim_model_type.osim_model_name + "_" + subject_name + ".osim"
         )
@@ -132,30 +167,79 @@ class BiomodModelCreator:
         )
         self.new_model_created = False
 
+        # Create the models
         if not (skip_if_existing and os.path.isfile(self.biorbd_model_full_path)):
-            # Convert the osim model to a biorbd model
-            converter = otb.Converter(
-                self.biorbd_model_full_path,  # .bioMod file to export to
-                self.osim_model_full_path,  # .osim file to convert from
-                ignore_muscle_applied_tag=False,
-                ignore_fixed_dof_tag=False,
-                ignore_clamped_dof_tag=False,
-                mesh_dir=vtp_geometry_path,
-                muscle_type=otb.MuscleType.HILL,
-                state_type=otb.MuscleStateType.DEGROOTE,
-                print_warnings=True,
-                print_general_informations=False,
-                vtp_polygons_to_triangles=True,
-                muscles_to_ignore=osim_model_type.muscles_to_ignore,
-                markers_to_ignore=osim_model_type.markers_to_ignore,
-            )
-            converter.convert_file()
-            self.sketchy_replace_biomod_lines()
-            self.new_model_created = True
+            self.convert_c3d_to_trc()
+            self.personalize_xml_file()
+            self.scale_opensim_model()
+            self.create_biorbd_model()
         self.biorbd_model = biorbd.Model(self.biorbd_model_full_path)
 
         if not (skip_if_existing and os.path.isfile(self.biorbd_model_full_path)):
             self.extended_model_for_EKF()
+
+
+    def convert_c3d_to_trc(self):
+        """
+        This function reads the c3d static file and converts it into a trc file that will be used to scale the model in OpenSim.
+        The trc file is saved at the same place as the original c3d file.
+        """
+        self.trc_file_path = self.static_trial.replace(".c3d", ".trc")
+
+        # Read the c3d file
+        c3d_adapter = osim.C3DFileAdapter()
+        tables = c3d_adapter.read(self.static_trial)
+        markers_table = c3d_adapter.getMarkersTable(tables)
+
+        # Write the trc file
+        sto_adapter = osim.STOFileAdapter()
+        sto_adapter.write(markers_table.flatten(), self.trc_file_path)
+
+
+    def personalize_xml_file(self):
+
+        self.new_xml_path = self.osim_model_type.xml_setup_file.replace(".xml", f"_{self.subject_name}.xml")
+
+        # Modify the original xml with the participants information
+        tree = ET.parse(self.osim_model_type.xml_setup_file)
+        root = tree.getroot()
+        for elem in root.iter():
+            if elem.tag == "model_file":
+                elem.text = self.osim_model_type.osim_model_full_path
+            if elem.tag == "output_model_file":
+                elem.text = self.osim_model_full_path,
+            if elem.tag == "mass":
+                elem.text = f"{self.subject_mass}"
+            if elem.tag == "marker_file":
+                elem.text = os.path.abspath(self.trc_file_path)
+        tree.write(self.new_xml_path)
+
+
+    def scale_opensim_model(self):
+        tool = osim.ScaleTool(self.new_xml_path)
+        tool.run()
+
+
+    def create_biorbd_model(self):
+        # Convert the osim model to a biorbd model
+        converter = otb.Converter(
+            self.biorbd_model_full_path,  # .bioMod file to export to
+            self.osim_model_full_path,  # .osim file to convert from
+            ignore_muscle_applied_tag=False,
+            ignore_fixed_dof_tag=False,
+            ignore_clamped_dof_tag=False,
+            mesh_dir=self.vtp_geometry_path,
+            muscle_type=otb.MuscleType.HILL,
+            state_type=otb.MuscleStateType.DEGROOTE,
+            print_warnings=True,
+            print_general_informations=False,
+            vtp_polygons_to_triangles=True,
+            muscles_to_ignore=self.osim_model_type.muscles_to_ignore,
+            markers_to_ignore=self.osim_model_type.markers_to_ignore,
+        )
+        converter.convert_file()
+        self.sketchy_replace_biomod_lines()
+        self.new_model_created = True
 
 
     def sketchy_replace_biomod_lines(self):
@@ -300,7 +384,7 @@ class BiomodModelCreator:
     def inputs(self):
         return {
             "subject_name": self.subject_name,
-            "osim_model_type": self.osim_model,
+            "osim_model_type": self.osim_model_type,
             "osim_model_full_path": self.osim_model_full_path,
         }
 

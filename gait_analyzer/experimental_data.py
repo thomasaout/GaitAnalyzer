@@ -2,7 +2,7 @@ import ezc3d
 import biorbd
 import numpy as np
 
-from gait_analyzer.biomod_model_creator import BiomodModelCreator
+from gait_analyzer.model_creator import ModelCreator
 from gait_analyzer.operator import Operator
 
 
@@ -11,7 +11,7 @@ class ExperimentalData:
     This class contains all the experimental data from a trial (markers, EMG, force plates data, gait parameters).
     """
 
-    def __init__(self, c3d_file_name: str, subject_name: str, result_folder:str, biorbd_model_creator: BiomodModelCreator, animate_c3d_flag: bool):
+    def __init__(self, c3d_file_name: str, subject_name: str, result_folder:str, model_creator: BiomodModelCreator, animate_c3d_flag: bool):
         """
         Initialize the ExperimentalData.
         .
@@ -23,7 +23,7 @@ class ExperimentalData:
             The name of the subject.
         result_folder: str
             The folder where the results will be saved. It will look like result_folder/subject_name.
-        biorbd_model_creator: BiomodModelCreator
+        model_creator: BiomodModelCreator
             The subject's personalized biorbd model.
         animate_c3d: bool
             If True, the c3d file will be animated.
@@ -39,7 +39,7 @@ class ExperimentalData:
         # Initial attributes
         self.c3d_file_name = c3d_file_name
         self.c3d_full_file_path = "../data/" + c3d_file_name
-        self.biorbd_model_creator = biorbd_model_creator
+        self.model_creator = model_creator
         self.subject_name = subject_name
         self.result_folder = result_folder
 
@@ -71,8 +71,8 @@ class ExperimentalData:
         Extract important information and sort the data
         """
         def load_model():
-            self.model_marker_names = [m.to_string() for m in self.biorbd_model_creator.biorbd_model.markerNames()]
-            # model_muscle_names = [m.to_string() for m in self.biorbd_model_creator.biorbd_model.muscleNames()]
+            self.model_marker_names = [m.to_string() for m in self.model_creator.biorbd_model.markerNames()]
+            # model_muscle_names = [m.to_string() for m in self.model_creator.biorbd_model.muscleNames()]
 
         def sort_markers():
             self.c3d = ezc3d.c3d(self.c3d_full_file_path, extract_forceplat_data=True)
@@ -98,7 +98,7 @@ class ExperimentalData:
             """
             This function augments the marker set with virtual markers to improve the extended Kalman filter kinematics reconstruction.
             """
-            markers_for_virtual = self.biorbd_model_creator.markers_for_virtual
+            markers_for_virtual = self.model_creator.markers_for_virtual
             markers_sorted_with_virtual = np.zeros((3, len(self.model_marker_names) + len(markers_for_virtual.keys()), self.nb_marker_frames))
             markers_sorted_with_virtual[:, :len(self.model_marker_names), :] = self.markers_sorted[:, :, :]
             for i_marker, name in enumerate(markers_for_virtual.keys()):
@@ -210,7 +210,7 @@ class ExperimentalData:
     def inputs(self):
         return {
             "c3d_full_file_path": self.c3d_full_file_path,
-            "biorbd_model_creator": self.biorbd_model_creator,
+            "model_creator": self.model_creator,
         }
 
     def outputs(self):
