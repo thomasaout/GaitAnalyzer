@@ -2,13 +2,15 @@ name: environment
 channels:
   - conda-forge
 dependencies:
-  - numpy
+  - numpy = 1.25
   - matplotlib
-  - biorbd>=1.11.2
-  - bioptim>=3.2.1
+  - biorbd>=1.10.0
   - ezc3d>=1.5.17
   - scipy
   - lxml
   - pandas
   - openpyxl
   - gitpython
+  - pyorerun
+  - pyomeca
+  - opensim-org::opensim=4.5.1

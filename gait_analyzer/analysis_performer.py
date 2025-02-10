@@ -12,7 +12,7 @@ class AnalysisPerformer:
     def __init__(
         self,
         analysis_to_perform: callable,
-        subjects_to_analyze: list[str],
+        subjects_to_analyze: dict[str:float],
         result_folder: str = "../results/",
         skip_if_existing: bool = False,
     ):
@@ -23,18 +23,19 @@ class AnalysisPerformer:
         ----------
         analysis_to_perform: callable(subject_name: str, subject_mass: float, c3d_file_name: str)
             The analysis to perform
-        subjects_to_analyze: list[str]
-            The list of subjects to analyze
+        subjects_to_analyze: dict[str: float]
+            The dictionary of the name and mass of the subjects to analyze
         result_folder: str
             The folder where the results will be saved. It will look like result_folder/subject_name.
         skip_if_existing: bool
             If True, the analysis will not be performed if the results already exist.
         """
+
         # Checks:
         if not callable(analysis_to_perform):
             raise ValueError("analysis_to_perform must be a callable")
-        if not isinstance(subjects_to_analyze, list):
-            raise ValueError("subjects_to_analyze must be a list")
+        if not isinstance(subjects_to_analyze, dict):
+            raise ValueError("subjects_to_analyze must be a dictionary")
         for subject in subjects_to_analyze:
             if not isinstance(subject, str):
                 raise ValueError("All elements of subjects_to_analyze must be strings")
@@ -50,8 +51,12 @@ class AnalysisPerformer:
         self.result_folder = result_folder
         self.skip_if_existing = skip_if_existing
 
+        # Extended attributes
+        self.figures_result_folder = None
+        self.models_result_folder = None
+
         # Run the analysis
-        self.run_analysis(result_folder=result_folder)
+        self.run_analysis()
 
     @staticmethod
     def get_version():
@@ -128,47 +133,68 @@ class AnalysisPerformer:
         # For matlab analysis
         savemat(result_file_name + ".mat", result_dict)
 
-    def run_analysis(self, result_folder: str):
+    def run_analysis(self):
         """
         Loops over the data files and perform the analysis specified by the user (on the subjects specified by the user).
         """
         # Loop over all subjects
         for subject_name in self.subjects_to_analyze:
+
+            subject_data_folder = f"../data/{subject_name}"
+            subject_mass = self.subjects_to_analyze[subject_name]
+            if not isinstance(subject_mass, float):
+                raise ValueError(f"Mass of subject {subject_name} must be a float.")
+            if subject_mass < 30 or subject_mass > 100:
+                raise ValueError(f"Mass of subject {subject_name} must be a expressed in [30, 100] kg.")
+
             # Checks
-            if not os.path.exists(f"../data/{subject_name}"):
-                os.makedirs(f"../data/{subject_name}")
-                tempo_subject_path = os.path.abspath(f"../data/{subject_name}")
+            if not os.path.exists(subject_data_folder):
+                os.makedirs(subject_data_folder)
+                tempo_subject_path = os.path.abspath(subject_data_folder)
                 raise RuntimeError(
                     f"Data folder for subject {subject_name} does not exist. I have created it here {tempo_subject_path}, please put the data files in here."
                 )
-            if not os.path.exists(f"../data/{subject_name}/Sujet_{subject_name}.xlsx"):
-                tempo_subject_path = os.path.abspath(f"../data/{subject_name}/Sujet_{subject_name}.xlsx")
-                raise FileNotFoundError(f"Please put the participant information file here {tempo_subject_path}")
 
-            # TODO: Thomas -> Generalize this part
-            # # Get the subject's information
-            # subject_path = f"../data/{subject_name}/Sujet_{subject_name}.xlsx"
-            # dfs = pd.read_excel(subject_path, sheet_name=None)
-            # mass_column_idx = list(dfs["Subject presentation"]["Information Sujet "]).index("Masse")
-            # subject_mass = float(dfs["Subject presentation"]["Value"][mass_column_idx])
-            subject_mass = 0.0
+            # Loop over files to find the static trial
+            static_trial_full_file_path = None
+            for data_file in os.listdir(subject_data_folder):
+                if data_file.endswith("static.c3d"):
+                    static_trial_full_file_path = f"../data/{subject_name}/{data_file}"
+                    break
+            if not static_trial_full_file_path:
+                raise FileNotFoundError(
+                    f"Please put the static trial file here {os.path.abspath(subject_data_folder)} and name it [...]_static.c3d"
+                )
+
+            # Define subject specific paths
+            result_folder = f"{self.result_folder}/{subject_name}"
+            self.figures_result_folder = f"{result_folder}/figures"
+            self.models_result_folder = f"{result_folder}/models"
+            if not os.path.exists(result_folder):
+                os.makedirs(result_folder)
+                os.makedirs(self.figures_result_folder)
+                os.makedirs(self.models_result_folder)
+                print("The results folder was created here: ", os.path.abspath(result_folder))
+            if not os.path.exists(self.figures_result_folder):
+                os.makedirs(self.figures_result_folder)
+            if not os.path.exists(self.models_result_folder):
+                os.makedirs(self.models_result_folder)
 
             # Loop over all data files
-            for data_file in os.listdir(f"../data/{subject_name}"):
-                if data_file.endswith("Statique.c3d") or not data_file.endswith(
-                    ".c3d"
-                ):  # TODO: Charbie -> add other "conditions_to_exclude" here
+            for data_file in os.listdir(subject_data_folder):
+                if data_file.endswith("Statique.c3d") or not data_file.endswith(".c3d"):
                     continue
                 c3d_file_name = f"../data/{subject_name}/{data_file}"
-                result_folder = f"{self.result_folder}/{subject_name}"
-                if not os.path.exists(result_folder):
-                    os.makedirs(result_folder)
                 result_file_name = f"{result_folder}/{data_file.replace('.c3d', '_results')}"
 
+                # Skip if already exists
                 if self.skip_if_existing and os.path.exists(result_file_name + ".pkl"):
                     print(f"Skipping {subject_name} - {data_file} because it already exists.")
                     continue
 
+                # Actually perform the analysis
                 print("Analyzing ", subject_name, " : ", data_file)
-                results = self.analysis_to_perform(subject_name, subject_mass, c3d_file_name, result_folder)
+                results = self.analysis_to_perform(
+                    subject_name, subject_mass, static_trial_full_file_path, c3d_file_name, result_folder
+                )
                 self.save_subject_results(results, result_file_name)

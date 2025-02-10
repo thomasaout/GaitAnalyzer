@@ -189,3 +189,5 @@ models/biorbd_models/
 models/OpenSim_models/
 
 *.png
+
+examples/Geometry/

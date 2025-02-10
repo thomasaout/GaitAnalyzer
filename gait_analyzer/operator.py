@@ -43,7 +43,6 @@ class Operator:
                 x_averaged[i] = np.mean(x[i - window_size // 2 : i + window_size // 2 + 1])
         return x_averaged
 
-
     @staticmethod
     def apply_filtfilt(data: np.ndarray, order: int, sampling_rate: int, cutoff_freq: int):
         """
@@ -69,14 +68,13 @@ class Operator:
         """
         nyquist = 0.5 * sampling_rate
         normal_cutoff = cutoff_freq / nyquist
-        b, a = butter(order, normal_cutoff, btype='low', analog=False)
+        b, a = butter(order, normal_cutoff, btype="low", analog=False)
         filtered_data = np.zeros_like(data)
         filtered_data[:, :] = np.nan
         for i_data in range(data.shape[0]):
             non_nan_idx = ~np.isnan(data[i_data, :])
-            filtered_data[i_data, non_nan_idx] = filtfilt(b, a,  data[i_data, non_nan_idx], axis=0)
+            filtered_data[i_data, non_nan_idx] = filtfilt(b, a, data[i_data, non_nan_idx], axis=0)
         return filtered_data
-
 
     @staticmethod
     def apply_savgol(data: np.ndarray, window_length: int, polyorder: int):
@@ -103,16 +101,15 @@ class Operator:
         filtered_data[:, :] = np.nan
         for i_data in range(data.shape[0]):
             non_nan_idx = ~np.isnan(data[i_data, :])
-            filtered_data[i_data, non_nan_idx] = savgol_filter(data[i_data, non_nan_idx],
-                                                               window_length=window_length,
-                                                                polyorder=polyorder,
-                                                               axis=0)
+            filtered_data[i_data, non_nan_idx] = savgol_filter(
+                data[i_data, non_nan_idx], window_length=window_length, polyorder=polyorder, axis=0
+            )
         return filtered_data
 
     @staticmethod
-    def from_marker_frame_to_analog_frame(analogs_time_vector: np.ndarray,
-                                          markers_time_vector: np.ndarray,
-                                          marker_idx: int | list[int]) -> int | list[int]:
+    def from_marker_frame_to_analog_frame(
+        analogs_time_vector: np.ndarray, markers_time_vector: np.ndarray, marker_idx: int | list[int]
+    ) -> int | list[int]:
         """
         This function converts a marker frame index into an analog frame index since the analogs are sampled at a higher frequency than the markers.
         .
@@ -141,9 +138,9 @@ class Operator:
         return analog_idx
 
     @staticmethod
-    def from_analog_frame_to_marker_frame(analogs_time_vector: np.ndarray,
-                                          markers_time_vector: np.ndarray,
-                                          analog_idx: int | list[int]) -> int | list[int]:
+    def from_analog_frame_to_marker_frame(
+        analogs_time_vector: np.ndarray, markers_time_vector: np.ndarray, analog_idx: int | list[int]
+    ) -> int | list[int]:
         """
         This function converts an analog frame index into a marker frame index since the analogs are sampled at a higher frequency than the markers.
         .
@@ -163,9 +160,9 @@ class Operator:
         """
         analog_to_marker_ratio = int(round(analogs_time_vector.shape[0] / markers_time_vector.shape[0]))
         if isinstance(analog_idx, int):
-            marker_idx =  int(round(analog_idx / analog_to_marker_ratio))
+            marker_idx = int(round(analog_idx / analog_to_marker_ratio))
         elif isinstance(analog_idx, list):
-            marker_idx =  [int(round(idx / analog_to_marker_ratio)) for idx in analog_idx]
+            marker_idx = [int(round(idx / analog_to_marker_ratio)) for idx in analog_idx]
         else:
             raise ValueError("analog_idx must be an int or a list of int.")
         return marker_idx
