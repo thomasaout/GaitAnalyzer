@@ -11,7 +11,14 @@ class ExperimentalData:
     This class contains all the experimental data from a trial (markers, EMG, force plates data, gait parameters).
     """
 
-    def __init__(self, c3d_file_name: str, subject_name: str, result_folder:str, model_creator: ModelCreator, animate_c3d_flag: bool):
+    def __init__(
+        self,
+        c3d_file_name: str,
+        subject_name: str,
+        result_folder: str,
+        model_creator: ModelCreator,
+        animate_c3d_flag: bool,
+    ):
         """
         Initialize the ExperimentalData.
         .
@@ -70,6 +77,7 @@ class ExperimentalData:
         """
         Extract important information and sort the data
         """
+
         def load_model():
             self.model_marker_names = [m.to_string() for m in self.model_creator.biorbd_model.markerNames()]
             # model_muscle_names = [m.to_string() for m in self.model_creator.biorbd_model.muscleNames()]
@@ -86,7 +94,9 @@ class ExperimentalData:
                 self.marker_units = 0.001
             if len(self.model_marker_names) > len(exp_marker_names):
                 supplementary_marker_names = [name for name in self.model_marker_names if name not in exp_marker_names]
-                raise ValueError(f"The markers {supplementary_marker_names} are not in the c3d file, but are in the model.")
+                raise ValueError(
+                    f"The markers {supplementary_marker_names} are not in the c3d file, but are in the model."
+                )
             markers_sorted = np.zeros((3, len(self.model_marker_names), self.nb_marker_frames))
             markers_sorted[:, :, :] = np.nan
             for i_marker, name in enumerate(exp_marker_names):
@@ -99,13 +109,19 @@ class ExperimentalData:
             This function augments the marker set with virtual markers to improve the extended Kalman filter kinematics reconstruction.
             """
             markers_for_virtual = self.model_creator.markers_for_virtual
-            markers_sorted_with_virtual = np.zeros((3, len(self.model_marker_names) + len(markers_for_virtual.keys()), self.nb_marker_frames))
-            markers_sorted_with_virtual[:, :len(self.model_marker_names), :] = self.markers_sorted[:, :, :]
+            markers_sorted_with_virtual = np.zeros(
+                (3, len(self.model_marker_names) + len(markers_for_virtual.keys()), self.nb_marker_frames)
+            )
+            markers_sorted_with_virtual[:, : len(self.model_marker_names), :] = self.markers_sorted[:, :, :]
             for i_marker, name in enumerate(markers_for_virtual.keys()):
                 exp_marker_position = np.zeros((3, len(markers_for_virtual[name]), self.nb_marker_frames))
                 for i in range(len(markers_for_virtual[name])):
-                    exp_marker_position[:, i, :] = self.markers_sorted[:, self.model_marker_names.index(markers_for_virtual[name][i]), :]
-                markers_sorted_with_virtual[:, len(self.model_marker_names) + i_marker, :] = np.mean(exp_marker_position, axis=1)
+                    exp_marker_position[:, i, :] = self.markers_sorted[
+                        :, self.model_marker_names.index(markers_for_virtual[name][i]), :
+                    ]
+                markers_sorted_with_virtual[:, len(self.model_marker_names) + i_marker, :] = np.mean(
+                    exp_marker_position, axis=1
+                )
             self.markers_sorted_with_virtual = markers_sorted_with_virtual
 
         def sort_analogs():
@@ -152,24 +168,35 @@ class ExperimentalData:
             for i_platform in range(nb_platforms):
 
                 # Get the data
-                force = platforms[i_platform]['force']
-                moment = platforms[i_platform]['moment'] * units
-                cop = platforms[i_platform]['center_of_pressure'] * units
+                force = platforms[i_platform]["force"]
+                moment = platforms[i_platform]["moment"] * units
+                cop = platforms[i_platform]["center_of_pressure"] * units
 
                 # Filter center of pressure data
-                cop_filtered[i_platform] = Operator.apply_filtfilt(cop, order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10)
+                cop_filtered[i_platform] = Operator.apply_filtfilt(
+                    cop, order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10
+                )
 
                 # Modify moments to express them at the center of the cop
-                platform_origin[i_platform, :, 0] = np.mean(platforms[i_platform]['corners'] * units, axis=1)
+                platform_origin[i_platform, :, 0] = np.mean(platforms[i_platform]["corners"] * units, axis=1)
                 for i_frame in range(self.nb_analog_frames):
                     r = platform_origin[i_platform, :, 0] - cop_filtered[i_platform, :, i_frame]
                     moment_offset = np.cross(r, force[:, i_frame])
                     moment_adjusted[i_platform, :, i_frame] = moment[:, i_frame] + moment_offset
 
                 # Filter forces and moments
-                force_filtered[i_platform, :, :] = Operator.apply_filtfilt(force, order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10)
-                moment_filtered[i_platform, :, :] = Operator.apply_filtfilt(moment, order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10)
-                moment_adjusted_filtered[i_platform, :, :] = Operator.apply_filtfilt(moment_adjusted[i_platform, :, :], order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10)
+                force_filtered[i_platform, :, :] = Operator.apply_filtfilt(
+                    force, order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10
+                )
+                moment_filtered[i_platform, :, :] = Operator.apply_filtfilt(
+                    moment, order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10
+                )
+                moment_adjusted_filtered[i_platform, :, :] = Operator.apply_filtfilt(
+                    moment_adjusted[i_platform, :, :],
+                    order=4,
+                    sampling_rate=self.analogs_sampling_frequency,
+                    cutoff_freq=10,
+                )
 
                 # Store output in a biorbd compatible format
                 f_ext_sorted[i_platform, :3, :] = cop[:, :]
@@ -182,11 +209,9 @@ class ExperimentalData:
             self.f_ext_sorted = f_ext_sorted
             self.f_ext_sorted_filtered = f_ext_sorted_filtered
 
-
         def compute_time_vectors():
             self.markers_time_vector = np.linspace(0, self.markers_dt * self.nb_marker_frames, self.nb_marker_frames)
             self.analogs_time_vector = np.linspace(0, self.analogs_dt * self.nb_analog_frames, self.nb_analog_frames)
-
 
         # Perform the initial treatment
         load_model()
@@ -195,7 +220,6 @@ class ExperimentalData:
         sort_analogs()
         extract_force_platform_data()
         compute_time_vectors()
-
 
     def animate_c3d(self):
         # TODO: Charbie -> animate the c3d file with pyorerun

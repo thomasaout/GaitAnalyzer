@@ -12,7 +12,7 @@ class AnalysisPerformer:
     def __init__(
         self,
         analysis_to_perform: callable,
-        subjects_to_analyze: dict[str: float],
+        subjects_to_analyze: dict[str:float],
         result_folder: str = "../results/",
         skip_if_existing: bool = False,
     ):
@@ -51,13 +51,12 @@ class AnalysisPerformer:
         self.result_folder = result_folder
         self.skip_if_existing = skip_if_existing
 
-        # Extended attributes 
+        # Extended attributes
         self.figures_result_folder = None
         self.models_result_folder = None
-        
+
         # Run the analysis
         self.run_analysis()
-
 
     @staticmethod
     def get_version():
@@ -134,7 +133,6 @@ class AnalysisPerformer:
         # For matlab analysis
         savemat(result_file_name + ".mat", result_dict)
 
-
     def run_analysis(self):
         """
         Loops over the data files and perform the analysis specified by the user (on the subjects specified by the user).
@@ -164,7 +162,9 @@ class AnalysisPerformer:
                     static_trial_full_file_path = f"../data/{subject_name}/{data_file}"
                     break
             if not static_trial_full_file_path:
-                raise FileNotFoundError(f"Please put the static trial file here {os.path.abspath(subject_data_folder)} and name it [...]_static.c3d")
+                raise FileNotFoundError(
+                    f"Please put the static trial file here {os.path.abspath(subject_data_folder)} and name it [...]_static.c3d"
+                )
 
             # Define subject specific paths
             result_folder = f"{self.result_folder}/{subject_name}"
@@ -179,7 +179,7 @@ class AnalysisPerformer:
                 os.makedirs(self.figures_result_folder)
             if not os.path.exists(self.models_result_folder):
                 os.makedirs(self.models_result_folder)
-                
+
             # Loop over all data files
             for data_file in os.listdir(subject_data_folder):
                 if data_file.endswith("Statique.c3d") or not data_file.endswith(".c3d"):
@@ -194,5 +194,7 @@ class AnalysisPerformer:
 
                 # Actually perform the analysis
                 print("Analyzing ", subject_name, " : ", data_file)
-                results = self.analysis_to_perform(subject_name, subject_mass, static_trial_full_file_path, c3d_file_name, result_folder)
+                results = self.analysis_to_perform(
+                    subject_name, subject_mass, static_trial_full_file_path, c3d_file_name, result_folder
+                )
                 self.save_subject_results(results, result_file_name)

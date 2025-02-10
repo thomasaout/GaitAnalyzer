@@ -51,7 +51,6 @@ class ResultManager:
         self.inverse_dynamics_performer = None
         self.optimal_estimator = None
 
-
     def create_model(self, osim_model_type, skip_if_existing: bool):
         """
         Create and add the biorbd model to the ResultManager
@@ -62,13 +61,14 @@ class ResultManager:
             raise Exception("Biorbd model already added")
 
         # Add ModelCreator
-        self.model_creator = ModelCreator(subject_name=self.subject_name,
-                                          subject_mass=self.subject_mass,
-                                          static_trial=self.static_trial,
-                                          models_result_folder=f"{self.result_folder}/models",
-                                          osim_model_type=osim_model_type,
-                                          skip_if_existing=skip_if_existing)
-
+        self.model_creator = ModelCreator(
+            subject_name=self.subject_name,
+            subject_mass=self.subject_mass,
+            static_trial=self.static_trial,
+            models_result_folder=f"{self.result_folder}/models",
+            osim_model_type=osim_model_type,
+            skip_if_existing=skip_if_existing,
+        )
 
     def add_experimental_data(self, c3d_file_name: str, animate_c3d_flag: bool = False):
 
@@ -100,7 +100,9 @@ class ResultManager:
         # Add events
         self.events = Events(experimental_data=self.experimental_data, plot_phases_flag=plot_phases_flag)
 
-    def reconstruct_kinematics(self, skip_if_existing: bool = False, animate_kinematics_flag: bool = False, plot_kinematics_flag: bool = False):
+    def reconstruct_kinematics(
+        self, skip_if_existing: bool = False, animate_kinematics_flag: bool = False, plot_kinematics_flag: bool = False
+    ):
 
         # Checks
         if self.model_creator is None:
@@ -122,7 +124,6 @@ class ResultManager:
             plot_kinematics_flag=plot_kinematics_flag,
         )
 
-
     def perform_inverse_dynamics(self):
 
         # Checks
@@ -131,7 +132,9 @@ class ResultManager:
         if self.experimental_data is None:
             raise Exception("Please add the experimental data first by running ResultManager.add_experimental_data()")
         if self.kinematics_reconstructor is None:
-            raise Exception("Please add the kinematics reconstructor first by running ResultManager.reconstruct_kinematics()")
+            raise Exception(
+                "Please add the kinematics reconstructor first by running ResultManager.reconstruct_kinematics()"
+            )
         if self.inverse_dynamics_performer is not None:
             raise Exception("inverse_dynamics_performer already added")
 
@@ -143,7 +146,6 @@ class ResultManager:
             self.kinematics_reconstructor.qdot_filtered,
             self.kinematics_reconstructor.qddot_filtered,
         )
-
 
     def estimate_optimally(self):
 
