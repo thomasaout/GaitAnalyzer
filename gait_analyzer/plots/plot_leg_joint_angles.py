@@ -10,7 +10,9 @@ from gait_analyzer.plots.plot_utils import split_cycles, mean_cycles, LegToPlot,
 
 
 class PlotLegData:
-    def __init__(self, result_folder: str, leg_to_plot: LegToPlot, plot_type: PlotType, conditions_to_compare: list[str]):
+    def __init__(
+        self, result_folder: str, leg_to_plot: LegToPlot, plot_type: PlotType, conditions_to_compare: list[str]
+    ):
         # Checks
         if not isinstance(result_folder, str):
             raise ValueError("result_folder must be a string")
@@ -38,7 +40,6 @@ class PlotLegData:
         # Prepare the plot
         self.prepare_plot()
 
-
     def prepare_plot(self):
         """
         This function prepares the data to plot.
@@ -54,10 +55,16 @@ class PlotLegData:
                         with open(file_in_sub_folder, "rb") as file:
                             data = pickle.load(file)
                         subject_name = data["subject_name"]
-                        cond = file_in_sub_folder.replace(f"{self.result_folder}/{result_file}/", "").replace(subject_name, "").replace("_results.pkl", "")
-                        event_idx = Operator.from_analog_frame_to_marker_frame(data["analogs_time_vector"],
-                                                                      data["markers_time_vector"],
-                                                                      data["events"]["right_leg_heel_touch"])
+                        cond = (
+                            file_in_sub_folder.replace(f"{self.result_folder}/{result_file}/", "")
+                            .replace(subject_name, "")
+                            .replace("_results.pkl", "")
+                        )
+                        event_idx = Operator.from_analog_frame_to_marker_frame(
+                            data["analogs_time_vector"],
+                            data["markers_time_vector"],
+                            data["events"]["right_leg_heel_touch"],
+                        )
                         if cond in self.conditions_to_compare:
                             cycles_data[cond] += split_cycles(data[self.plot_type.value], event_idx)
             else:
@@ -66,9 +73,9 @@ class PlotLegData:
                         data = pickle.load(file)
                     subject_name = data["subject_name"]
                     cond = result_file.replace(subject_name, "").replace(".pkl", "")
-                    event_idx = Operator.from_analog_frame_to_marker_frame(data["analogs_time_vector"],
-                                                                  data["markers_time_vector"],
-                                                                  data["events"]["right_leg_heel_touch"])
+                    event_idx = Operator.from_analog_frame_to_marker_frame(
+                        data["analogs_time_vector"], data["markers_time_vector"], data["events"]["right_leg_heel_touch"]
+                    )
                     if cond in self.conditions_to_compare:
                         cycles_data[cond] += split_cycles(data[self.plot_type.value], event_idx)
 
@@ -94,7 +101,6 @@ class PlotLegData:
         self.plot_idx = plot_idx
         self.plot_labels = plot_labels
 
-
     def draw_plot(self):
         # TODO: Charbie -> combine plots in one figure (Q and Power for example side by side)
 
@@ -108,7 +114,7 @@ class PlotLegData:
         n_rows = len(self.plot_idx) // n_cols
         fig, axs = plt.subplots(n_rows, n_cols, figsize=(fig_width, 10))
         n_data_to_plot = len(self.cycles_data)
-        colors = [colormaps["magma"](i/n_data_to_plot) for i in range(n_data_to_plot)]
+        colors = [colormaps["magma"](i / n_data_to_plot) for i in range(n_data_to_plot)]
         nb_frames_interp = 101
         normalized_time = np.linspace(0, 100, nb_frames_interp)
 
@@ -131,32 +137,28 @@ class PlotLegData:
             all_mean_data[i_condition, :, :] = mean_data
             all_std_data[i_condition, :, :] = std_data
             for i_ax, ax in enumerate(axs):
-                ax.fill_between(normalized_time,
-                                mean_data[i_ax, :] - std_data[i_ax, :],
-                                mean_data[i_ax, :] + std_data[i_ax, :],
-                                color=colors[i_condition], alpha=0.3)
+                ax.fill_between(
+                    normalized_time,
+                    mean_data[i_ax, :] - std_data[i_ax, :],
+                    mean_data[i_ax, :] + std_data[i_ax, :],
+                    color=colors[i_condition],
+                    alpha=0.3,
+                )
                 if i_ax == 0:
                     lines_list += ax.plot(normalized_time, mean_data[i_ax, :], label=key, color=colors[i_condition])
                     labels_list += [key]
                 else:
-                    ax.plot(normalized_time,
-                            mean_data[i_ax, :], label=key,
-                            color=colors[i_condition])
+                    ax.plot(normalized_time, mean_data[i_ax, :], label=key, color=colors[i_condition])
                 ax.set_ylabel(f"{self.plot_labels[i_ax]} " + unit_str)
             axs[-1].set_xlabel("Normalized time [%]")
 
-        axs[0].legend(lines_list,
-                      labels_list,
-                      bbox_to_anchor=(0.5, 1.6),
-                      loc='upper center')
+        axs[0].legend(lines_list, labels_list, bbox_to_anchor=(0.5, 1.6), loc="upper center")
         fig.subplots_adjust(top=0.9)
         fig.savefig(f"plot_conditions_{self.plot_type.value}.png")
         self.fig = fig
 
-
     def save(self, file_name: str):
         self.fig.savefig(file_name)
-
 
     def show(self):
         self.fig.show()

@@ -169,10 +169,32 @@ class Events:
             )[0]
             if left_heel_moving.shape == (0,):
                 plt.figure()
-                plt.plot((self.experimental_data.markers_time_vector[1:] + self.experimental_data.markers_time_vector[:-1]) / 2, left_cal_velocity, label="Left heel velocity")
-                plt.plot(self.experimental_data.markers_time_vector, self.experimental_data.markers_sorted[2, self.experimental_data.model_marker_names.index("LCAL"), :], label="Left heel height")
-                plt.plot(self.experimental_data.analogs_time_vector, self.experimental_data.f_ext_sorted[0, 8, :], label="Vertical Left GRF")
-                plt.plot(np.array([self.experimental_data.analogs_time_vector[0], self.experimental_data.analogs_time_vector[-1]]), np.array([self.heel_velocity_threshold, self.heel_velocity_threshold]), '--k', label="Velocity  threshold")
+                plt.plot(
+                    (self.experimental_data.markers_time_vector[1:] + self.experimental_data.markers_time_vector[:-1])
+                    / 2,
+                    left_cal_velocity,
+                    label="Left heel velocity",
+                )
+                plt.plot(
+                    self.experimental_data.markers_time_vector,
+                    self.experimental_data.markers_sorted[
+                        2, self.experimental_data.model_marker_names.index("LCAL"), :
+                    ],
+                    label="Left heel height",
+                )
+                plt.plot(
+                    self.experimental_data.analogs_time_vector,
+                    self.experimental_data.f_ext_sorted[0, 8, :],
+                    label="Vertical Left GRF",
+                )
+                plt.plot(
+                    np.array(
+                        [self.experimental_data.analogs_time_vector[0], self.experimental_data.analogs_time_vector[-1]]
+                    ),
+                    np.array([self.heel_velocity_threshold, self.heel_velocity_threshold]),
+                    "--k",
+                    label="Velocity  threshold",
+                )
                 plt.legend()
                 plt.show()
                 raise RuntimeError("The left heel marker (LCAL) is not moving, please double check the data.")
@@ -201,10 +223,32 @@ class Events:
             )[0]
             if right_heel_moving.shape == (0,):
                 plt.figure()
-                plt.plot((self.experimental_data.markers_time_vector[1:] + self.experimental_data.markers_time_vector[:-1]) / 2, left_cal_velocity, label="Left heel velocity")
-                plt.plot(self.experimental_data.markers_time_vector, self.experimental_data.markers_sorted[2, self.experimental_data.model_marker_names.index("LCAL"), :], label="Left heel height")
-                plt.plot(self.experimental_data.analogs_time_vector, self.experimental_data.f_ext_sorted[0, 8, :], label="Vertical Left GRF")
-                plt.plot(np.array([self.experimental_data.analogs_time_vector[0], self.experimental_data.analogs_time_vector[-1]]), np.array([self.heel_velocity_threshold, self.heel_velocity_threshold]), '--k', label="Velocity  threshold")
+                plt.plot(
+                    (self.experimental_data.markers_time_vector[1:] + self.experimental_data.markers_time_vector[:-1])
+                    / 2,
+                    left_cal_velocity,
+                    label="Left heel velocity",
+                )
+                plt.plot(
+                    self.experimental_data.markers_time_vector,
+                    self.experimental_data.markers_sorted[
+                        2, self.experimental_data.model_marker_names.index("LCAL"), :
+                    ],
+                    label="Left heel height",
+                )
+                plt.plot(
+                    self.experimental_data.analogs_time_vector,
+                    self.experimental_data.f_ext_sorted[0, 8, :],
+                    label="Vertical Left GRF",
+                )
+                plt.plot(
+                    np.array(
+                        [self.experimental_data.analogs_time_vector[0], self.experimental_data.analogs_time_vector[-1]]
+                    ),
+                    np.array([self.heel_velocity_threshold, self.heel_velocity_threshold]),
+                    "--k",
+                    label="Velocity  threshold",
+                )
                 plt.legend()
                 plt.show()
                 raise RuntimeError("The right heel marker (RCAL) is not moving, please double check the data.")
@@ -306,7 +350,6 @@ class Events:
         self.detect_phases_both_legs("toesL", "toes_only", "swing")
         self.detect_phases_both_legs("toesL_heelR", "toes_only", "heel_only")
         self.detect_phases_both_legs("toesL_heelR_toesR", "toes_only", "flat_foot")
-
 
     def plot_events(self):
         """
@@ -464,13 +507,11 @@ class Events:
         plt.savefig(result_file_full_path)
         plt.show()
 
-
     def get_result_file_full_path(self):
         result_folder = self.experimental_data.result_folder
-        trial_name = self.experimental_data.c3d_file_name.split('/')[-1][:-4]
+        trial_name = self.experimental_data.c3d_file_name.split("/")[-1][:-4]
         result_file_full_path = f"{result_folder}/events_{trial_name}.pkl"
         return result_file_full_path
-
 
     def save_events(self):
         """
@@ -479,7 +520,6 @@ class Events:
         result_file_full_path = self.get_result_file_full_path()
         with open(result_file_full_path, "wb") as file:
             pickle.dump(self.outputs(), file)
-
 
     def inputs(self):
         return {

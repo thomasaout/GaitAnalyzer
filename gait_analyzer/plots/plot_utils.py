@@ -10,6 +10,7 @@ class LegToPlot(Enum):
     RIGHT = "R"
     BOTH = "both"
 
+
 class PlotType(Enum):
     Q = "q"
     QDOT = "qdot"
@@ -17,6 +18,7 @@ class PlotType(Enum):
     TAU = "tau"
     POWER = "power"
     ANGULAR_MOMENTUM = "h"
+
 
 class DimentionsToPlot(Enum):
     BIDIMENTIONAL = "2D"
@@ -88,13 +90,15 @@ def split_cycles(data: np.ndarray, event_idx: list[int]) -> list[np.ndarray]:
 
     # Split the data into cycles (skipping everything before the first event and after the last event)
     cycles = []
-    for i_event in range(len(event_idx)-1):
-        cycles += [data[event_idx[i_event]:event_idx[i_event+1], :]]
+    for i_event in range(len(event_idx) - 1):
+        cycles += [data[event_idx[i_event] : event_idx[i_event + 1], :]]
 
     return cycles
 
 
-def mean_cycles(data: list[np.ndarray], index_to_keep: list[int], nb_frames_interp: int) -> tuple[np.ndarray, np.ndarray]:
+def mean_cycles(
+    data: list[np.ndarray], index_to_keep: list[int], nb_frames_interp: int
+) -> tuple[np.ndarray, np.ndarray]:
     """
     This function computes the mean over cycles.
 
@@ -143,5 +147,3 @@ def mean_cycles(data: list[np.ndarray], index_to_keep: list[int], nb_frames_inte
     std_data = np.nanstd(interpolated_data_array, axis=0)
 
     return mean_data, std_data
-
-

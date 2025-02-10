@@ -1,5 +1,5 @@
 from .analysis_performer import AnalysisPerformer
-from .biomod_model_creator import BiomodModelCreator, OsimModels
+from .model_creator import ModelCreator, OsimModels
 from .experimental_data import ExperimentalData
 from .helper import helper
 from .kinematics_reconstructor import KinematicsReconstructor

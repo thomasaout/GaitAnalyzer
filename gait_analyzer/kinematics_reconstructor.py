@@ -9,7 +9,7 @@ from pyomeca import Markers
 
 from gait_analyzer.operator import Operator
 from gait_analyzer.experimental_data import ExperimentalData
-from gait_analyzer.biomod_model_creator import BiomodModelCreator
+from gait_analyzer.model_creator import ModelCreator
 from gait_analyzer.events import Events
 
 
@@ -101,6 +101,7 @@ segment_dict = {"pelvis": {"dof_idx": [0, 1, 2, 3, 4, 5],
                               "max_bound": [1.5708]},
                 }
 
+
 class KinematicsReconstructor:
     """
     This class reconstruct the kinematics based on the marker position and the model predefined.
@@ -121,7 +122,7 @@ class KinematicsReconstructor:
         ----------
         experimental_data: ExperimentalData
             The experimental data from the trial
-        biorbd_model_creator: BiomodModelCreator
+        model_creator: ModelCreator
             The biorbd model to use for the kinematics reconstruction
         events: Events
             The events to use for the kinematics reconstruction since we exploit the fact that the movement is cyclic
@@ -143,10 +144,8 @@ class KinematicsReconstructor:
             raise ValueError(
                 "experimental_data must be an instance of ExperimentalData. You can declare it by running ExperimentalData(file_path)."
             )
-        if not isinstance(biorbd_model_creator, BiomodModelCreator):
-            raise ValueError(
-                "biorbd_model_creator must be an instance of BiomodModelCreator."
-            )
+        if not isinstance(model_creator, ModelCreator):
+            raise ValueError("model_creator must be an instance of ModelCreator.")
         if not isinstance(events, Events):
             raise ValueError(
                 "events must be an instance of Events."
@@ -158,7 +157,7 @@ class KinematicsReconstructor:
 
         # Initial attributes
         self.experimental_data = experimental_data
-        self.biorbd_model_creator = biorbd_model_creator
+        self.model_creator = model_creator
         self.events = events
         self.reconstruction_type = reconstruction_type
 
@@ -185,7 +184,6 @@ class KinematicsReconstructor:
         if plot_kinematics_flag:
             self.plot_kinematics()
 
-
     def check_if_existing(self):
         """
         Check if the kinematics reconstruction already exists.
@@ -205,19 +203,18 @@ class KinematicsReconstructor:
                 self.q_filtered = data["q_filtered"]
                 self.qdot = data["qdot"]
                 self.qddot = data["qddot"]
-                self.biorbd_model = self.biorbd_model_creator.biorbd_model
+                self.biorbd_model = self.model_creator.biorbd_model
                 self.reconstruction_type = ReconstructionType(data["reconstruction_type"])
                 self.is_loaded_kinematics = True
             return True
         else:
             return False
 
-
     def perform_kinematics_reconstruction(self):
 
         print("Performing inverse kinematics reconstruction using 'only_lm'")
 
-        model = biorbd.Model(self.biorbd_model_creator.biorbd_model_virtual_markers_full_path)
+        model = biorbd.Model(self.model_creator.biorbd_model_virtual_markers_full_path)
         self.biorbd_model = model
         markers = self.experimental_data.markers_sorted_with_virtual
         nb_frames = markers.shape[2]
@@ -234,8 +231,7 @@ class KinematicsReconstructor:
             raise NotImplementedError(f"The reconstruction_type {self.reconstruction_type} is not implemented yet.")
 
         self.q = q_recons
-        self.t = self.experimental_data.markers_time_vector[:self.max_frames]
-
+        self.t = self.experimental_data.markers_time_vector[: self.max_frames]
 
     def filter_kinematics(self):
         """
@@ -277,7 +273,9 @@ class KinematicsReconstructor:
             elif filter_type == "filtfilt":
                 q_filtered = Operator.apply_filtfilt(q, order=4, sampling_rate=sampling_rate, cutoff_freq=6)
             else:
-                raise NotImplementedError(f"filter_type {filter_type} not implemented. It must be 'savgol' or 'filtfilt'.")
+                raise NotImplementedError(
+                    f"filter_type {filter_type} not implemented. It must be 'savgol' or 'filtfilt'."
+                )
 
             # Compute and filter qdot
             qdot = np.zeros_like(q)
@@ -321,7 +319,7 @@ class KinematicsReconstructor:
                     plt.plot(self.t, self.q_filtered[i_dof, :] * 180 / np.pi, label=f"{self.biorbd_model.nameDof()[i_dof].to_string()} [" + r"$^\circ$" + "]")
             plt.legend()
             fig.tight_layout()
-            result_file_full_path = self.get_result_file_full_path()
+            result_file_full_path = self.get_result_file_full_path(self.experimental_data.result_folder + "figures/")
             fig.savefig(result_file_full_path.replace(".pkl", "_ALL_IN_ONE.png"))
         else:
             fig, axs = plt.subplots(7, 6, figsize=(10, 10))
@@ -334,9 +332,8 @@ class KinematicsReconstructor:
                     axs[i_dof].plot(self.t, self.q_filtered[i_dof, :] * 180 / np.pi)
                     axs[i_dof].set_title(f"{self.biorbd_model.nameDof()[i_dof].to_string()} [" + r"$^\circ$" + "]")
             fig.tight_layout()
-            result_file_full_path = self.get_result_file_full_path()
+            result_file_full_path = self.get_result_file_full_path(self.experimental_data.result_folder + "figures/")
             fig.savefig(result_file_full_path.replace(".pkl", ".png"))
-
 
     def animate_kinematics(self):
         """
@@ -344,12 +341,14 @@ class KinematicsReconstructor:
         """
         # Model
         # model = BiorbdModel.from_biorbd_object(self.biorbd_model)
-        model = BiorbdModel(self.biorbd_model_creator.biorbd_model_virtual_markers_full_path)
+        model = BiorbdModel(self.model_creator.biorbd_model_virtual_markers_full_path)
         model.options.transparent_mesh = False
 
         # Markers
         marker_names = [m.to_string() for m in self.biorbd_model.markerNames()]
-        markers = Markers(data=self.experimental_data.markers_sorted_with_virtual[:, :, :self.max_frames], channels=marker_names)
+        markers = Markers(
+            data=self.experimental_data.markers_sorted_with_virtual[:, :, : self.max_frames], channels=marker_names
+        )
 
         # Visualization
         viz = PhaseRerun(self.t)
@@ -360,13 +359,12 @@ class KinematicsReconstructor:
         viz.add_animated_model(model, q_animation, tracked_markers=markers)
         viz.rerun_by_frame("Kinematics reconstruction")
 
-
-    def get_result_file_full_path(self):
-        result_folder = self.experimental_data.result_folder
-        trial_name = self.experimental_data.c3d_file_name.split('/')[-1][:-4]
+    def get_result_file_full_path(self, result_folder=None):
+        if result_folder is None:
+            result_folder = self.experimental_data.result_folder
+        trial_name = self.experimental_data.c3d_file_name.split("/")[-1][:-4]
         result_file_full_path = f"{result_folder}/inv_kin_{trial_name}.pkl"
         return result_file_full_path
-
 
     def save_kinematics_reconstruction(self):
         """
@@ -392,4 +390,3 @@ class KinematicsReconstructor:
             "is_loaded_kinematics": self.is_loaded_kinematics,
             "reconstruction_type": self.reconstruction_type.value,
         }
-

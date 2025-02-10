@@ -5,6 +5,7 @@ This report is for gait analysis.
 
 ## Installation
 If you need help setting up your environment, you can follow the instructions in the section setup.
+* Please note that python 3.10 must be used because of OpenSim's API. 
 
 For now the GaitAnalyzer library is only installable from source files. 
 If you only want to use it, you can now clone the repository:
@@ -14,7 +15,7 @@ git clone https://github.com/laboratoireIRISSE/GaitAnalyzer.git
 But if you would like to contribute, you can fork the repository and clone your fork instead.
 To be able to use the GaitAnalyzer properly, you can install the following dependency packages from conda-forge
 ```bash
-conda install -c conda-forge numpy matplotlib biorbd bioptim ezc3d scipy lxml pandas openpyxl gitpython pyorerun pyomeca
+conda install -c conda-forge numpy matplotlib biorbd=1.10.0 bioptim ezc3d scipy lxml pandas openpyxl gitpython pyorerun pyomeca opensim-org::opensim=4.5.1
 ```
 You must also install the following libraries:
 - osim_to_biomod (https://github.com/pyomeca/osim_to_biomod) #TODO: add to conda-forge
@@ -33,7 +34,7 @@ conda --version
 ```
 Then, you can create a new environment with the following command:
 ```bash
-conda create --name [name of your environment] python=3.11
+conda create --name [name of your environment] python=3.10
 ```
 The python version should be 3.11 because of opensim that will be installed after.
 
