@@ -142,7 +142,7 @@ class KinematicsReconstructor:
         experimental_data: ExperimentalData,
         model_creator: ModelCreator,
         events: Events,
-        reconstruction_type: ReconstructionType,
+        reconstruction_type: ReconstructionType | list[ReconstructionType],
         skip_if_existing: bool,
         animate_kinematics_flag: bool,
         plot_kinematics_flag: bool,
@@ -160,6 +160,7 @@ class KinematicsReconstructor:
             The events to use for the kinematics reconstruction since we exploit the fact that the movement is cyclic
         reconstruction_type: ReconstructionType
             The type of algorithm to use to perform the reconstruction
+            If the reconstruction_type is a list, the kinematics will be first reconstructed with the first element of the list, and then withe the other ones as a fallback if the reconstruction os not acceptable (<5cm error on the 75e percentile).
         skip_if_existing: bool
             If True, the kinematics will not be reconstructed if the output file already exists
         animate_kinematics_flag: bool
@@ -180,8 +181,8 @@ class KinematicsReconstructor:
             raise ValueError("model_creator must be an instance of ModelCreator.")
         if not isinstance(events, Events):
             raise ValueError("events must be an instance of Events.")
-        if not isinstance(reconstruction_type, ReconstructionType):
-            raise ValueError("reconstruction_type must be an instance of ReconstructionType.")
+        if not isinstance(reconstruction_type, ReconstructionType) and not isinstance(reconstruction_type, list):
+            raise ValueError("reconstruction_type must be an instance of ReconstructionType or a list of ReconstructionType.")
 
         # Initial attributes
         self.experimental_data = experimental_data
@@ -232,7 +233,10 @@ class KinematicsReconstructor:
                 self.qdot = data["qdot"]
                 self.qddot = data["qddot"]
                 self.biorbd_model = self.model_creator.biorbd_model
-                self.reconstruction_type = ReconstructionType(data["reconstruction_type"])
+                if isinstance(data["reconstruction_type"], str):
+                    self.reconstruction_type = ReconstructionType(data["reconstruction_type"])
+                else:
+                    self.reconstruction_type = [ReconstructionType(i_recons) for i_recons in data["reconstruction_type"]]
                 self.is_loaded_kinematics = True
             return True
         else:
@@ -240,28 +244,44 @@ class KinematicsReconstructor:
 
     def perform_kinematics_reconstruction(self):
 
-        print("Performing inverse kinematics reconstruction using 'only_lm'")
-
         model = biorbd.Model(self.model_creator.biorbd_model_virtual_markers_full_path)
         self.biorbd_model = model
         markers = self.experimental_data.markers_sorted_with_virtual
         nb_frames = markers.shape[2]
-        self.max_frames = nb_frames  # TODO: add the possibility to chose the frame range to reconstruct
+        self.max_frames = 1000  # nb_frames  # TODO: add the possibility to chose the frame range to reconstruct
 
         q_recons = np.ndarray((model.nbQ(), nb_frames))
-
-        if self.reconstruction_type in [ReconstructionType.ONLY_LM, ReconstructionType.LM, ReconstructionType.TRF]:
-            ik = biorbd.InverseKinematics(model, markers[:, :, : self.max_frames])
-            q_recons[:, : self.max_frames] = ik.solve(method=self.reconstruction_type.value)
-        elif self.reconstruction_type == ReconstructionType.EKF:
-            q_recons[:, : self.max_frames] = biorbd.extended_kalman_filter(
-                model, self.experimental_data.c3d_full_file_path
-            )
+        is_successful_reconstruction = False
+        if isinstance(self.reconstruction_type, ReconstructionType):
+            reconstruction_type = [self.reconstruction_type]
         else:
-            raise NotImplementedError(f"The reconstruction_type {self.reconstruction_type} is not implemented yet.")
+            reconstruction_type = self.reconstruction_type
+        for recons_method in reconstruction_type:
+            print(f"Performing inverse kinematics reconstruction using {recons_method.value}")
+            if recons_method in [ReconstructionType.ONLY_LM, ReconstructionType.LM, ReconstructionType.TRF]:
+                ik = biorbd.InverseKinematics(model, markers[:, :, : self.max_frames])
+                q_recons[:, : self.max_frames] = ik.solve(method=recons_method.value)
+                residuals = ik.sol()["residuals"]
+            elif recons_method == ReconstructionType.EKF:
+                # TODO: Charbie -> When using the EKF, these qdot and qddot should be used instead of finite difference
+                _, q_recons[:, : self.max_frames], _, _ = biorbd.extended_kalman_filter(
+                    model, self.experimental_data.c3d_full_file_path
+                )
+                residuals = np.zeros_like(markers)
+                raise Warning("The EKF acceptance criteria was not implemented yet. Please see the developers if you encounter this warning.")
+            else:
+                raise NotImplementedError(f"The reconstruction_type {recons_method} is not implemented yet.")
+
+            # Check if this reconstruction was acceptable
+            if np.all(np.percentile(residuals, 75, axis=0) < 0.05):
+                is_successful_reconstruction = True
+                break
+
+        if not is_successful_reconstruction:
+            raise RuntimeError("The reconstruction was not successful :( Please consider using a different method or checking the experimental data labeling.")
 
         self.q = q_recons
-        self.t = self.experimental_data.markers_time_vector[: self.max_frames]
+        self.t = self.experimental_data.markers_time_vector
 
     def filter_kinematics(self):
         """
@@ -391,7 +411,7 @@ class KinematicsReconstructor:
         )
 
         # Visualization
-        viz = PhaseRerun(self.t)
+        viz = PhaseRerun(self.t[: self.max_frames])
         if self.q.shape[0] == self.biorbd_model.nbQ():
             q_animation = self.q_filtered[:, : self.max_frames].reshape(self.biorbd_model.nbQ(), self.max_frames)
         else:
@@ -421,6 +441,10 @@ class KinematicsReconstructor:
         }
 
     def outputs(self):
+        if isinstance(self.reconstruction_type, list):
+            reconstruction_type = [i_recons.value for i_recons in self.reconstruction_type]
+        else:
+            reconstruction_type = self.reconstruction_type.value
         return {
             "t": self.t,
             "q": self.q,
@@ -428,5 +452,5 @@ class KinematicsReconstructor:
             "qdot": self.qdot,
             "qddot": self.qddot,
             "is_loaded_kinematics": self.is_loaded_kinematics,
-            "reconstruction_type": self.reconstruction_type.value,
+            "reconstruction_type": reconstruction_type,
         }

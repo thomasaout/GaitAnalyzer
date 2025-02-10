@@ -19,12 +19,12 @@ def analysis_to_perform(
     results = ResultManager(
         subject_name=subject_name, subject_mass=subject_mass, static_trial=static_trial, result_folder=result_folder
     )
-    results.create_model(osim_model_type=OsimModels.WholeBody(), skip_if_existing=False)
+    results.create_model(osim_model_type=OsimModels.WholeBody(), skip_if_existing=True)
     results.add_experimental_data(c3d_file_name=c3d_file_name, animate_c3d_flag=False)
     results.add_events(plot_phases_flag=False)
     results.reconstruct_kinematics(
-        reconstruction_type=ReconstructionType.ONLY_LM,
-        animate_kinematics_flag=False,
+        reconstruction_type=[ReconstructionType.TRF, ReconstructionType.ONLY_LM],
+        animate_kinematics_flag=True,
         plot_kinematics_flag=True,
         skip_if_existing=False,
     )
@@ -52,7 +52,7 @@ if __name__ == "__main__":
         subjects_to_analyze={"AOT_01": 69.2},
         result_folder="results",
         trails_to_analyze=["_ManipStim_L200_F30_I20"],
-        skip_if_existing=True,
+        skip_if_existing=False,
     )
 
     # --- Example of how to plot the joint angles --- #

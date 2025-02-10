@@ -69,6 +69,7 @@ class ExperimentalData:
         self.analogs_time_vector = None
 
         # Extract data from the c3d file
+        print(f"Reading experimental data from file {self.c3d_file_name} ...")
         self.perform_initial_treatment()
         self.extract_gait_parameters()
         if animate_c3d_flag:
