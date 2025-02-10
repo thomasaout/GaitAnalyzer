@@ -189,9 +189,7 @@ class AnalysisPerformer:
             # Loop over all data files
             for data_file in os.listdir(subject_data_folder):
                 # Files that we should not analyze
-                if data_file.endswith("Statique.c3d") or not data_file.endswith(
-                    ".c3d"
-                ):
+                if data_file.endswith("Statique.c3d") or not data_file.endswith(".c3d"):
                     continue
                 if self.trails_to_analyze is not None and not any(
                     trail in data_file for trail in self.trails_to_analyze

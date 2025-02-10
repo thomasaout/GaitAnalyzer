@@ -17,89 +17,119 @@ class ReconstructionType(Enum):
     """
     Type of reconstruction to perform
     """
+
     ONLY_LM = "only_lm"  # Levenberg-Marquardt with 0.0001 initialization
     LM = "LM"  # Levenberg-Marquardt with mid-bounds initialization
     TRF = "trf"  # Trust Region Reflective
     EKF = "ekf"  # Extended Kalman Filter
 
 
-segment_dict = {"pelvis": {"dof_idx": [0, 1, 2, 3, 4, 5],
-                           "markers_idx": [0, 1, 2, 3, 49],
-                           "min_bound": [-3, -3, -3, -np.pi / 4, -np.pi / 4, -np.pi],
-                           "max_bound": [3, 3, 3, np.pi / 4, np.pi / 4, np.pi]},
-                "femur_r": {"dof_idx": [6, 7, 8],
-                            "markers_idx": [4, 5, 6, 50, 51],
-                            "min_bound": [-0.6981317007977318, -1.0471975511965976, -0.5235987755982988],
-                            "max_bound": [2.0943951023931953, 0.5235987755982988, 0.5235987755982988]},
-                "tibia_r": {"dof_idx": [9],
-                            "markers_idx": [7, 8, 9, 52, 53],
-                            "min_bound": [-2.6179938779914944],
-                            "max_bound": [0.0]},
-                "calcn_r": {"dof_idx": [10, 11],
-                            "markers_idx": [10, 11, 12, 54, 55],
-                            "min_bound": [-0.8726646259971648, -0.2617993877991494],
-                            "max_bound": [0.5235987755982988, 0.2617993877991494]},
-                "toes_r": {"dof_idx": [12],
-                           "markers_idx": [13],
-                           "min_bound": [-0.8726646259971648],
-                           "max_bound": [1.0471975511965976]},
-                "femur_l": {"dof_idx": [13, 14, 15],
-                            "markers_idx": [14, 15, 16, 56, 57],
-                            "min_bound": [-0.6981317007977318, -1.0471975511965976, -0.5235987755982988],
-                            "max_bound": [2.0943951023931953, 0.5235987755982988, 0.5235987755982988]},
-                "tibia_l": {"dof_idx": [16],
-                            "markers_idx": [17, 18, 19, 58, 59],
-                            "min_bound": [-2.6179938779914944],
-                            "max_bound": [0.0]},
-                "calcn_l": {"dof_idx": [17, 18],
-                            "markers_idx": [20, 21, 22, 60, 61],
-                            "min_bound": [-0.8726646259971648, -0.2617993877991494],
-                            "max_bound": [0.5235987755982988, 0.2617993877991494]},
-                "toes_l": {"dof_idx": [19],
-                           "markers_idx": [23],
-                           "min_bound": [-0.8726646259971648],
-                           "max_bound": [1.0471975511965976]},
-                "torso": {"dof_idx": [20, 21, 22],
-                          "markers_idx": [24, 25, 26, 27, 28, 62],
-                          "min_bound": [-1.5707963267948966, -0.6108652381980153, -0.7853981633974483],
-                          "max_bound": [0.7853981633974483, 0.6108652381980153, 0.7853981633974483]},
-                "head": {"dof_idx": [23, 24, 25],
-                         "markers_idx": [29, 30, 31, 32, 33],
-                         "min_bound": [-0.8726646259971648, -0.59999999999999998, -1.2217],
-                         "max_bound": [0.7853981633974483, 0.59999999999999998, 1.2217]},
-                "humerus_r": {"dof_idx": [26, 27, 28],
-                              "markers_idx": [34, 35, 63],
-                              "min_bound": [-1.5707963300000001, -3.8397000000000001, -1.5707963300000001],
-                              "max_bound": [3.1415999999999999, 1.5707963300000001, 1.5707963300000001]},
-                "radius_r": {"dof_idx": [29, 30],
-                             "markers_idx": [36, 37, 64],
-                             "min_bound": [0.0, -3.1415999999999999],
-                             "max_bound": [3.1415999999999999, 3.1415999999999999]},
-                "hand_r": {"dof_idx": [31, 32],
-                           "markers_idx": [38, 39, 65],
-                           "min_bound": [-1.5708, -0.43633231],
-                           "max_bound": [1.5708, 0.61086523999999998]},
-                "fingers_r": {"dof_idx": [33],
-                              "markers_idx": [40],
-                              "min_bound": [-1.5708],
-                              "max_bound": [1.5708]},
-                "humerus_l": {"dof_idx": [34, 35, 36],
-                              "markers_idx": [41, 42, 66],
-                              "min_bound": [-1.5707963300000001, -3.8397000000000001, -1.5707963300000001],
-                              "max_bound": [3.1415999999999999, 1.5707963300000001, 1.5707963300000001]},
-                "radius_l": {"dof_idx": [37, 38],
-                             "markers_idx": [43, 44, 67],
-                             "min_bound": [0.0, -3.1415999999999999],
-                             "max_bound": [3.1415999999999999, 3.1415999999999999]},
-                "hand_l": {"dof_idx": [39, 40],
-                           "markers_idx": [45, 46, 68],
-                           "min_bound": [-1.5708, -0.43633231],
-                           "max_bound": [1.5708, 0.61086523999999998]},
-                "fingers_l": {"dof_idx": [41],
-                              "markers_idx": [47, 48],
-                              "min_bound": [-1.5708],
-                              "max_bound": [1.5708]},
-                }
+segment_dict = {
+    "pelvis": {
+        "dof_idx": [0, 1, 2, 3, 4, 5],
+        "markers_idx": [0, 1, 2, 3, 49],
+        "min_bound": [-3, -3, -3, -np.pi / 4, -np.pi / 4, -np.pi],
+        "max_bound": [3, 3, 3, np.pi / 4, np.pi / 4, np.pi],
+    },
+    "femur_r": {
+        "dof_idx": [6, 7, 8],
+        "markers_idx": [4, 5, 6, 50, 51],
+        "min_bound": [-0.6981317007977318, -1.0471975511965976, -0.5235987755982988],
+        "max_bound": [2.0943951023931953, 0.5235987755982988, 0.5235987755982988],
+    },
+    "tibia_r": {
+        "dof_idx": [9],
+        "markers_idx": [7, 8, 9, 52, 53],
+        "min_bound": [-2.6179938779914944],
+        "max_bound": [0.0],
+    },
+    "calcn_r": {
+        "dof_idx": [10, 11],
+        "markers_idx": [10, 11, 12, 54, 55],
+        "min_bound": [-0.8726646259971648, -0.2617993877991494],
+        "max_bound": [0.5235987755982988, 0.2617993877991494],
+    },
+    "toes_r": {
+        "dof_idx": [12],
+        "markers_idx": [13],
+        "min_bound": [-0.8726646259971648],
+        "max_bound": [1.0471975511965976],
+    },
+    "femur_l": {
+        "dof_idx": [13, 14, 15],
+        "markers_idx": [14, 15, 16, 56, 57],
+        "min_bound": [-0.6981317007977318, -1.0471975511965976, -0.5235987755982988],
+        "max_bound": [2.0943951023931953, 0.5235987755982988, 0.5235987755982988],
+    },
+    "tibia_l": {
+        "dof_idx": [16],
+        "markers_idx": [17, 18, 19, 58, 59],
+        "min_bound": [-2.6179938779914944],
+        "max_bound": [0.0],
+    },
+    "calcn_l": {
+        "dof_idx": [17, 18],
+        "markers_idx": [20, 21, 22, 60, 61],
+        "min_bound": [-0.8726646259971648, -0.2617993877991494],
+        "max_bound": [0.5235987755982988, 0.2617993877991494],
+    },
+    "toes_l": {
+        "dof_idx": [19],
+        "markers_idx": [23],
+        "min_bound": [-0.8726646259971648],
+        "max_bound": [1.0471975511965976],
+    },
+    "torso": {
+        "dof_idx": [20, 21, 22],
+        "markers_idx": [24, 25, 26, 27, 28, 62],
+        "min_bound": [-1.5707963267948966, -0.6108652381980153, -0.7853981633974483],
+        "max_bound": [0.7853981633974483, 0.6108652381980153, 0.7853981633974483],
+    },
+    "head": {
+        "dof_idx": [23, 24, 25],
+        "markers_idx": [29, 30, 31, 32, 33],
+        "min_bound": [-0.8726646259971648, -0.59999999999999998, -1.2217],
+        "max_bound": [0.7853981633974483, 0.59999999999999998, 1.2217],
+    },
+    "humerus_r": {
+        "dof_idx": [26, 27, 28],
+        "markers_idx": [34, 35, 63],
+        "min_bound": [-1.5707963300000001, -3.8397000000000001, -1.5707963300000001],
+        "max_bound": [3.1415999999999999, 1.5707963300000001, 1.5707963300000001],
+    },
+    "radius_r": {
+        "dof_idx": [29, 30],
+        "markers_idx": [36, 37, 64],
+        "min_bound": [0.0, -3.1415999999999999],
+        "max_bound": [3.1415999999999999, 3.1415999999999999],
+    },
+    "hand_r": {
+        "dof_idx": [31, 32],
+        "markers_idx": [38, 39, 65],
+        "min_bound": [-1.5708, -0.43633231],
+        "max_bound": [1.5708, 0.61086523999999998],
+    },
+    "fingers_r": {"dof_idx": [33], "markers_idx": [40], "min_bound": [-1.5708], "max_bound": [1.5708]},
+    "humerus_l": {
+        "dof_idx": [34, 35, 36],
+        "markers_idx": [41, 42, 66],
+        "min_bound": [-1.5707963300000001, -3.8397000000000001, -1.5707963300000001],
+        "max_bound": [3.1415999999999999, 1.5707963300000001, 1.5707963300000001],
+    },
+    "radius_l": {
+        "dof_idx": [37, 38],
+        "markers_idx": [43, 44, 67],
+        "min_bound": [0.0, -3.1415999999999999],
+        "max_bound": [3.1415999999999999, 3.1415999999999999],
+    },
+    "hand_l": {
+        "dof_idx": [39, 40],
+        "markers_idx": [45, 46, 68],
+        "min_bound": [-1.5708, -0.43633231],
+        "max_bound": [1.5708, 0.61086523999999998],
+    },
+    "fingers_l": {"dof_idx": [41], "markers_idx": [47, 48], "min_bound": [-1.5708], "max_bound": [1.5708]},
+}
 
 
 class KinematicsReconstructor:
@@ -107,14 +137,16 @@ class KinematicsReconstructor:
     This class reconstruct the kinematics based on the marker position and the model predefined.
     """
 
-    def __init__(self, 
-                 experimental_data: ExperimentalData, 
-                 biorbd_model_creator: BiomodModelCreator, 
-                 events: Events,
-                 reconstruction_type: ReconstructionType,
-                 skip_if_existing: bool,
-                 animate_kinematics_flag: bool,
-                 plot_kinematics_flag: bool):
+    def __init__(
+        self,
+        experimental_data: ExperimentalData,
+        biorbd_model_creator: BiomodModelCreator,
+        events: Events,
+        reconstruction_type: ReconstructionType,
+        skip_if_existing: bool,
+        animate_kinematics_flag: bool,
+        plot_kinematics_flag: bool,
+    ):
         """
         Initialize the KinematicsReconstructor.
         .
@@ -147,13 +179,9 @@ class KinematicsReconstructor:
         if not isinstance(model_creator, ModelCreator):
             raise ValueError("model_creator must be an instance of ModelCreator.")
         if not isinstance(events, Events):
-            raise ValueError(
-                "events must be an instance of Events."
-            )
+            raise ValueError("events must be an instance of Events.")
         if not isinstance(reconstruction_type, ReconstructionType):
-            raise ValueError(
-                "reconstruction_type must be an instance of ReconstructionType."
-            )
+            raise ValueError("reconstruction_type must be an instance of ReconstructionType.")
 
         # Initial attributes
         self.experimental_data = experimental_data
@@ -223,10 +251,12 @@ class KinematicsReconstructor:
         q_recons = np.ndarray((model.nbQ(), nb_frames))
 
         if self.reconstruction_type in [ReconstructionType.ONLY_LM, ReconstructionType.LM, ReconstructionType.TRF]:
-            ik = biorbd.InverseKinematics(model, markers[:, :, :self.max_frames])
-            q_recons[:, :self.max_frames] = ik.solve(method=self.reconstruction_type.value)
+            ik = biorbd.InverseKinematics(model, markers[:, :, : self.max_frames])
+            q_recons[:, : self.max_frames] = ik.solve(method=self.reconstruction_type.value)
         elif self.reconstruction_type == ReconstructionType.EKF:
-            q_recons[:, :self.max_frames] = biorbd.extended_kalman_filter(model, self.experimental_data.c3d_full_file_path)
+            q_recons[:, : self.max_frames] = biorbd.extended_kalman_filter(
+                model, self.experimental_data.c3d_full_file_path
+            )
         else:
             raise NotImplementedError(f"The reconstruction_type {self.reconstruction_type} is not implemented yet.")
 
@@ -262,7 +292,6 @@ class KinematicsReconstructor:
         #                 q[i_frame, rot_idx] = biorbd.Rotation.toEulerAngles(rotation_matrix, rotation_sequence).to_array()
         #     return q
 
-
         def filter(q):
             filter_type = "savgol"  # "filtfilt"  # "savgol"
 
@@ -280,9 +309,15 @@ class KinematicsReconstructor:
             # Compute and filter qdot
             qdot = np.zeros_like(q)
             for i_data in range(qdot.shape[0]):
-                qdot[i_data, 0] = (q_filtered[i_data, 1] - q_filtered[i_data, 0]) / (self.t[1] - self.t[0])  # Forward finite diff
-                qdot[i_data, 1:-1] = (q_filtered[i_data, 2:] - q_filtered[i_data, :-2]) / (self.t[2:] - self.t[:-2])  # Centered finite diff
-                qdot[i_data, -1] = (q_filtered[i_data, -1] - q_filtered[i_data, -2]) / (self.t[-1] - self.t[-2])  # Backward finite diff
+                qdot[i_data, 0] = (q_filtered[i_data, 1] - q_filtered[i_data, 0]) / (
+                    self.t[1] - self.t[0]
+                )  # Forward finite diff
+                qdot[i_data, 1:-1] = (q_filtered[i_data, 2:] - q_filtered[i_data, :-2]) / (
+                    self.t[2:] - self.t[:-2]
+                )  # Centered finite diff
+                qdot[i_data, -1] = (q_filtered[i_data, -1] - q_filtered[i_data, -2]) / (
+                    self.t[-1] - self.t[-2]
+                )  # Backward finite diff
 
             # Compute and filter qddot
             qddot = np.zeros_like(q)
@@ -307,16 +342,21 @@ class KinematicsReconstructor:
         plt.savefig("ddd.png")
         plt.show()
 
-
     def plot_kinematics(self):
         all_in_one = True
         if all_in_one:
             fig = plt.figure(figsize=(10, 10))
             for i_dof in range(self.q.shape[0]):
                 if i_dof < 3:
-                    plt.plot(self.t, self.q_filtered[i_dof, :], label=f"{self.biorbd_model.nameDof()[i_dof].to_string()} [m]")
+                    plt.plot(
+                        self.t, self.q_filtered[i_dof, :], label=f"{self.biorbd_model.nameDof()[i_dof].to_string()} [m]"
+                    )
                 else:
-                    plt.plot(self.t, self.q_filtered[i_dof, :] * 180 / np.pi, label=f"{self.biorbd_model.nameDof()[i_dof].to_string()} [" + r"$^\circ$" + "]")
+                    plt.plot(
+                        self.t,
+                        self.q_filtered[i_dof, :] * 180 / np.pi,
+                        label=f"{self.biorbd_model.nameDof()[i_dof].to_string()} [" + r"$^\circ$" + "]",
+                    )
             plt.legend()
             fig.tight_layout()
             result_file_full_path = self.get_result_file_full_path(self.experimental_data.result_folder + "figures/")
@@ -353,9 +393,9 @@ class KinematicsReconstructor:
         # Visualization
         viz = PhaseRerun(self.t)
         if self.q.shape[0] == self.biorbd_model.nbQ():
-            q_animation = self.q_filtered[:, :self.max_frames].reshape(self.biorbd_model.nbQ(), self.max_frames)
+            q_animation = self.q_filtered[:, : self.max_frames].reshape(self.biorbd_model.nbQ(), self.max_frames)
         else:
-            q_animation = self.q_filtered[:, :self.max_frames].T
+            q_animation = self.q_filtered[:, : self.max_frames].T
         viz.add_animated_model(model, q_animation, tracked_markers=markers)
         viz.rerun_by_frame("Kinematics reconstruction")
 

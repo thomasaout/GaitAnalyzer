@@ -13,14 +13,16 @@ class InverseDynamicsPerformer:
     This class performs the inverse dynamics based on the kinematics and the external forces.
     """
 
-    def __init__(self, 
-                 experimental_data: ExperimentalData, 
-                 biorbd_model: biorbd.Model, 
-                 q_filtered: np.ndarray,
-                 qdot: np.ndarray,
-                 qddot: np.ndarray,
-                 reintegrate_flag,
-                 animate_dynamics_flag):
+    def __init__(
+        self,
+        experimental_data: ExperimentalData,
+        biorbd_model: biorbd.Model,
+        q_filtered: np.ndarray,
+        qdot: np.ndarray,
+        qddot: np.ndarray,
+        reintegrate_flag,
+        animate_dynamics_flag,
+    ):
         """
         Initialize the InverseDynamicsPerformer.
         .
@@ -86,13 +88,14 @@ class InverseDynamicsPerformer:
         if animate_dynamics_flag:
             self.animate_dynamics()
 
-
     def perform_inverse_dynamics(self):
         print("Performing inverse dynamics...")
         tau = np.zeros_like(self.q_filtered)
         for i_node in range(self.q_filtered.shape[1]):
             f_ext = self.get_f_ext_at_frame(i_node)
-            tau[:, i_node] = self.biorbd_model.InverseDynamics(self.q_filtered[:, i_node], self.qdot[:, i_node], self.qddot[:, i_node], f_ext).to_array()
+            tau[:, i_node] = self.biorbd_model.InverseDynamics(
+                self.q_filtered[:, i_node], self.qdot[:, i_node], self.qddot[:, i_node], f_ext
+            ).to_array()
         self.tau = tau
 
     def get_f_ext_at_frame(self, i_marker_node: int):
@@ -135,16 +138,15 @@ class InverseDynamicsPerformer:
         )
         return f_ext_set
 
-
     def reintegrate_dynamics(self):
         """
         Reintegrate the dynamics to confirm the results using scipy.
         """
 
         def dynamics(t, x):
-            i_node = int(np.argmin(np.abs(self.experimental_data.markers_time_vector-t)))
-            q = x[:self.biorbd_model.nbQ()]
-            qdot = x[self.biorbd_model.nbQ():]
+            i_node = int(np.argmin(np.abs(self.experimental_data.markers_time_vector - t)))
+            q = x[: self.biorbd_model.nbQ()]
+            qdot = x[self.biorbd_model.nbQ() :]
             u = self.tau[:, i_node]
             f_ext_biorbd = self.get_f_ext_at_frame(i_node)
             dqdot = self.biorbd_model.ForwardDynamics(q, qdot, u, f_ext_biorbd).to_array()
@@ -159,16 +161,19 @@ class InverseDynamicsPerformer:
         #                            method="DOP853")
 
         # Euler integration for now
-        frames_to_reintegrate = range(int(2*self.experimental_data.marker_sampling_frequency),
-                                      int(3*self.experimental_data.marker_sampling_frequency))
+        frames_to_reintegrate = range(
+            int(2 * self.experimental_data.marker_sampling_frequency),
+            int(3 * self.experimental_data.marker_sampling_frequency),
+        )
         nb_frames_to_reintegrate = len(list(frames_to_reintegrate))
         dt = self.experimental_data.markers_dt
         x_reintegrated = np.zeros((nb_frames_to_reintegrate + 1, 2 * self.biorbd_model.nbQ()))
-        x_reintegrated [0, :] = np.hstack((self.q_filtered[frames_to_reintegrate[0], :],
-                                           self.qdot[frames_to_reintegrate[0], :]))
+        x_reintegrated[0, :] = np.hstack(
+            (self.q_filtered[frames_to_reintegrate[0], :], self.qdot[frames_to_reintegrate[0], :])
+        )
         for i, i_node in enumerate(frames_to_reintegrate):
-            q = x_reintegrated[i, :self.biorbd_model.nbQ()]
-            qdot = x_reintegrated[i, self.biorbd_model.nbQ():]
+            q = x_reintegrated[i, : self.biorbd_model.nbQ()]
+            qdot = x_reintegrated[i, self.biorbd_model.nbQ() :]
             u = self.tau[i_node, :]
             f_ext_biorbd = self.get_f_ext_at_frame(i_node)
             dqdot = self.biorbd_model.ForwardDynamics(q, qdot, u, f_ext_biorbd).to_array()
@@ -176,8 +181,7 @@ class InverseDynamicsPerformer:
             x_reintegrated[i + 1, :] = x_reintegrated[i, :] + dt * dx
 
         self.q_reintegrated = np.zeros_like(self.q_filtered)
-        self.q_reintegrated[list(frames_to_reintegrate), :] = x_reintegrated[:-1, :self.biorbd_model.nbQ()]
-
+        self.q_reintegrated[list(frames_to_reintegrate), :] = x_reintegrated[:-1, : self.biorbd_model.nbQ()]
 
     def animate_dynamics(self):
         """
@@ -193,17 +197,23 @@ class InverseDynamicsPerformer:
         markers = Markers(data=self.experimental_data.markers_sorted, channels=marker_names)
 
         # Add force plates to the animation
-        force_plate_idx = Operator.from_marker_frame_to_analog_frame(self.experimental_data.analogs_time_vector,
-                                                                     self.experimental_data.markers_time_vector,
-                                                                     list(range(len(self.experimental_data.markers_time_vector))))
+        force_plate_idx = Operator.from_marker_frame_to_analog_frame(
+            self.experimental_data.analogs_time_vector,
+            self.experimental_data.markers_time_vector,
+            list(range(len(self.experimental_data.markers_time_vector))),
+        )
         viz.add_force_plate(num=1, corners=self.experimental_data.platform_corners[0])
         viz.add_force_plate(num=2, corners=self.experimental_data.platform_corners[1])
-        viz.add_force_data(num=1,
-                           force_origin=self.experimental_data.f_ext_sorted_filtered[0, :3, force_plate_idx].T,
-                           force_vector=self.experimental_data.f_ext_sorted_filtered[0, 6:9, force_plate_idx].T)
-        viz.add_force_data(num=2,
-                           force_origin=self.experimental_data.f_ext_sorted_filtered[1, :3, force_plate_idx].T,
-                           force_vector=self.experimental_data.f_ext_sorted_filtered[1, 6:9, force_plate_idx].T)
+        viz.add_force_data(
+            num=1,
+            force_origin=self.experimental_data.f_ext_sorted_filtered[0, :3, force_plate_idx].T,
+            force_vector=self.experimental_data.f_ext_sorted_filtered[0, 6:9, force_plate_idx].T,
+        )
+        viz.add_force_data(
+            num=2,
+            force_origin=self.experimental_data.f_ext_sorted_filtered[1, :3, force_plate_idx].T,
+            force_vector=self.experimental_data.f_ext_sorted_filtered[1, 6:9, force_plate_idx].T,
+        )
 
         # Add the kinematics
         viz.add_animated_model(model, self.q_filtered.T, tracked_markers=markers)
@@ -213,7 +223,6 @@ class InverseDynamicsPerformer:
 
         # Play
         viz.rerun_by_frame("Kinematics reconstruction")
-
 
     def inputs(self):
         return {

@@ -100,11 +100,13 @@ class ResultManager:
         # Add events
         self.events = Events(experimental_data=self.experimental_data, plot_phases_flag=plot_phases_flag)
 
-    def reconstruct_kinematics(self,
-                               reconstruction_type = None,
-                               skip_if_existing: bool = False,
-                               animate_kinematics_flag: bool = False,
-                               plot_kinematics_flag: bool = False):
+    def reconstruct_kinematics(
+        self,
+        reconstruction_type=None,
+        skip_if_existing: bool = False,
+        animate_kinematics_flag: bool = False,
+        plot_kinematics_flag: bool = False,
+    ):
         # Checks
         if self.model_creator is None:
             raise Exception("Please add the biorbd model first by running ResultManager.create_model()")
@@ -125,8 +127,6 @@ class ResultManager:
             animate_kinematics_flag=animate_kinematics_flag,
             plot_kinematics_flag=plot_kinematics_flag,
         )
-
-    def perform_inverse_dynamics(self):
 
     def perform_inverse_dynamics(self, reintegrate_flag: bool = True, animate_dynamics_flag: bool = False):
         # Checks
