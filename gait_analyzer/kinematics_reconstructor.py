@@ -140,7 +140,7 @@ class KinematicsReconstructor:
     def __init__(
         self,
         experimental_data: ExperimentalData,
-        biorbd_model_creator: BiomodModelCreator,
+        model_creator: ModelCreator,
         events: Events,
         reconstruction_type: ReconstructionType,
         skip_if_existing: bool,
