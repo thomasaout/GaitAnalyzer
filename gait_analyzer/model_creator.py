@@ -169,7 +169,7 @@ class ModelCreator:
         if not (skip_if_existing and os.path.isfile(self.biorbd_model_full_path)):
             print(f"The model {self.biorbd_model_full_path} is being created...")
             self.convert_c3d_to_trc()
-            self.personalize_xml_file()
+            self.personalize_xml_file_hacky()
             self.scale_opensim_model()
             self.create_biorbd_model()
         else:
@@ -224,11 +224,12 @@ class ModelCreator:
                 f.write("\t".join(frame_data) + "\n")
 
 
-
     def personalize_xml_file(self):
-
+        """
+        This function should not be used right now, but it is still the real way to personalize the xml file.
+        We are waiting for OpenSim to fix their path bug.
+        """
         self.new_xml_path = self.osim_model_type.xml_setup_file.replace(".xml", f"_{self.subject_name}.xml")
-
         # Modify the original xml with the participants information
         tree = ET.parse(self.osim_model_type.xml_setup_file)
         root = tree.getroot()
@@ -251,15 +252,48 @@ class ModelCreator:
         tree.write(self.new_xml_path)
 
 
+    def personalize_xml_file_hacky(self):
+        """
+        This function is the one used in the process for now, but should be removed whenever we have the chance.
+        """
+        self.new_xml_path = self.osim_model_type.xml_setup_file.replace(".xml", f"_{self.subject_name}.xml")
+
+        import shutil
+        shutil.copyfile("../models/OpenSim_models/wholebody.xml", "wholebody.xml")
+        shutil.copyfile("../models/OpenSim_models/wholebody.osim", "wholebody.osim")
+        shutil.copyfile(self.trc_file_path, os.path.basename(self.trc_file_path))
+
+        # Modify the original xml with the participants information
+        tree = ET.parse("wholebody.xml")
+        root = tree.getroot()
+        for elem in root.iter():
+            if elem.tag == "model_file":
+                elem.text = "wholebody.osim"
+            elif elem.tag == "output_model_file":
+                rel_path = f"wholebody_{self.subject_name}.osim"
+                elem.text = rel_path
+            elif elem.tag == "mass":
+                elem.text = f"{self.subject_mass}"
+            elif elem.tag == "marker_file":
+                elem.text = os.path.basename(self.trc_file_path)
+        tree.write(f"wholebody_{self.subject_name}.xml")
+
+
     def scale_opensim_model(self):
-        tool = osim.ScaleTool(self.new_xml_path)
+        # tool = osim.ScaleTool(self.new_xml_path)
+        tool = osim.ScaleTool(f"wholebody_{self.subject_name}.xml")
         tool.run()
 
-        # Move the model to the right place
-        os.rename(
-            self.osim_model_type.osim_model_name + "_" + self.subject_name + ".osim",
-            self.osim_model_full_path,
-        )
+        # Copy the output to the right place
+        shutil.copyfile(f"wholebody_{self.subject_name}.osim", self.osim_model_full_path)
+        shutil.copyfile(f"wholebody_{self.subject_name}.xml", self.new_xml_path)
+
+        # Delete the temporary files
+        os.remove(f"wholebody_{self.subject_name}.osim")
+        os.remove(f"wholebody_{self.subject_name}.xml")
+        os.remove(os.path.basename(self.trc_file_path))
+        os.remove("wholebody.xml")
+        os.remove("wholebody.osim")
 
 
     def create_biorbd_model(self):
