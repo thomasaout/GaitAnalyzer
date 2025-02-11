@@ -512,13 +512,14 @@ class Events:
         """
         Get the frame range to analyze.
         """
-        heel_touches = Operator.from_analog_frame_to_marker_frame(self.experimental_data.analogs_time_vector,
-                                                                   self.experimental_data.markers_time_vector,
-                                                                   self.events["right_leg_heel_touch"])
+        heel_touches = Operator.from_analog_frame_to_marker_frame(
+            self.experimental_data.analogs_time_vector,
+            self.experimental_data.markers_time_vector,
+            self.events["right_leg_heel_touch"],
+        )
         start_frame = heel_touches[cycles_to_analyze.start]
         end_frame = heel_touches[cycles_to_analyze.stop]
         return range(start_frame, end_frame)
-
 
     def get_result_file_full_path(self):
         result_folder = self.experimental_data.result_folder

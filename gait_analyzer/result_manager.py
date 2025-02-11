@@ -11,7 +11,9 @@ class ResultManager:
     This class contains all the results from the gait analysis and is the main class handling all types of analysis to perform on the experimental data.
     """
 
-    def __init__(self, subject_name: str, subject_mass: float, cycles_to_analyze: range, static_trial: str, result_folder: str):
+    def __init__(
+        self, subject_name: str, subject_mass: float, cycles_to_analyze: range, static_trial: str, result_folder: str
+    ):
         """
         Initialize the ResultManager.
         .

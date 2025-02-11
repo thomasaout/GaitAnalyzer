@@ -213,6 +213,11 @@ class AnalysisPerformer:
                 # Actually perform the analysis
                 print("Analyzing ", subject_name, " : ", data_file)
                 results = self.analysis_to_perform(
-                    subject_name, subject_mass, self.cycles_to_analyze, static_trial_full_file_path, c3d_file_name, result_folder
+                    subject_name,
+                    subject_mass,
+                    self.cycles_to_analyze,
+                    static_trial_full_file_path,
+                    c3d_file_name,
+                    result_folder,
                 )
                 self.save_subject_results(results, result_file_name)

@@ -185,7 +185,9 @@ class KinematicsReconstructor:
         if not isinstance(events, Events):
             raise ValueError("events must be an instance of Events.")
         if not isinstance(reconstruction_type, ReconstructionType) and not isinstance(reconstruction_type, list):
-            raise ValueError("reconstruction_type must be an instance of ReconstructionType or a list of ReconstructionType.")
+            raise ValueError(
+                "reconstruction_type must be an instance of ReconstructionType or a list of ReconstructionType."
+            )
 
         # Initial attributes
         self.experimental_data = experimental_data
@@ -242,7 +244,9 @@ class KinematicsReconstructor:
                 if isinstance(data["reconstruction_type"], str):
                     self.reconstruction_type = ReconstructionType(data["reconstruction_type"])
                 else:
-                    self.reconstruction_type = [ReconstructionType(i_recons) for i_recons in data["reconstruction_type"]]
+                    self.reconstruction_type = [
+                        ReconstructionType(i_recons) for i_recons in data["reconstruction_type"]
+                    ]
                 self.is_loaded_kinematics = True
             return True
         else:
@@ -272,17 +276,19 @@ class KinematicsReconstructor:
                 residuals = ik.sol()["residuals"]
             elif recons_method == ReconstructionType.EKF:
                 # TODO: Charbie -> When using the EKF, these qdot and qddot should be used instead of finite difference
-                _, q_recons, _, _ = biorbd.extended_kalman_filter(
-                    model, self.experimental_data.c3d_full_file_path
-                )
+                _, q_recons, _, _ = biorbd.extended_kalman_filter(model, self.experimental_data.c3d_full_file_path)
                 residuals = np.zeros_like(markers)
-                raise Warning("The EKF acceptance criteria was not implemented yet. Please see the developers if you encounter this warning.")
+                raise Warning(
+                    "The EKF acceptance criteria was not implemented yet. Please see the developers if you encounter this warning."
+                )
             else:
                 raise NotImplementedError(f"The reconstruction_type {recons_method} is not implemented yet.")
 
             # Check if this reconstruction was acceptable
-            print(f"75 percentile between : {np.min(np.percentile(residuals[:, self.frame_range], 75, axis=0))} and "
-                  f"{np.max(np.percentile(residuals[:, self.frame_range], 75, axis=0))}")
+            print(
+                f"75 percentile between : {np.min(np.percentile(residuals[:, self.frame_range], 75, axis=0))} and "
+                f"{np.max(np.percentile(residuals[:, self.frame_range], 75, axis=0))}"
+            )
             # if np.all(np.percentile(residuals, 75, axis=0) < 0.1):
             #     is_successful_reconstruction = True
             #     break
@@ -425,7 +431,9 @@ class KinematicsReconstructor:
         # Visualization
         viz = PhaseRerun(self.t[self.frame_range])
         if self.q.shape[0] == self.biorbd_model.nbQ():
-            q_animation = self.q_filtered[:, self.frame_range].reshape(self.biorbd_model.nbQ(), len(list(self.frame_range)))
+            q_animation = self.q_filtered[:, self.frame_range].reshape(
+                self.biorbd_model.nbQ(), len(list(self.frame_range))
+            )
         else:
             q_animation = self.q_filtered[:, self.frame_range].T
         viz.add_animated_model(model, q_animation, tracked_markers=markers)
