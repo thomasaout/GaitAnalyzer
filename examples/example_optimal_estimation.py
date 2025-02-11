@@ -12,19 +12,19 @@ from gait_analyzer.kinematics_reconstructor import ReconstructionType
 
 
 def analysis_to_perform(
-    subject_name: str, subject_mass: float, static_trial: str, c3d_file_name: str, result_folder: str
+    subject_name: str, subject_mass: float, cycles_to_analyze: range, static_trial: str, c3d_file_name: str, result_folder: str
 ):
 
     # --- Example of analysis that must be performed in order --- #
     results = ResultManager(
-        subject_name=subject_name, subject_mass=subject_mass, static_trial=static_trial, result_folder=result_folder
+        subject_name=subject_name, subject_mass=subject_mass, cycles_to_analyze=cycles_to_analyze, static_trial=static_trial, result_folder=result_folder
     )
     results.create_model(osim_model_type=OsimModels.WholeBody(), skip_if_existing=True)
     results.add_experimental_data(c3d_file_name=c3d_file_name, animate_c3d_flag=False)
     results.add_events(plot_phases_flag=False)
     results.reconstruct_kinematics(
-        reconstruction_type=[ReconstructionType.TRF, ReconstructionType.ONLY_LM],
-        animate_kinematics_flag=True,
+        reconstruction_type=ReconstructionType.ONLY_LM,  # [ReconstructionType.ONLY_LM, ReconstructionType.LM, ReconstructionType.TRF],
+        animate_kinematics_flag=False,
         plot_kinematics_flag=True,
         skip_if_existing=False,
     )
@@ -50,6 +50,7 @@ if __name__ == "__main__":
     AnalysisPerformer(
         analysis_to_perform,
         subjects_to_analyze={"AOT_01": 69.2},
+        cycles_to_analyze=range(5, -5),
         result_folder="results",
         trails_to_analyze=["_ManipStim_L200_F30_I20"],
         skip_if_existing=False,
