@@ -160,12 +160,9 @@ class ExperimentalData:
             self.platform_corners += [np.mean(platforms[1]["corners"] * units, axis=0)]
 
             # Initialize arrays for storing external forces and moments
-            platform_origin = np.zeros((nb_platforms, 3, 1))
-            moment_adjusted = np.zeros((nb_platforms, 3, self.nb_analog_frames))
             force_filtered = np.zeros((nb_platforms, 3, self.nb_analog_frames))
             moment_filtered = np.zeros((nb_platforms, 3, self.nb_analog_frames))
             cop_filtered = np.zeros((nb_platforms, 3, self.nb_analog_frames))
-            moment_adjusted_filtered = np.zeros((nb_platforms, 3, self.nb_analog_frames))
             f_ext_sorted = np.zeros((2, 9, self.nb_analog_frames))
             f_ext_sorted_filtered = np.zeros((2, 9, self.nb_analog_frames))
 
@@ -182,13 +179,6 @@ class ExperimentalData:
                     cop, order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10
                 )
 
-                # # Modify moments to express them at the center of the cop
-                # platform_origin[i_platform, :, 0] = np.mean(platforms[i_platform]['corners'] * units, axis=1)
-                # for i_frame in range(self.nb_analog_frames):
-                #     r = platform_origin[i_platform, :, 0] - cop_filtered[i_platform, :, i_frame]
-                #     moment_offset = np.cross(r, force[:, i_frame])
-                #     moment_adjusted[i_platform, :, i_frame] = moment[:, i_frame] + moment_offset
-
                 # Filter forces and moments
                 force_filtered[i_platform, :, :] = Operator.apply_filtfilt(
                     force, order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10
@@ -196,17 +186,15 @@ class ExperimentalData:
                 moment_filtered[i_platform, :, :] = Operator.apply_filtfilt(
                     moment, order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10
                 )
-                # moment_adjusted_filtered[i_platform, :, :] = Operator.apply_filtfilt(moment_adjusted[i_platform, :, :], order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10)
-                moment_adjusted_filtered[i_platform, :, :] = moment_filtered[i_platform, :, :]
-                moment_adjusted_filtered[i_platform, :2, :] = (
+                moment_filtered[i_platform, :2, :] = (
                     0  # Remove X and Y moments (as only Z reaction moments can be applied on the foot)
                 )
 
                 # Store output in a biorbd compatible format
                 f_ext_sorted[i_platform, :3, :] = cop[:, :]
                 f_ext_sorted_filtered[i_platform, :3, :] = cop_filtered[i_platform, :, :]
-                f_ext_sorted[i_platform, 3:6, :] = moment_adjusted[i_platform, :, :]
-                f_ext_sorted_filtered[i_platform, 3:6, :] = moment_adjusted_filtered[i_platform, :, :]
+                f_ext_sorted[i_platform, 3:6, :] = moment[i_platform, :, :]
+                f_ext_sorted_filtered[i_platform, 3:6, :] = moment_filtered[i_platform, :, :]
                 f_ext_sorted[i_platform, 6:9, :] = force[:, :]
                 f_ext_sorted_filtered[i_platform, 6:9, :] = force_filtered[i_platform, :, :]
 
