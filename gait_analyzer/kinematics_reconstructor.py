@@ -4,7 +4,10 @@ from enum import Enum
 import numpy as np
 import matplotlib.pyplot as plt
 import biorbd
-from pyorerun import BiorbdModel, PhaseRerun
+try :
+    from pyorerun import BiorbdModel, PhaseRerun
+except :
+    pass
 from pyomeca import Markers
 
 from gait_analyzer.operator import Operator

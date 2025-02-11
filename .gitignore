@@ -191,3 +191,5 @@ models/OpenSim_models/
 *.png
 
 examples/Geometry/
+
+osim_to_biomod/
