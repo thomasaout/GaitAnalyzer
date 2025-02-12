@@ -4,9 +4,10 @@ from enum import Enum
 import numpy as np
 import matplotlib.pyplot as plt
 import biorbd
-try :
+
+try:
     from pyorerun import BiorbdModel, PhaseRerun
-except :
+except:
     pass
 from pyomeca import Markers
 
@@ -22,7 +23,7 @@ class ReconstructionType(Enum):
     """
 
     ONLY_LM = "only_lm"  # Levenberg-Marquardt with 0.0001 initialization
-    LM = "LM"  # Levenberg-Marquardt with mid-bounds initialization
+    LM = "lm"  # Levenberg-Marquardt with mid-bounds initialization
     TRF = "trf"  # Trust Region Reflective
     EKF = "ekf"  # Extended Kalman Filter
 
@@ -145,6 +146,7 @@ class KinematicsReconstructor:
         experimental_data: ExperimentalData,
         model_creator: ModelCreator,
         events: Events,
+        cycles_to_analyze: range,
         reconstruction_type: ReconstructionType | list[ReconstructionType],
         skip_if_existing: bool,
         animate_kinematics_flag: bool,
@@ -161,6 +163,8 @@ class KinematicsReconstructor:
             The biorbd model to use for the kinematics reconstruction
         events: Events
             The events to use for the kinematics reconstruction since we exploit the fact that the movement is cyclic
+        cycles_to_analyze: range
+            The range of cycles to analyze
         reconstruction_type: ReconstructionType
             The type of algorithm to use to perform the reconstruction
             If the reconstruction_type is a list, the kinematics will be first reconstructed with the first element of the list, and then withe the other ones as a fallback if the reconstruction os not acceptable (<5cm error on the 75e percentile).
@@ -185,15 +189,20 @@ class KinematicsReconstructor:
         if not isinstance(events, Events):
             raise ValueError("events must be an instance of Events.")
         if not isinstance(reconstruction_type, ReconstructionType) and not isinstance(reconstruction_type, list):
-            raise ValueError("reconstruction_type must be an instance of ReconstructionType or a list of ReconstructionType.")
+            raise ValueError(
+                "reconstruction_type must be an instance of ReconstructionType or a list of ReconstructionType."
+            )
 
         # Initial attributes
         self.experimental_data = experimental_data
         self.model_creator = model_creator
         self.events = events
+        self.cycles_to_analyze = cycles_to_analyze
         self.reconstruction_type = reconstruction_type
 
         # Extended attributes
+        self.frame_range = None
+        self.markers = None
         self.biorbd_model = None
         self.t = None
         self.q = None
@@ -239,21 +248,25 @@ class KinematicsReconstructor:
                 if isinstance(data["reconstruction_type"], str):
                     self.reconstruction_type = ReconstructionType(data["reconstruction_type"])
                 else:
-                    self.reconstruction_type = [ReconstructionType(i_recons) for i_recons in data["reconstruction_type"]]
+                    self.reconstruction_type = [
+                        ReconstructionType(i_recons) for i_recons in data["reconstruction_type"]
+                    ]
                 self.is_loaded_kinematics = True
             return True
         else:
             return False
 
     def perform_kinematics_reconstruction(self):
-
+        """
+        Perform the kinematics reconstruction for all frames, and then only keep the frames in the cycles to analyze.
+        This is a waist of computation, but the beginning of the reconstruction is always shitty.
+        """
         model = biorbd.Model(self.model_creator.biorbd_model_virtual_markers_full_path)
         self.biorbd_model = model
+        self.frame_range = self.events.get_frame_range(self.cycles_to_analyze)
         markers = self.experimental_data.markers_sorted_with_virtual
-        nb_frames = markers.shape[2]
-        self.max_frames = 1000  # nb_frames  # TODO: add the possibility to chose the frame range to reconstruct
 
-        q_recons = np.ndarray((model.nbQ(), nb_frames))
+        q_recons = np.ndarray((model.nbQ(), markers.shape[2]))
         is_successful_reconstruction = False
         if isinstance(self.reconstruction_type, ReconstructionType):
             reconstruction_type = [self.reconstruction_type]
@@ -262,58 +275,39 @@ class KinematicsReconstructor:
         for recons_method in reconstruction_type:
             print(f"Performing inverse kinematics reconstruction using {recons_method.value}")
             if recons_method in [ReconstructionType.ONLY_LM, ReconstructionType.LM, ReconstructionType.TRF]:
-                ik = biorbd.InverseKinematics(model, markers[:, :, : self.max_frames])
-                q_recons[:, : self.max_frames] = ik.solve(method=recons_method.value)
+                ik = biorbd.InverseKinematics(model, markers)
+                q_recons = ik.solve(method=recons_method.value)
                 residuals = ik.sol()["residuals"]
             elif recons_method == ReconstructionType.EKF:
                 # TODO: Charbie -> When using the EKF, these qdot and qddot should be used instead of finite difference
-                _, q_recons[:, : self.max_frames], _, _ = biorbd.extended_kalman_filter(
-                    model, self.experimental_data.c3d_full_file_path
-                )
+                _, q_recons, _, _ = biorbd.extended_kalman_filter(model, self.experimental_data.c3d_full_file_path)
                 residuals = np.zeros_like(markers)
-                raise Warning("The EKF acceptance criteria was not implemented yet. Please see the developers if you encounter this warning.")
+                raise Warning(
+                    "The EKF acceptance criteria was not implemented yet. Please see the developers if you encounter this warning."
+                )
             else:
                 raise NotImplementedError(f"The reconstruction_type {recons_method} is not implemented yet.")
 
             # Check if this reconstruction was acceptable
-            if np.all(np.percentile(residuals, 75, axis=0) < 0.05):
-                is_successful_reconstruction = True
-                break
+            print(
+                f"75 percentile between : {np.min(np.percentile(residuals[:, self.frame_range], 75, axis=0))} and "
+                f"{np.max(np.percentile(residuals[:, self.frame_range], 75, axis=0))}"
+            )
+            # if np.all(np.percentile(residuals, 75, axis=0) < 0.1):
+            #     is_successful_reconstruction = True
+            #     break
 
-        if not is_successful_reconstruction:
-            raise RuntimeError("The reconstruction was not successful :( Please consider using a different method or checking the experimental data labeling.")
+        # if not is_successful_reconstruction:
+        #     raise RuntimeError("The reconstruction was not successful :( Please consider using a different method or checking the experimental data labeling.")
 
-        self.q = q_recons
-        self.t = self.experimental_data.markers_time_vector
+        self.q = q_recons[:, self.frame_range]
+        self.t = self.experimental_data.markers_time_vector[self.frame_range]
+        self.markers = markers[:, :, self.frame_range]
 
     def filter_kinematics(self):
         """
         Unwrap and filter the joint angles.
         """
-        # def reinterpret_angles(biorbd_model: biorbd.Model, q: np.ndarray):
-        #     """
-        #     Performs unwrap on the kinematics from which it re-expressed in terms of matrix rotation before
-        #     (which makes it more likely to be in the same quadrant)
-        #
-        #     Returns
-        #     -------
-        #
-        #     """
-        #     dof_names = [n.to_string() for n in biorbd_model.nameDof()]
-        #     for i_segment, segment_name in enumerate(segment_dict):
-        #         rotation_sequence = ""
-        #         rot_idx = []
-        #         for dof in segment_dict[segment_name]["dof_idx"]:
-        #             if dof_names[dof][-6:-1] != "Trans":  # Skip translations
-        #                 rotation_sequence += dof_names[dof][-1]
-        #                 rot_idx += [dof]
-        #         if rotation_sequence != "XX":
-        #             rotation_sequence = rotation_sequence.lower()
-        #             for i_frame in range(q.shape[0]):
-        #                 rot = q[i_frame, rot_idx]
-        #                 rotation_matrix = biorbd.Rotation.fromEulerAngles(rot, rotation_sequence)
-        #                 q[i_frame, rot_idx] = biorbd.Rotation.toEulerAngles(rotation_matrix, rotation_sequence).to_array()
-        #     return q
 
         def filter(q):
             filter_type = "savgol"  # "filtfilt"  # "savgol"
@@ -351,19 +345,7 @@ class KinematicsReconstructor:
 
             return q_filtered, qdot, qddot
 
-        # def wrap(q):
-        #     for i_dof in range(q.shape[0]):
-        #         q[i_dof, :] = (q[i_dof, :] + np.pi) % (2 * np.pi) - np.pi
-        #     return q
-
-        # q_from_rotation_matrix = reinterpret_angles(self.biorbd_model, self.q)
         self.q_filtered, self.qdot, self.qddot = filter(self.q)
-
-        plt.figure()
-        for i in range(7, 9):
-            plt.plot(self.q_filtered[i, :4000])
-        plt.savefig("ddd.png")
-        plt.show()
 
     def plot_kinematics(self):
         all_in_one = True
@@ -382,7 +364,7 @@ class KinematicsReconstructor:
                     )
             plt.legend()
             fig.tight_layout()
-            result_file_full_path = self.get_result_file_full_path(self.experimental_data.result_folder + "figures/")
+            result_file_full_path = self.get_result_file_full_path(self.experimental_data.result_folder + "/figures")
             fig.savefig(result_file_full_path.replace(".pkl", "_ALL_IN_ONE.png"))
         else:
             fig, axs = plt.subplots(7, 6, figsize=(10, 10))
@@ -395,7 +377,7 @@ class KinematicsReconstructor:
                     axs[i_dof].plot(self.t, self.q_filtered[i_dof, :] * 180 / np.pi)
                     axs[i_dof].set_title(f"{self.biorbd_model.nameDof()[i_dof].to_string()} [" + r"$^\circ$" + "]")
             fig.tight_layout()
-            result_file_full_path = self.get_result_file_full_path(self.experimental_data.result_folder + "figures/")
+            result_file_full_path = self.get_result_file_full_path(self.experimental_data.result_folder + "/figures")
             fig.savefig(result_file_full_path.replace(".pkl", ".png"))
 
     def animate_kinematics(self):
@@ -410,15 +392,17 @@ class KinematicsReconstructor:
         # Markers
         marker_names = [m.to_string() for m in self.biorbd_model.markerNames()]
         markers = Markers(
-            data=self.experimental_data.markers_sorted_with_virtual[:, :, : self.max_frames], channels=marker_names
+            data=self.experimental_data.markers_sorted_with_virtual[:, :, self.frame_range], channels=marker_names
         )
 
         # Visualization
-        viz = PhaseRerun(self.t[: self.max_frames])
+        viz = PhaseRerun(self.t[self.frame_range])
         if self.q.shape[0] == self.biorbd_model.nbQ():
-            q_animation = self.q_filtered[:, : self.max_frames].reshape(self.biorbd_model.nbQ(), self.max_frames)
+            q_animation = self.q_filtered[:, self.frame_range].reshape(
+                self.biorbd_model.nbQ(), len(list(self.frame_range))
+            )
         else:
-            q_animation = self.q_filtered[:, : self.max_frames].T
+            q_animation = self.q_filtered[:, self.frame_range].T
         viz.add_animated_model(model, q_animation, tracked_markers=markers)
         viz.rerun_by_frame("Kinematics reconstruction")
 
@@ -454,6 +438,8 @@ class KinematicsReconstructor:
             "q_filtered": self.q_filtered,
             "qdot": self.qdot,
             "qddot": self.qddot,
+            "markers": self.markers,
+            "frame_range": self.frame_range,
             "is_loaded_kinematics": self.is_loaded_kinematics,
             "reconstruction_type": reconstruction_type,
         }

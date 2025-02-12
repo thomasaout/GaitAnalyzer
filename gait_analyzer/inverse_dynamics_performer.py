@@ -2,12 +2,13 @@ import numpy as np
 from scipy.integrate import solve_ivp
 import biorbd
 from pyomeca import Markers
-try :
+
+try:
     from pyorerun import BiorbdModel, PhaseRerun
-except :
+except:
     pass
 
-from gait_analyzer import Operator
+from gait_analyzer import Operator, KinematicsReconstructor
 from gait_analyzer.experimental_data import ExperimentalData
 
 
@@ -19,10 +20,7 @@ class InverseDynamicsPerformer:
     def __init__(
         self,
         experimental_data: ExperimentalData,
-        biorbd_model: biorbd.Model,
-        q_filtered: np.ndarray,
-        qdot: np.ndarray,
-        qddot: np.ndarray,
+        kinematics_reconstructor: KinematicsReconstructor,
         reintegrate_flag,
         animate_dynamics_flag,
     ):
@@ -33,14 +31,8 @@ class InverseDynamicsPerformer:
         ----------
         experimental_data: ExperimentalData
             The experimental data from the trial
-        biorbd_model: biorbd.Model
-            The biorbd model to use for the inverse dynamics
-        q_filtered: np.ndarray()
-            The generalized coordinates
-        qdot: np.ndarray()
-            The generalized velocities
-        qddot: np.ndarray()
-            The generalized accelerations
+        kinematics_reconstructor: KinematicsReconstructor
+            The kinematics reconstructor
         reintegrate_flag: bool
             If True the dynamics is reintegrated to confirm the results
         animate_dynamics_flag: bool
@@ -52,16 +44,10 @@ class InverseDynamicsPerformer:
             raise ValueError(
                 "experimental_data must be an instance of ExperimentalData. You can declare it by running ExperimentalData(file_path)."
             )
-        if not isinstance(biorbd_model, biorbd.Model):
+        if not isinstance(kinematics_reconstructor, KinematicsReconstructor):
             raise ValueError(
                 "biorbd_model must be an instance of biorbd.Model. You can declare it by running biorbd.Model('path_to_model.bioMod')."
             )
-        if not isinstance(q_filtered, np.ndarray):
-            raise ValueError("q_filtered must be a numpy array")
-        if not isinstance(qdot, np.ndarray):
-            raise ValueError("qdot must be a numpy array")
-        if not isinstance(qddot, np.ndarray):
-            raise ValueError("qddot must be a numpy array")
         if not isinstance(reintegrate_flag, bool):
             raise ValueError("reintegrate_flag must be a boolean")
         if not isinstance(animate_dynamics_flag, bool):
@@ -72,10 +58,12 @@ class InverseDynamicsPerformer:
 
         # Initial attributes
         self.experimental_data = experimental_data
-        self.biorbd_model = biorbd_model
-        self.q_filtered = q_filtered
-        self.qdot = qdot
-        self.qddot = qddot
+        self.biorbd_model = kinematics_reconstructor.biorbd_model
+        self.kinematics_reconstructor = kinematics_reconstructor
+        self.q_filtered = kinematics_reconstructor.q_filtered
+        self.qdot = kinematics_reconstructor.qdot
+        self.qddot = kinematics_reconstructor.qddot
+        self.t = kinematics_reconstructor.t
 
         # Extended attributes
         self.tau = None
@@ -131,12 +119,12 @@ class InverseDynamicsPerformer:
         # Average over the marker frame time lapse
         f_ext_set.add(
             "calcn_l",
-            np.mean(self.experimental_data.f_ext_sorted[0, 3:, frame_range], axis=0),
+            np.mean(self.experimental_data.f_ext_sorted[0, 3:9, frame_range], axis=0),
             np.mean(self.experimental_data.f_ext_sorted[0, :3, frame_range], axis=0),
         )
         f_ext_set.add(
             "calcn_r",
-            np.mean(self.experimental_data.f_ext_sorted[1, 3:, frame_range], axis=0),
+            np.mean(self.experimental_data.f_ext_sorted[1, 3:9, frame_range], axis=0),
             np.mean(self.experimental_data.f_ext_sorted[1, :3, frame_range], axis=0),
         )
         return f_ext_set
@@ -170,21 +158,21 @@ class InverseDynamicsPerformer:
         )
         nb_frames_to_reintegrate = len(list(frames_to_reintegrate))
         dt = self.experimental_data.markers_dt
-        x_reintegrated = np.zeros((nb_frames_to_reintegrate + 1, 2 * self.biorbd_model.nbQ()))
-        x_reintegrated[0, :] = np.hstack(
-            (self.q_filtered[frames_to_reintegrate[0], :], self.qdot[frames_to_reintegrate[0], :])
+        x_reintegrated = np.zeros((2 * self.biorbd_model.nbQ(), nb_frames_to_reintegrate + 1))
+        x_reintegrated[:, 0] = np.hstack(
+            (self.q_filtered[:, frames_to_reintegrate.start], self.qdot[:, frames_to_reintegrate.start])
         )
         for i, i_node in enumerate(frames_to_reintegrate):
-            q = x_reintegrated[i, : self.biorbd_model.nbQ()]
-            qdot = x_reintegrated[i, self.biorbd_model.nbQ() :]
-            u = self.tau[i_node, :]
+            q = x_reintegrated[: self.biorbd_model.nbQ(), i]
+            qdot = x_reintegrated[self.biorbd_model.nbQ() :, i]
+            u = self.tau[:, i_node]
             f_ext_biorbd = self.get_f_ext_at_frame(i_node)
             dqdot = self.biorbd_model.ForwardDynamics(q, qdot, u, f_ext_biorbd).to_array()
             dx = np.hstack((qdot, dqdot))
-            x_reintegrated[i + 1, :] = x_reintegrated[i, :] + dt * dx
+            x_reintegrated[:, i + 1] = x_reintegrated[:, i] + dt * dx
 
         self.q_reintegrated = np.zeros_like(self.q_filtered)
-        self.q_reintegrated[list(frames_to_reintegrate), :] = x_reintegrated[:-1, : self.biorbd_model.nbQ()]
+        self.q_reintegrated[:, list(frames_to_reintegrate)] = x_reintegrated[: self.biorbd_model.nbQ(), :-1]
 
     def animate_dynamics(self):
         """
@@ -193,17 +181,17 @@ class InverseDynamicsPerformer:
         # Add the model
         model = BiorbdModel.from_biorbd_object(self.biorbd_model)
         model.options.transparent_mesh = False
-        viz = PhaseRerun(self.experimental_data.markers_time_vector)
+        viz = PhaseRerun(self.kinematics_reconstructor.t)
 
         # Add experimental markers
         marker_names = [m.to_string() for m in self.biorbd_model.markerNames()]
-        markers = Markers(data=self.experimental_data.markers_sorted, channels=marker_names)
+        markers = Markers(data=self.kinematics_reconstructor.markers, channels=marker_names)
 
         # Add force plates to the animation
         force_plate_idx = Operator.from_marker_frame_to_analog_frame(
             self.experimental_data.analogs_time_vector,
             self.experimental_data.markers_time_vector,
-            list(range(len(self.experimental_data.markers_time_vector))),
+            list(self.kinematics_reconstructor.frame_range),
         )
         viz.add_force_plate(num=1, corners=self.experimental_data.platform_corners[0])
         viz.add_force_plate(num=2, corners=self.experimental_data.platform_corners[1])
@@ -219,10 +207,10 @@ class InverseDynamicsPerformer:
         )
 
         # Add the kinematics
-        viz.add_animated_model(model, self.q_filtered.T, tracked_markers=markers)
+        viz.add_animated_model(model, self.q_filtered, tracked_markers=markers)
 
         # Add the reintegration of the dynamics
-        viz.add_animated_model(model, self.q_reintegrated.T)
+        viz.add_animated_model(model, self.q_reintegrated)
 
         # Play
         viz.rerun_by_frame("Kinematics reconstruction")
