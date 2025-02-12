@@ -60,11 +60,15 @@ class PlotLegData:
                             .replace(subject_name, "")
                             .replace("_results.pkl", "")
                         )
-                        event_idx = Operator.from_analog_frame_to_marker_frame(
+                        event_idx_markers = Operator.from_analog_frame_to_marker_frame(
                             data["analogs_time_vector"],
                             data["markers_time_vector"],
                             data["events"]["right_leg_heel_touch"],
                         )
+                        cycles_to_analyze = data["cycles_to_analyze"]
+                        events_idx_q = np.array(event_idx_markers)[cycles_to_analyze.start: cycles_to_analyze.stop]
+                        events_idx_q -= events_idx_q[0]
+                        event_idx = list(events_idx_q)
                         if cond in self.conditions_to_compare:
                             cycles_data[cond] += split_cycles(data[self.plot_type.value], event_idx)
             else:
@@ -73,9 +77,13 @@ class PlotLegData:
                         data = pickle.load(f)
                     subject_name = data["subject_name"]
                     cond = result_file.replace(subject_name, "").replace(".pkl", "")
-                    event_idx = Operator.from_analog_frame_to_marker_frame(
+                    event_idx_markers = Operator.from_analog_frame_to_marker_frame(
                         data["analogs_time_vector"], data["markers_time_vector"], data["events"]["right_leg_heel_touch"]
                     )
+                    cycles_to_analyze = data["cycles_to_analyze"]
+                    events_idx_q = np.array(event_idx_markers)[cycles_to_analyze.start: cycles_to_analyze.stop]
+                    events_idx_q -= events_idx_q[0]
+                    event_idx = list(events_idx_q)
                     if cond in self.conditions_to_compare:
                         cycles_data[cond] += split_cycles(data[self.plot_type.value], event_idx)
 
@@ -84,7 +92,7 @@ class PlotLegData:
         data_tempo = cycles_data[list(cycles_data.keys())[0]]
         for i in range(len(data_tempo)):
             print(data_tempo[i].shape)
-            plt.plot(data_tempo[i][:, 5])
+            plt.plot(data_tempo[i][5, :])
         plt.savefig("plottttt.png")
         plt.show()
 

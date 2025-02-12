@@ -376,7 +376,7 @@ class Events:
         # Detect events
         self.detect_toes_off()
         self.detect_heel_off()
-        self.detect_heel_touch(show_debug_plot_flag=True)
+        self.detect_heel_touch(show_debug_plot_flag=False)
         self.detect_toes_touch()
 
         # Detect phases for each leg

@@ -30,7 +30,7 @@ def analysis_to_perform(
     )
     results.create_model(osim_model_type=OsimModels.WholeBody(), skip_if_existing=True)
     results.add_experimental_data(c3d_file_name=c3d_file_name, animate_c3d_flag=False)
-    results.add_events(plot_phases_flag=True)
+    results.add_events(plot_phases_flag=False)
     results.reconstruct_kinematics(
         reconstruction_type=ReconstructionType.ONLY_LM,  # [ReconstructionType.ONLY_LM, ReconstructionType.LM, ReconstructionType.TRF],
         animate_kinematics_flag=False,
@@ -84,5 +84,5 @@ if __name__ == "__main__":
         conditions_to_compare=["_ManipStim_L200_F30_I20"],
     )
     plot.draw_plot()
-    plot.save("results/AOT_01_Q_plot_temporary.png")
+    plot.save("results/AOT_01_Tau_plot_temporary.png")
     plot.show()

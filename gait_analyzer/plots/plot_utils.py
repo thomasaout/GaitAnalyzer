@@ -87,11 +87,14 @@ def split_cycles(data: np.ndarray, event_idx: list[int]) -> list[np.ndarray]:
         raise ValueError("data must be a 2D numpy array.")
     if data.shape[0] == 0 or data.shape[1] == 0:
         raise ValueError("data must not be empty.")
+    if data.shape[1] < event_idx[-1]:
+        raise RuntimeError(f"Watch out, you are trying to plot data shape {data.shape}, and the code expects shape (nb_data_dim, nb_frames)."
+                           f"Your frame dimension {data.shape[1]} is too short for the event indices {event_idx}.")
 
     # Split the data into cycles (skipping everything before the first event and after the last event)
     cycles = []
     for i_event in range(len(event_idx) - 1):
-        cycles += [data[event_idx[i_event] : event_idx[i_event + 1], :]]
+        cycles += [data[:, event_idx[i_event] : event_idx[i_event + 1]]]
 
     return cycles
 
@@ -128,18 +131,18 @@ def mean_cycles(
 
     data_dim = len(index_to_keep)
     interpolated_data_array = np.zeros((len(data), data_dim, nb_frames_interp))
-    fig_data_dim = data[0].shape[1]
+    fig_data_dim = data[0].shape[0]
     for i_cycle, cycle in enumerate(data):
-        if fig_data_dim != cycle.shape[1]:
+        if fig_data_dim != cycle.shape[0]:
             raise ValueError(f"Data dimension is inconsistant across cycles.")
-        frames_dim = cycle.shape[0]
+        frames_dim = cycle.shape[1]
         # TODO: @ThomasAout -> How do you usually deal with the cycle length being variable ?
         x_to_interpolate_on = np.linspace(0, 1, num=nb_frames_interp)
         for i_dim, dim in enumerate(index_to_keep):
-            y_data = cycle[:, dim]
+            y_data_old = cycle[dim, :]
             x_data = np.linspace(0, 1, num=frames_dim)
-            y_data = y_data[~np.isnan(y_data)]
-            x_data = x_data[~np.isnan(y_data)]
+            y_data = y_data_old[~np.isnan(y_data_old)]
+            x_data = x_data[~np.isnan(y_data_old)]
             interpolation_object = CubicSpline(x_data, y_data)
             interpolated_data_array[i_cycle, i_dim, :] = interpolation_object(x_to_interpolate_on)
 
