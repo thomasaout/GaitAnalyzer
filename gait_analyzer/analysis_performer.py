@@ -13,6 +13,7 @@ class AnalysisPerformer:
         self,
         analysis_to_perform: callable,
         subjects_to_analyze: dict[str:float],
+        cycles_to_analyze: range = range(5, -5),
         result_folder: str = "../results/",
         trails_to_analyze: list[str] = None,
         skip_if_existing: bool = False,
@@ -26,6 +27,8 @@ class AnalysisPerformer:
             The analysis to perform
         subjects_to_analyze: dict[str: float]
             The dictionary of the name and mass of the subjects to analyze
+        cycles_to_analyze: range
+            The range of cycles to analyze
         result_folder: str
             The folder where the results will be saved. It will look like result_folder/subject_name.
         trails_to_analyze: list[str]
@@ -42,6 +45,8 @@ class AnalysisPerformer:
         for subject in subjects_to_analyze:
             if not isinstance(subject, str):
                 raise ValueError("All elements of subjects_to_analyze must be strings")
+        if not isinstance(cycles_to_analyze, range):
+            raise ValueError("cycles_to_analyze must be a range of cycles to analyze")
         if not isinstance(result_folder, str):
             raise ValueError("result_folder must be a string")
         if not isinstance(trails_to_analyze, list) and trails_to_analyze is not None:
@@ -53,6 +58,7 @@ class AnalysisPerformer:
         # Initial attributes
         self.analysis_to_perform = analysis_to_perform
         self.subjects_to_analyze = subjects_to_analyze
+        self.cycles_to_analyze = cycles_to_analyze
         self.result_folder = result_folder
         self.trails_to_analyze = trails_to_analyze
         self.skip_if_existing = skip_if_existing
@@ -117,6 +123,7 @@ class AnalysisPerformer:
         result_dict = self.get_version()
         result_dict["subject_name"] = results.subject_name
         result_dict["subject_mass"] = results.subject_mass
+        result_dict["cycles_to_analyze"] = results.cycles_to_analyze
         for attr_name in dir(results):
             attr = getattr(results, attr_name)
             if not callable(attr) and not attr_name.startswith("__"):
@@ -129,6 +136,8 @@ class AnalysisPerformer:
                             )
                         elif key == "biorbd_model":
                             pass  # biorbd models are not picklable
+                        elif value is None:
+                            pass  # Nones are not picklable
                         else:
                             result_dict[key] = value
 
@@ -207,6 +216,11 @@ class AnalysisPerformer:
                 # Actually perform the analysis
                 print("Analyzing ", subject_name, " : ", data_file)
                 results = self.analysis_to_perform(
-                    subject_name, subject_mass, static_trial_full_file_path, c3d_file_name, result_folder
+                    subject_name,
+                    subject_mass,
+                    self.cycles_to_analyze,
+                    static_trial_full_file_path,
+                    c3d_file_name,
+                    result_folder,
                 )
                 self.save_subject_results(results, result_file_name)

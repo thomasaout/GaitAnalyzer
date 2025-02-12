@@ -11,7 +11,9 @@ class ResultManager:
     This class contains all the results from the gait analysis and is the main class handling all types of analysis to perform on the experimental data.
     """
 
-    def __init__(self, subject_name: str, subject_mass: float, static_trial: str, result_folder: str):
+    def __init__(
+        self, subject_name: str, subject_mass: float, cycles_to_analyze: range, static_trial: str, result_folder: str
+    ):
         """
         Initialize the ResultManager.
         .
@@ -21,6 +23,8 @@ class ResultManager:
             The name of the subject
         subject_mass: float
             The mass of the subject
+        cycles_to_analyze: range
+            The range of cycles to analyze
         static_trial: str
             The full file path of the static trial ([...]_static.c3d)
         result_folder: str
@@ -31,6 +35,8 @@ class ResultManager:
             raise ValueError("subject_name must be a string")
         if not isinstance(subject_mass, float):
             raise ValueError("subject_mass must be an float")
+        if not isinstance(cycles_to_analyze, range):
+            raise ValueError("cycles_to_analyze must be a range of cycles to analyze")
         if not isinstance(static_trial, str):
             raise ValueError("static_trial must be a string")
         if not isinstance(result_folder, str):
@@ -39,6 +45,7 @@ class ResultManager:
         # Initial attributes
         self.subject_name = subject_name
         self.subject_mass = subject_mass
+        self.cycles_to_analyze = cycles_to_analyze
         self.result_folder = result_folder
         self.static_trial = static_trial
 
@@ -122,6 +129,7 @@ class ResultManager:
             self.experimental_data,
             self.model_creator,
             self.events,
+            self.cycles_to_analyze,
             reconstruction_type=reconstruction_type,
             skip_if_existing=skip_if_existing,
             animate_kinematics_flag=animate_kinematics_flag,
@@ -144,10 +152,7 @@ class ResultManager:
         # Perform inverse dynamics
         self.inverse_dynamics_performer = InverseDynamicsPerformer(
             self.experimental_data,
-            self.model_creator.biorbd_model,
-            self.kinematics_reconstructor.q_filtered,
-            self.kinematics_reconstructor.qdot,
-            self.kinematics_reconstructor.qddot,
+            self.kinematics_reconstructor,
             reintegrate_flag=reintegrate_flag,
             animate_dynamics_flag=animate_dynamics_flag,
         )

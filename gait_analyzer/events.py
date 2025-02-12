@@ -28,7 +28,7 @@ class Events:
             )
 
         # Parameters of the detection algorithm
-        self.minimal_vertical_force_threshold = 20  # TODO: Charbie -> cite article and make it weight dependent
+        self.minimal_vertical_force_threshold = 50  # TODO: Charbie -> cite article and make it weight dependent
         self.minimal_forward_force_threshold = 5  # TODO: Charbie -> cite article and make it weight dependent
         self.heel_velocity_threshold = 0.05
 
@@ -74,7 +74,7 @@ class Events:
         if plot_phases_flag:
             self.plot_events()
 
-    def detect_heel_touch(self):
+    def detect_heel_touch(self, show_debug_plot_flag: bool):
         """
         Detect the heel touch event when the antero-posterior GRF reaches a certain threshold after the swing phase
         """
@@ -84,8 +84,10 @@ class Events:
         # Left
         swing_timings = np.where(self.phases_left_leg["swing"])[0]
         left_swing_sequence = np.array_split(swing_timings, np.flatnonzero(np.diff(swing_timings) > 1) + 1)
+        idx_left_start_search = []
         for i_swing, swing_phase in enumerate(left_swing_sequence):
             idx = swing_phase[-1] - 5
+            idx_left_start_search += [idx]
             while (
                 idx < self.experimental_data.nb_analog_frames - 1
                 and np.abs(grf_left_y_filtered[idx]) < self.minimal_forward_force_threshold
@@ -98,8 +100,10 @@ class Events:
         # Right
         swing_timings = np.where(self.phases_right_leg["swing"])[0]
         right_swing_sequence = np.array_split(swing_timings, np.flatnonzero(np.diff(swing_timings) > 1) + 1)
+        idx_right_start_search = []
         for i_swing, swing_phase in enumerate(right_swing_sequence):
             idx = swing_phase[-1] - 5
+            idx_right_start_search += [idx]
             while (
                 idx < self.experimental_data.nb_analog_frames - 1
                 and np.abs(grf_right_y_filtered[idx]) < self.minimal_forward_force_threshold
@@ -108,6 +112,43 @@ class Events:
             if idx <= self.experimental_data.nb_analog_frames - 1:
                 idx -= 1
                 self.events["right_leg_heel_touch"] += [int(((swing_phase[-1] + idx) / 2))]
+
+        if show_debug_plot_flag:
+            idx_left_start_search = np.array(idx_left_start_search)
+            idx_right_start_search = np.array(idx_right_start_search)
+            import matplotlib.pyplot as plt
+
+            fig, axs = plt.subplots(2, 1)
+            # Left leg
+            axs[0].plot(np.abs(grf_left_y_filtered), "-b")
+            axs[0].plot(idx_left_start_search, np.abs(grf_left_y_filtered)[idx_left_start_search], ".g")
+            axs[0].plot(
+                np.array([0, grf_left_y_filtered.shape[0]]),
+                np.array([self.minimal_forward_force_threshold, self.minimal_forward_force_threshold]),
+                "--k",
+            )
+            axs[0].plot(
+                self.events["left_leg_heel_touch"],
+                np.abs(grf_left_y_filtered)[self.events["left_leg_heel_touch"]],
+                "oc",
+            )
+            axs[0].set_title("Left leg antero-posterior GRF")
+            # Right leg
+            axs[1].plot(np.abs(grf_right_y_filtered), "-b")
+            axs[1].plot(idx_right_start_search, np.abs(grf_right_y_filtered)[idx_right_start_search], ".g")
+            axs[1].plot(
+                np.array([0, grf_right_y_filtered.shape[0]]),
+                np.array([self.minimal_forward_force_threshold, self.minimal_forward_force_threshold]),
+                "--k",
+            )
+            axs[1].plot(
+                self.events["right_leg_heel_touch"],
+                np.abs(grf_right_y_filtered)[self.events["right_leg_heel_touch"]],
+                "oc",
+            )
+            axs[1].set_title("Right leg antero-posterior GRF")
+            plt.savefig("grf_y_filtered.png")
+            plt.show()
 
     def detect_toes_touch(self):
         """
@@ -280,20 +321,48 @@ class Events:
                 continue
             self.events["right_leg_toes_off"] += [int(beginning_swing_idx)]
 
-    def detect_swing_phases_temporary(self):
+    def detect_swing_phases_temporary(self, show_debug_plot_flag: bool):
         """
         Detect the swing phase when the vertical GRF is lower than a threshold
         """
-        grf_right_z_filtered = Operator.moving_average(self.experimental_data.f_ext_sorted[0, 8, :], 21)
-        grf_left_z_filtered = Operator.moving_average(self.experimental_data.f_ext_sorted[1, 8, :], 21)
-        self.phases_left_leg["swing"][:] = np.abs(grf_right_z_filtered) < self.minimal_vertical_force_threshold
-        self.phases_right_leg["swing"][:] = np.abs(grf_left_z_filtered) < self.minimal_vertical_force_threshold
-        # import matplotlib.pyplot as plt
-        # plt.figure()
-        # plt.plot(np.abs(grf_right_z_filtered))
-        # plt.plot(np.array([0, len(grf_right_z_filtered)]), np.array([self.minimal_vertical_force_threshold, self.minimal_vertical_force_threshold]), '--k')
-        # plt.savefig("GRF_test.png")
-        # plt.show()
+        grf_left_z_filtered = Operator.moving_average(self.experimental_data.f_ext_sorted[0, 8, :], 21)
+        grf_right_z_filtered = Operator.moving_average(self.experimental_data.f_ext_sorted[1, 8, :], 21)
+        self.phases_left_leg["swing"][:] = np.abs(grf_left_z_filtered) < self.minimal_vertical_force_threshold
+        self.phases_right_leg["swing"][:] = np.abs(grf_right_z_filtered) < self.minimal_vertical_force_threshold
+
+        if show_debug_plot_flag:
+            import matplotlib.pyplot as plt
+
+            fig, axs = plt.subplots(2, 1)
+            # Left leg
+            axs[0].plot(np.abs(grf_left_z_filtered), "-b")
+            axs[0].plot(
+                np.arange(len(self.phases_left_leg["swing"]))[np.where(self.phases_left_leg["swing"])],
+                np.abs(grf_left_z_filtered)[np.where(self.phases_left_leg["swing"])],
+                ".m",
+            )
+            axs[0].plot(
+                np.array([0, len(grf_left_z_filtered)]),
+                np.array([self.minimal_vertical_force_threshold, self.minimal_vertical_force_threshold]),
+                "--k",
+            )
+            axs[0].set_title("Left leg vertical GRF")
+            # Right leg
+            axs[1].plot(np.abs(grf_right_z_filtered), "-b")
+            axs[1].plot(
+                np.arange(len(self.phases_right_leg["swing"]))[np.where(self.phases_right_leg["swing"])],
+                np.abs(grf_right_z_filtered)[np.where(self.phases_right_leg["swing"])],
+                ".m",
+            )
+            axs[1].plot(
+                np.array([0, len(grf_right_z_filtered)]),
+                np.array([self.minimal_vertical_force_threshold, self.minimal_vertical_force_threshold]),
+                "--k",
+            )
+            axs[1].set_title("Right leg vertical GRF")
+            plt.tight_layout()
+            plt.savefig("swing_phases_temporary.png")
+            plt.show()
         return
 
     def detect_leg_phases_between_events(self, phase_name, init_event_name, closing_event_name):
@@ -326,12 +395,12 @@ class Events:
         # TODO: Charbie -> Add references to the articles where these methods are described
         # TODO: Charbie -> Add an alternative AI detection method
 
-        self.detect_swing_phases_temporary()
+        self.detect_swing_phases_temporary(show_debug_plot_flag=False)
 
         # Detect events
         self.detect_toes_off()
         self.detect_heel_off()
-        self.detect_heel_touch()
+        self.detect_heel_touch(show_debug_plot_flag=False)
         self.detect_toes_touch()
 
         # Detect phases for each leg
@@ -505,8 +574,21 @@ class Events:
         axs[2].set_ylabel("Phases both legs")
 
         result_file_full_path = self.get_result_file_full_path()
-        plt.savefig(result_file_full_path)
+        plt.savefig(result_file_full_path.replace(".pkl", ".png"))
         plt.show()
+
+    def get_frame_range(self, cycles_to_analyze: range):
+        """
+        Get the frame range to analyze.
+        """
+        heel_touches = Operator.from_analog_frame_to_marker_frame(
+            self.experimental_data.analogs_time_vector,
+            self.experimental_data.markers_time_vector,
+            self.events["right_leg_heel_touch"],
+        )
+        start_frame = heel_touches[cycles_to_analyze.start]
+        end_frame = heel_touches[cycles_to_analyze.stop]
+        return range(start_frame, end_frame)
 
     def get_result_file_full_path(self):
         result_folder = self.experimental_data.result_folder
