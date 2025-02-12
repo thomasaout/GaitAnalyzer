@@ -135,6 +135,8 @@ class AnalysisPerformer:
                             )
                         elif key == "biorbd_model":
                             pass  # biorbd models are not picklable
+                        elif value is None:
+                            pass  # Nones are not picklable
                         else:
                             result_dict[key] = value
 

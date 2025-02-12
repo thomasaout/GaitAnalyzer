@@ -115,12 +115,12 @@ class InverseDynamicsPerformer:
         # Average over the marker frame time lapse
         f_ext_set.add(
             "calcn_l",
-            np.mean(self.experimental_data.f_ext_sorted[0, 3:, frame_range], axis=0),
+            np.mean(self.experimental_data.f_ext_sorted[0, 3:9, frame_range], axis=0),
             np.mean(self.experimental_data.f_ext_sorted[0, :3, frame_range], axis=0),
         )
         f_ext_set.add(
             "calcn_r",
-            np.mean(self.experimental_data.f_ext_sorted[1, 3:, frame_range], axis=0),
+            np.mean(self.experimental_data.f_ext_sorted[1, 3:9, frame_range], axis=0),
             np.mean(self.experimental_data.f_ext_sorted[1, :3, frame_range], axis=0),
         )
         return f_ext_set

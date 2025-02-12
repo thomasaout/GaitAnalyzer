@@ -52,8 +52,8 @@ class PlotLegData:
                 for file_in_sub_folder in os.listdir(os.path.join(self.result_folder, result_file)):
                     file_in_sub_folder = os.path.join(self.result_folder, result_file, file_in_sub_folder)
                     if file_in_sub_folder.endswith("results.pkl"):
-                        with open(file_in_sub_folder, "rb") as file:
-                            data = pickle.load(file)
+                        with open(file_in_sub_folder, "rb") as f:
+                            data = pickle.load(f)
                         subject_name = data["subject_name"]
                         cond = (
                             file_in_sub_folder.replace(f"{self.result_folder}/{result_file}/", "")
@@ -69,8 +69,8 @@ class PlotLegData:
                             cycles_data[cond] += split_cycles(data[self.plot_type.value], event_idx)
             else:
                 if result_file.endswith("results.pkl"):
-                    with open(result_file, "rb") as file:
-                        data = pickle.load(file)
+                    with open(result_file, "rb") as f:
+                        data = pickle.load(f)
                     subject_name = data["subject_name"]
                     cond = result_file.replace(subject_name, "").replace(".pkl", "")
                     event_idx = Operator.from_analog_frame_to_marker_frame(

@@ -193,7 +193,7 @@ class ExperimentalData:
                 # Store output in a biorbd compatible format
                 f_ext_sorted[i_platform, :3, :] = cop[:, :]
                 f_ext_sorted_filtered[i_platform, :3, :] = cop_filtered[i_platform, :, :]
-                f_ext_sorted[i_platform, 3:6, :] = moment[i_platform, :, :]
+                f_ext_sorted[i_platform, 3:6, :] = moment[:, :]
                 f_ext_sorted_filtered[i_platform, 3:6, :] = moment_filtered[i_platform, :, :]
                 f_ext_sorted[i_platform, 6:9, :] = force[:, :]
                 f_ext_sorted_filtered[i_platform, 6:9, :] = force_filtered[i_platform, :, :]
