@@ -2,9 +2,10 @@ import numpy as np
 from scipy.integrate import solve_ivp
 import biorbd
 from pyomeca import Markers
-try :
+
+try:
     from pyorerun import BiorbdModel, PhaseRerun
-except :
+except:
     pass
 
 from gait_analyzer import Operator, KinematicsReconstructor

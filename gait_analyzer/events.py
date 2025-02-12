@@ -117,20 +117,35 @@ class Events:
             idx_left_start_search = np.array(idx_left_start_search)
             idx_right_start_search = np.array(idx_right_start_search)
             import matplotlib.pyplot as plt
+
             fig, axs = plt.subplots(2, 1)
             # Left leg
-            axs[0].plot(np.abs(grf_left_y_filtered), '-b')
-            axs[0].plot(idx_left_start_search, np.abs(grf_left_y_filtered)[idx_left_start_search], '.g')
-            axs[0].plot(np.array([0, grf_left_y_filtered.shape[0]]),
-                        np.array([self.minimal_forward_force_threshold, self.minimal_forward_force_threshold]), '--k')
-            axs[0].plot(self.events["left_leg_heel_touch"], np.abs(grf_left_y_filtered)[self.events["left_leg_heel_touch"]], 'oc')
+            axs[0].plot(np.abs(grf_left_y_filtered), "-b")
+            axs[0].plot(idx_left_start_search, np.abs(grf_left_y_filtered)[idx_left_start_search], ".g")
+            axs[0].plot(
+                np.array([0, grf_left_y_filtered.shape[0]]),
+                np.array([self.minimal_forward_force_threshold, self.minimal_forward_force_threshold]),
+                "--k",
+            )
+            axs[0].plot(
+                self.events["left_leg_heel_touch"],
+                np.abs(grf_left_y_filtered)[self.events["left_leg_heel_touch"]],
+                "oc",
+            )
             axs[0].set_title("Left leg antero-posterior GRF")
             # Right leg
-            axs[1].plot(np.abs(grf_right_y_filtered), '-b')
-            axs[1].plot(idx_right_start_search, np.abs(grf_right_y_filtered)[idx_right_start_search], '.g')
-            axs[1].plot(np.array([0, grf_right_y_filtered.shape[0]]),
-                        np.array([self.minimal_forward_force_threshold, self.minimal_forward_force_threshold]), '--k')
-            axs[1].plot(self.events["right_leg_heel_touch"], np.abs(grf_right_y_filtered)[self.events["right_leg_heel_touch"]], 'oc')
+            axs[1].plot(np.abs(grf_right_y_filtered), "-b")
+            axs[1].plot(idx_right_start_search, np.abs(grf_right_y_filtered)[idx_right_start_search], ".g")
+            axs[1].plot(
+                np.array([0, grf_right_y_filtered.shape[0]]),
+                np.array([self.minimal_forward_force_threshold, self.minimal_forward_force_threshold]),
+                "--k",
+            )
+            axs[1].plot(
+                self.events["right_leg_heel_touch"],
+                np.abs(grf_right_y_filtered)[self.events["right_leg_heel_touch"]],
+                "oc",
+            )
             axs[1].set_title("Right leg antero-posterior GRF")
             plt.savefig("grf_y_filtered.png")
             plt.show()
@@ -317,24 +332,33 @@ class Events:
 
         if show_debug_plot_flag:
             import matplotlib.pyplot as plt
+
             fig, axs = plt.subplots(2, 1)
             # Left leg
-            axs[0].plot(np.abs(grf_left_z_filtered), '-b')
-            axs[0].plot(np.arange(len(self.phases_left_leg["swing"]))[np.where(self.phases_left_leg["swing"])],
-                     np.abs(grf_left_z_filtered)[np.where(self.phases_left_leg["swing"])],
-                     '.m')
-            axs[0].plot(np.array([0, len(grf_left_z_filtered)]),
-                     np.array([self.minimal_vertical_force_threshold, self.minimal_vertical_force_threshold]),
-                     '--k')
+            axs[0].plot(np.abs(grf_left_z_filtered), "-b")
+            axs[0].plot(
+                np.arange(len(self.phases_left_leg["swing"]))[np.where(self.phases_left_leg["swing"])],
+                np.abs(grf_left_z_filtered)[np.where(self.phases_left_leg["swing"])],
+                ".m",
+            )
+            axs[0].plot(
+                np.array([0, len(grf_left_z_filtered)]),
+                np.array([self.minimal_vertical_force_threshold, self.minimal_vertical_force_threshold]),
+                "--k",
+            )
             axs[0].set_title("Left leg vertical GRF")
             # Right leg
-            axs[1].plot(np.abs(grf_right_z_filtered), '-b')
-            axs[1].plot(np.arange(len(self.phases_right_leg["swing"]))[np.where(self.phases_right_leg["swing"])],
-                     np.abs(grf_right_z_filtered)[np.where(self.phases_right_leg["swing"])],
-                     '.m')
-            axs[1].plot(np.array([0, len(grf_right_z_filtered)]),
-                     np.array([self.minimal_vertical_force_threshold, self.minimal_vertical_force_threshold]),
-                     '--k')
+            axs[1].plot(np.abs(grf_right_z_filtered), "-b")
+            axs[1].plot(
+                np.arange(len(self.phases_right_leg["swing"]))[np.where(self.phases_right_leg["swing"])],
+                np.abs(grf_right_z_filtered)[np.where(self.phases_right_leg["swing"])],
+                ".m",
+            )
+            axs[1].plot(
+                np.array([0, len(grf_right_z_filtered)]),
+                np.array([self.minimal_vertical_force_threshold, self.minimal_vertical_force_threshold]),
+                "--k",
+            )
             axs[1].set_title("Right leg vertical GRF")
             plt.tight_layout()
             plt.savefig("swing_phases_temporary.png")

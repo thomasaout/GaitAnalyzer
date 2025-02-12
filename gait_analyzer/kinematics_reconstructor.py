@@ -4,9 +4,10 @@ from enum import Enum
 import numpy as np
 import matplotlib.pyplot as plt
 import biorbd
-try :
+
+try:
     from pyorerun import BiorbdModel, PhaseRerun
-except :
+except:
     pass
 from pyomeca import Markers
 
@@ -345,7 +346,6 @@ class KinematicsReconstructor:
             return q_filtered, qdot, qddot
 
         self.q_filtered, self.qdot, self.qddot = filter(self.q)
-
 
     def plot_kinematics(self):
         all_in_one = True

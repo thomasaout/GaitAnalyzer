@@ -88,8 +88,10 @@ def split_cycles(data: np.ndarray, event_idx: list[int]) -> list[np.ndarray]:
     if data.shape[0] == 0 or data.shape[1] == 0:
         raise ValueError("data must not be empty.")
     if data.shape[1] < event_idx[-1]:
-        raise RuntimeError(f"Watch out, you are trying to plot data shape {data.shape}, and the code expects shape (nb_data_dim, nb_frames)."
-                           f"Your frame dimension {data.shape[1]} is too short for the event indices {event_idx}.")
+        raise RuntimeError(
+            f"Watch out, you are trying to plot data shape {data.shape}, and the code expects shape (nb_data_dim, nb_frames)."
+            f"Your frame dimension {data.shape[1]} is too short for the event indices {event_idx}."
+        )
 
     # Split the data into cycles (skipping everything before the first event and after the last event)
     cycles = []

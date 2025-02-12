@@ -66,7 +66,7 @@ class PlotLegData:
                             data["events"]["right_leg_heel_touch"],
                         )
                         cycles_to_analyze = data["cycles_to_analyze"]
-                        events_idx_q = np.array(event_idx_markers)[cycles_to_analyze.start: cycles_to_analyze.stop]
+                        events_idx_q = np.array(event_idx_markers)[cycles_to_analyze.start : cycles_to_analyze.stop]
                         events_idx_q -= events_idx_q[0]
                         event_idx = list(events_idx_q)
                         if cond in self.conditions_to_compare:
@@ -81,7 +81,7 @@ class PlotLegData:
                         data["analogs_time_vector"], data["markers_time_vector"], data["events"]["right_leg_heel_touch"]
                     )
                     cycles_to_analyze = data["cycles_to_analyze"]
-                    events_idx_q = np.array(event_idx_markers)[cycles_to_analyze.start: cycles_to_analyze.stop]
+                    events_idx_q = np.array(event_idx_markers)[cycles_to_analyze.start : cycles_to_analyze.stop]
                     events_idx_q -= events_idx_q[0]
                     event_idx = list(events_idx_q)
                     if cond in self.conditions_to_compare:
