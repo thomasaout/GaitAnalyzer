@@ -8,8 +8,6 @@ from xml.etree import ElementTree as ET
 
 
 class OsimModels:
-    # TODO: Charbie -> Do we have the right to add the OpenSim models to a public repository?
-    # TODO: Charbie -> Otherwise, can Floethv give the link to the OpenSim model?
     @property
     def osim_model_name(self):
         raise RuntimeError(
@@ -116,9 +114,6 @@ class OsimModels:
                 "vas_lat_l",
             ]
 
-        @property
-        def markers_to_ignore(self):
-            return ["LHJC", "RHJC", "RKJC", "RAJC", "LKJC", "LAJC", "REJC", "RSJC", "RWJC", "LSJC", "LEJC", "LWJC"]
 
 
 class ModelCreator:
@@ -323,7 +318,6 @@ class ModelCreator:
             print_general_informations=False,
             vtp_polygons_to_triangles=True,
             muscles_to_ignore=self.osim_model_type.muscles_to_ignore,
-            markers_to_ignore=self.osim_model_type.markers_to_ignore,
         )
         converter.convert_file()
         self.sketchy_replace_biomod_lines()

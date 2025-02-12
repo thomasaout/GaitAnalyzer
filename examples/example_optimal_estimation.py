@@ -28,7 +28,7 @@ def analysis_to_perform(
         static_trial=static_trial,
         result_folder=result_folder,
     )
-    results.create_model(osim_model_type=OsimModels.WholeBody(), skip_if_existing=True)
+    results.create_model(osim_model_type=OsimModels.WholeBody(), skip_if_existing=False)
     results.add_experimental_data(c3d_file_name=c3d_file_name, animate_c3d_flag=False)
     results.add_events(plot_phases_flag=False)
     results.reconstruct_kinematics(
@@ -58,10 +58,9 @@ if __name__ == "__main__":
     # --- Example of how to run the analysis --- #
     AnalysisPerformer(
         analysis_to_perform,
-        subjects_to_analyze={"AOT_01": 69.2},  # add participants
-        cycles_to_analyze=range(5, -5),
+        subjects_to_analyze={"AOT_01": 69.2,"LEK_10": 59.8 }, # To modify according to the participant
         result_folder="results",
-        trails_to_analyze=["_ManipStim_L200_F30_I20"],
+        trails_to_analyze=[""],
         skip_if_existing=False,
     )
 
@@ -70,10 +69,14 @@ if __name__ == "__main__":
         result_folder="results",
         leg_to_plot=LegToPlot.RIGHT,
         plot_type=PlotType.Q,
-        conditions_to_compare=["_ManipStim_L200_F30_I20"],
+        conditions_to_compare=[
+            "_ManipStim_L400_F40_I20",
+            "_ManipStim_L400_F40_I40",
+            "_ManipStim_L400_F40_I60",
+        ],
     )
     plot.draw_plot()
-    plot.save("results/AOT_01_Q_plot_temporary.png")
+    plot.save("results/AOT_01_Q_plot_temporary.png") # To customize for the participant
     plot.show()
 
     # --- Example of how to plot the joint torques --- #
@@ -81,7 +84,11 @@ if __name__ == "__main__":
         result_folder="results",
         leg_to_plot=LegToPlot.RIGHT,
         plot_type=PlotType.TAU,
-        conditions_to_compare=["_ManipStim_L200_F30_I20"],
+        conditions_to_compare=[
+            "_ManipStim_L400_F40_I20",
+            "_ManipStim_L400_F40_I40",
+            "_ManipStim_L400_F40_I60",
+        ],
     )
     plot.draw_plot()
     plot.save("results/AOT_01_Tau_plot_temporary.png")
