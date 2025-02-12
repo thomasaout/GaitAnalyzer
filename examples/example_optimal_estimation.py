@@ -61,7 +61,7 @@ if __name__ == "__main__":
         subjects_to_analyze={"AOT_01": 69.2}, # add participants
         cycles_to_analyze=range(5, -5),
         result_folder="results",
-        #trails_to_analyze=["_ManipStim_L200_F30_I20"],
+        trails_to_analyze=["_ManipStim_L200_F30_I20"],
         skip_if_existing=False,
     )
 
