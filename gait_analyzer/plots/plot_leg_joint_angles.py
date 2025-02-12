@@ -81,17 +81,17 @@ class PlotLegData:
 
         # TODO: remove ------------------------
         plt.figure()
-        data_tempo = cycles_data["_ManipStim_L400_F40_I40"]
+        data_tempo = cycles_data[list(cycles_data.keys())[0]]
         for i in range(len(data_tempo)):
             print(data_tempo[i].shape)
-            plt.plot(data_tempo[i][:, 6])
+            plt.plot(data_tempo[i][:, 5])
         plt.savefig("plottttt.png")
         plt.show()
 
         # Prepare the plot
         if self.leg_to_plot == LegToPlot.RIGHT:
-            plot_idx = [20, 3, 6, 9, 11]
-            plot_labels = ["Torso", "Pelvis", "Femur", "Tibia", "Calcaneus"]
+            plot_idx = [20, 3, 6, 9, 10]
+            plot_labels = ["Torso", "Pelvis", "Hip", "Knee", "Ankle"]
             # plot_labels = ["Hip", "Knee", "Ankle"]  # TODO
         else:
             raise NotImplementedError("Only the right leg is implemented for now.")
@@ -130,7 +130,7 @@ class PlotLegData:
             cycles = self.cycles_data[key]
             # Compute the mean over cycles
             if len(cycles) == 0:
-                continue  # TODO: Charbie -> remove this when all data are available!
+                continue
             mean_data, std_data = mean_cycles(cycles, index_to_keep=self.plot_idx, nb_frames_interp=nb_frames_interp)
             mean_data = mean_data * unit_conversion
             std_data = std_data * unit_conversion

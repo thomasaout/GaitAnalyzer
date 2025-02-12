@@ -60,6 +60,7 @@ class ExperimentalData:
         self.markers_sorted = None
         self.markers_sorted_with_virtual = None
         self.analogs_sampling_frequency = None
+        self.platform_corners = None
         self.analogs_dt = None
         self.nb_analog_frames = None
         self.f_ext_sorted = None
@@ -68,6 +69,7 @@ class ExperimentalData:
         self.analogs_time_vector = None
 
         # Extract data from the c3d file
+        print(f"Reading experimental data from file {self.c3d_file_name} ...")
         self.perform_initial_treatment()
         self.extract_gait_parameters()
         if animate_c3d_flag:
@@ -153,6 +155,9 @@ class ExperimentalData:
             platforms = self.c3d["data"]["platform"]
             nb_platforms = len(platforms)
             units = self.marker_units  # We assume that the all position units are the same as the markers'
+            self.platform_corners = []
+            self.platform_corners += [np.mean(platforms[0]["corners"] * units, axis=0)]
+            self.platform_corners += [np.mean(platforms[1]["corners"] * units, axis=0)]
 
             # Initialize arrays for storing external forces and moments
             platform_origin = np.zeros((nb_platforms, 3, 1))
@@ -177,12 +182,12 @@ class ExperimentalData:
                     cop, order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10
                 )
 
-                # Modify moments to express them at the center of the cop
-                platform_origin[i_platform, :, 0] = np.mean(platforms[i_platform]["corners"] * units, axis=1)
-                for i_frame in range(self.nb_analog_frames):
-                    r = platform_origin[i_platform, :, 0] - cop_filtered[i_platform, :, i_frame]
-                    moment_offset = np.cross(r, force[:, i_frame])
-                    moment_adjusted[i_platform, :, i_frame] = moment[:, i_frame] + moment_offset
+                # # Modify moments to express them at the center of the cop
+                # platform_origin[i_platform, :, 0] = np.mean(platforms[i_platform]['corners'] * units, axis=1)
+                # for i_frame in range(self.nb_analog_frames):
+                #     r = platform_origin[i_platform, :, 0] - cop_filtered[i_platform, :, i_frame]
+                #     moment_offset = np.cross(r, force[:, i_frame])
+                #     moment_adjusted[i_platform, :, i_frame] = moment[:, i_frame] + moment_offset
 
                 # Filter forces and moments
                 force_filtered[i_platform, :, :] = Operator.apply_filtfilt(
@@ -191,11 +196,10 @@ class ExperimentalData:
                 moment_filtered[i_platform, :, :] = Operator.apply_filtfilt(
                     moment, order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10
                 )
-                moment_adjusted_filtered[i_platform, :, :] = Operator.apply_filtfilt(
-                    moment_adjusted[i_platform, :, :],
-                    order=4,
-                    sampling_rate=self.analogs_sampling_frequency,
-                    cutoff_freq=10,
+                # moment_adjusted_filtered[i_platform, :, :] = Operator.apply_filtfilt(moment_adjusted[i_platform, :, :], order=4, sampling_rate=self.analogs_sampling_frequency, cutoff_freq=10)
+                moment_adjusted_filtered[i_platform, :, :] = moment_filtered[i_platform, :, :]
+                moment_adjusted_filtered[i_platform, :2, :] = (
+                    0  # Remove X and Y moments (as only Z reaction moments can be applied on the foot)
                 )
 
                 # Store output in a biorbd compatible format

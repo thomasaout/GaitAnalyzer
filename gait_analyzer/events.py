@@ -69,6 +69,7 @@ class Events:
             "toesL_heelR": np.zeros((nb_analog_frames,)),
             "toesL_heelR_toesR": np.zeros((nb_analog_frames,)),
         }
+        print("Detecting events...")
         self.find_event_timestamps()
         if plot_phases_flag:
             self.plot_events()

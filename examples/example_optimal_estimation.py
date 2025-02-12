@@ -8,6 +8,7 @@ from gait_analyzer import (
     LegToPlot,
     PlotType,
 )
+from gait_analyzer.kinematics_reconstructor import ReconstructionType
 
 
 def analysis_to_perform(
@@ -18,11 +19,16 @@ def analysis_to_perform(
     results = ResultManager(
         subject_name=subject_name, subject_mass=subject_mass, static_trial=static_trial, result_folder=result_folder
     )
-    results.create_model(osim_model_type=OsimModels.WholeBody(), skip_if_existing=False)
+    results.create_model(osim_model_type=OsimModels.WholeBody(), skip_if_existing=True)
     results.add_experimental_data(c3d_file_name=c3d_file_name, animate_c3d_flag=False)
     results.add_events(plot_phases_flag=False)
-    results.reconstruct_kinematics(animate_kinematics_flag=False, plot_kinematics_flag=True, skip_if_existing=False)
-    results.perform_inverse_dynamics()
+    results.reconstruct_kinematics(
+        reconstruction_type=[ReconstructionType.TRF, ReconstructionType.ONLY_LM],
+        animate_kinematics_flag=False,
+        plot_kinematics_flag=True,
+        skip_if_existing=False,
+    )
+    results.perform_inverse_dynamics(reintegrate_flag=False, animate_dynamics_flag=False)
 
     # --- Example of analysis that can be performed in any order --- #
     # results.estimate_optimally()
@@ -42,7 +48,11 @@ if __name__ == "__main__":
 
     # --- Example of how to run the analysis --- #
     AnalysisPerformer(
-        analysis_to_perform, subjects_to_analyze={"AOT_01": 69.2}, result_folder="results", skip_if_existing=True
+        analysis_to_perform,
+        subjects_to_analyze={"AOT_01": 69.2}, # add participants
+        result_folder="results",
+        #trails_to_analyze=["_ManipStim_L200_F30_I20"],
+        skip_if_existing=False,
     )
 
     # --- Example of how to plot the joint angles --- #

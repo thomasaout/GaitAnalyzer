@@ -1,5 +1,6 @@
 import numpy as np
 
+""" 
 from bioptim import (
     BiorbdModel,
     OptimalControlProgram,
@@ -18,7 +19,7 @@ from bioptim import (
     PhaseTransitionFcn,
     BiMappingList,
 )
-
+"""
 from gait_analyzer.experimental_data import ExperimentalData
 
 

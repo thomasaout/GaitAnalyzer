@@ -14,6 +14,7 @@ class AnalysisPerformer:
         analysis_to_perform: callable,
         subjects_to_analyze: dict[str:float],
         result_folder: str = "../results/",
+        trails_to_analyze: list[str] = None,
         skip_if_existing: bool = False,
     ):
         """
@@ -27,6 +28,8 @@ class AnalysisPerformer:
             The dictionary of the name and mass of the subjects to analyze
         result_folder: str
             The folder where the results will be saved. It will look like result_folder/subject_name.
+        trails_to_analyze: list[str]
+            The list of trails to analyze. If None, all the trails will be analyzed.
         skip_if_existing: bool
             If True, the analysis will not be performed if the results already exist.
         """
@@ -41,6 +44,8 @@ class AnalysisPerformer:
                 raise ValueError("All elements of subjects_to_analyze must be strings")
         if not isinstance(result_folder, str):
             raise ValueError("result_folder must be a string")
+        if not isinstance(trails_to_analyze, list) and trails_to_analyze is not None:
+            raise ValueError("trails_to_analyze must be a list of strings")
         if not os.path.exists(result_folder):
             os.makedirs(result_folder)
             print(f"Result folder did not exist, I have created it here {os.path.abspath(result_folder)}")
@@ -49,6 +54,7 @@ class AnalysisPerformer:
         self.analysis_to_perform = analysis_to_perform
         self.subjects_to_analyze = subjects_to_analyze
         self.result_folder = result_folder
+        self.trails_to_analyze = trails_to_analyze
         self.skip_if_existing = skip_if_existing
 
         # Extended attributes
@@ -182,8 +188,14 @@ class AnalysisPerformer:
 
             # Loop over all data files
             for data_file in os.listdir(subject_data_folder):
+                # Files that we should not analyze
                 if data_file.endswith("Statique.c3d") or not data_file.endswith(".c3d"):
                     continue
+                if self.trails_to_analyze is not None and not any(
+                    trail in data_file for trail in self.trails_to_analyze
+                ):
+                    continue
+
                 c3d_file_name = f"../data/{subject_name}/{data_file}"
                 result_file_name = f"{result_folder}/{data_file.replace('.c3d', '_results')}"
 
