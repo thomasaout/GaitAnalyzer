@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<OpenSimDocument Version="40500">
+<OpenSimDocument Version="40000">
 	<Model name="Whole-body">
 		<defaults>
 			<ControlLinear name="default">
@@ -48,13 +48,8 @@
 				<optimal_force>1</optimal_force>
 			</TorqueActuator>
 			<Thelen2003Muscle name="default">
-				<!--The path of the actuator which defines length and lengthening speed.-->
-				<GeometryPath name="path">
-					<!--Default appearance attributes for this AbstractGeometryPath.-->
-					<Appearance>
-						<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-						<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-					</Appearance>
+				<!--The set of points defining the path of the actuator.-->
+				<GeometryPath name="geometrypath">
 					<!--The set of points defining the path-->
 					<PathPointSet>
 						<objects />
@@ -65,6 +60,11 @@
 						<objects />
 						<groups />
 					</PathWrapSet>
+					<!--Default appearance attributes for this GeometryPath-->
+					<Appearance>
+						<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+						<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+					</Appearance>
 				</GeometryPath>
 				<!--Maximum isometric force that the fibers can generate-->
 				<max_isometric_force>546</max_isometric_force>
@@ -696,7 +696,7 @@
 									<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
 									<socket_frame>..</socket_frame>
 									<!--Scale factors in X, Y, Z directions respectively.-->
-									<scale_factors>1 1 1</scale_factors>
+									<scale_factors>1.1299999999999999 1.1299999999999999 1.1299999999999999</scale_factors>
 									<!--Default appearance attributes for this Geometry-->
 									<Appearance>
 										<!--The opacity used to display the geometry between 0:transparent, 1:opaque.-->
@@ -705,13 +705,13 @@
 										<color>1 1 1</color>
 									</Appearance>
 									<!--Name of geometry file.-->
-									<mesh_file>jaw.vtp</mesh_file>
+									<mesh_file>hat_jaw.vtp</mesh_file>
 								</Mesh>
 							</attached_geometry>
 							<!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
 							<socket_parent>..</socket_parent>
 							<!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
-							<translation>0 0.059999999999999998 0</translation>
+							<translation>0.02 -0.52000000000000002 0</translation>
 							<!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
 							<orientation>-0 0 -0</orientation>
 						</PhysicalOffsetFrame>
@@ -729,7 +729,7 @@
 									<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
 									<socket_frame>..</socket_frame>
 									<!--Scale factors in X, Y, Z directions respectively.-->
-									<scale_factors>1 1 1</scale_factors>
+									<scale_factors>1.1399999999999999 1.1399999999999999 1.1399999999999999</scale_factors>
 									<!--Default appearance attributes for this Geometry-->
 									<Appearance>
 										<!--The opacity used to display the geometry between 0:transparent, 1:opaque.-->
@@ -738,13 +738,13 @@
 										<color>1 1 1</color>
 									</Appearance>
 									<!--Name of geometry file.-->
-									<mesh_file>skull.vtp</mesh_file>
+									<mesh_file>hat_skull.vtp</mesh_file>
 								</Mesh>
 							</attached_geometry>
 							<!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
 							<socket_parent>..</socket_parent>
 							<!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
-							<translation>0 0.059999999999999998 0</translation>
+							<translation>0.02 -0.52000000000000002 0</translation>
 							<!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
 							<orientation>-0 0 -0</orientation>
 						</PhysicalOffsetFrame>
@@ -2604,7 +2604,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-2.6179999999999999 2.0943950999999998</range>
+							<range>-0.52359800000000001 2.0943950999999998</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -2620,7 +2620,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-2.0943950999999998 2.0943950999999998</range>
+							<range>-0.87266460000000001 0.52359869999999997</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -2636,7 +2636,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-2.0943950999999998 2.0943950999999998</range>
+							<range>-0.78539809999999999 0.61086523800000003</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -2759,7 +2759,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-3.1415999999999999 0.34910000000000002</range>
+							<range>-2.44346095 0.17453289999999999</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -2839,7 +2839,7 @@
 						<!--3 Axes for translations are listed next.-->
 						<TransformAxis name="translation1">
 							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
-							<coordinates></coordinates>
+							<coordinates>knee_angle_r</coordinates>
 							<!--Rotation or translation axis for the transform.-->
 							<axis>1 0 0</axis>
 							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
@@ -2849,7 +2849,7 @@
 						</TransformAxis>
 						<TransformAxis name="translation2">
 							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
-							<coordinates></coordinates>
+							<coordinates>knee_angle_r</coordinates>
 							<!--Rotation or translation axis for the transform.-->
 							<axis>0 1 0</axis>
 							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
@@ -2882,7 +2882,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-1.5707963300000001 1.5707963300000001</range>
+							<range>-0.87266462 0.34906585000000001</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -3005,7 +3005,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-1.5707963300000001 1.5707963300000001</range>
+							<range>-0.34906579999999998 0.52359876999999999</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -3128,7 +3128,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-1.5707963300000001 1.5707963300000001</range>
+							<range>-0.78539815999999996 1.5707963300000001</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -3251,7 +3251,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-2.6179999999999999 2.0943950999999998</range>
+							<range>-0.52359800000000001 2.0943950999999998</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -3267,7 +3267,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-2.0943950999999998 2.0943950999999998</range>
+							<range>-0.87266460000000001 0.52359869999999997</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -3283,7 +3283,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-2.0943950999999998 2.0943950999999998</range>
+							<range>-0.78539809999999999 0.61086523800000003</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -3406,7 +3406,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-3.1415999999999999 0.34910000000000002</range>
+							<range>-2.44346095 0.17453289999999999</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -3486,7 +3486,7 @@
 						<!--3 Axes for translations are listed next.-->
 						<TransformAxis name="translation1">
 							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
-							<coordinates></coordinates>
+							<coordinates>knee_angle_l</coordinates>
 							<!--Rotation or translation axis for the transform.-->
 							<axis>1 0 0</axis>
 							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
@@ -3496,7 +3496,7 @@
 						</TransformAxis>
 						<TransformAxis name="translation2">
 							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
-							<coordinates></coordinates>
+							<coordinates>knee_angle_l</coordinates>
 							<!--Rotation or translation axis for the transform.-->
 							<axis>0 1 0</axis>
 							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
@@ -3529,7 +3529,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-1.0471975499999999 1.0471975499999999</range>
+							<range>-0.87266462 0.34906585000000001</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -3652,7 +3652,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-1.5707963300000001 1.5707963300000001</range>
+							<range>-0.34906579999999998 0.52359876999999999</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -3775,7 +3775,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-1.0471975499999999 1.0471975499999999</range>
+							<range>-0.78539815999999996 1.0471975499999999</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -3898,7 +3898,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-1.5707963300000001 1.5707963300000001</range>
+							<range>-1.5707963300000001 0.52359800000000001</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -3914,7 +3914,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-1.5707963300000001 1.5707963300000001</range>
+							<range>-0.52359800000000001 0.52359800000000001</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -3930,7 +3930,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-1.5707963300000001 1.5707963300000001</range>
+							<range>-0.52359800000000001 0.52359800000000001</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -4053,7 +4053,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-1.74533 1.0471975499999999</range>
+							<range>-1.0471975499999999 1.0471975499999999</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -4069,7 +4069,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-0.59999999999999998 0.59999999999999998</range>
+							<range>-0.78539816299999998 0.78539816299999998</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -4085,7 +4085,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-1.2217 1.2217</range>
+							<range>-1.3962634 1.3962634</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -4210,7 +4210,7 @@
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
 							<range>-1.5707963300000001 3.1415999999999999</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
-							<clamped>false</clamped>
+							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
 							<locked>false</locked>
 							<!--If specified, the coordinate can be prescribed by a function of time. It can be any OpenSim Function with valid second order derivatives.-->
@@ -4224,9 +4224,9 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-3.8397000000000001 1.5707963300000001</range>
+							<range>-3.1415999999999999 0.6109</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
-							<clamped>false</clamped>
+							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
 							<locked>false</locked>
 							<!--If specified, the coordinate can be prescribed by a function of time. It can be any OpenSim Function with valid second order derivatives.-->
@@ -4240,9 +4240,9 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-1.5707963300000001 1.5707963300000001</range>
+							<range>-1.7453292 1.7453292</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
-							<clamped>false</clamped>
+							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
 							<locked>false</locked>
 							<!--If specified, the coordinate can be prescribed by a function of time. It can be any OpenSim Function with valid second order derivatives.-->
@@ -4363,7 +4363,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>0 3.1415999999999999</range>
+							<range>0 2.9670999999999998</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -4486,9 +4486,9 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-3.1415999999999999 3.1415999999999999</range>
+							<range>-0.34910000000000002 3.4906999999999999</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
-							<clamped>false</clamped>
+							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
 							<locked>false</locked>
 							<!--If specified, the coordinate can be prescribed by a function of time. It can be any OpenSim Function with valid second order derivatives.-->
@@ -4855,7 +4855,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-1.5708 1.5708</range>
+							<range>-0.17449999999999999 1.5708</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -4980,7 +4980,7 @@
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
 							<range>-1.5707963300000001 3.1415999999999999</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
-							<clamped>false</clamped>
+							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
 							<locked>false</locked>
 							<!--If specified, the coordinate can be prescribed by a function of time. It can be any OpenSim Function with valid second order derivatives.-->
@@ -4994,9 +4994,9 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-3.8397000000000001 1.5707963300000001</range>
+							<range>-3.1415999999999999 0.6109</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
-							<clamped>false</clamped>
+							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
 							<locked>false</locked>
 							<!--If specified, the coordinate can be prescribed by a function of time. It can be any OpenSim Function with valid second order derivatives.-->
@@ -5010,9 +5010,9 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-1.5707963300000001 1.5707963300000001</range>
+							<range>-1.7453292 1.7453292</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
-							<clamped>false</clamped>
+							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
 							<locked>false</locked>
 							<!--If specified, the coordinate can be prescribed by a function of time. It can be any OpenSim Function with valid second order derivatives.-->
@@ -5133,7 +5133,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>0 3.1415999999999999</range>
+							<range>0 2.9670999999999998</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -5256,9 +5256,9 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-3.1415999999999999 3.1415999999999999</range>
+							<range>-0.34910000000000002 3.4906999999999999</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
-							<clamped>false</clamped>
+							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
 							<locked>false</locked>
 							<!--If specified, the coordinate can be prescribed by a function of time. It can be any OpenSim Function with valid second order derivatives.-->
@@ -5625,7 +5625,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-1.5708 1.5708</range>
+							<range>-0.17449999999999999 1.5708</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -5751,13 +5751,8 @@
 		<ForceSet name="forceset">
 			<objects>
 				<Schutte1993Muscle_Deprecated name="ant_delt_r">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -5787,6 +5782,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>1142.5999999999999</max_isometric_force>
@@ -5798,13 +5798,8 @@
 					<pennation_angle_at_optimal>0.383972435439</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="ant_delt_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -5834,6 +5829,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>1142.5999999999999</max_isometric_force>
@@ -5845,13 +5845,8 @@
 					<pennation_angle_at_optimal>0.383972435439</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="medial_delt_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -5875,6 +5870,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>1142.5999999999999</max_isometric_force>
@@ -5886,13 +5886,8 @@
 					<pennation_angle_at_optimal>0.383972435439</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="post_delt_r">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -5922,6 +5917,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>259.88</max_isometric_force>
@@ -5933,13 +5933,8 @@
 					<pennation_angle_at_optimal>0.31415926535900002</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="post_delt_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -5969,6 +5964,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>259.88</max_isometric_force>
@@ -5980,13 +5980,8 @@
 					<pennation_angle_at_optimal>0.31415926535900002</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="medial_delt_r">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -6010,6 +6005,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>1142.5999999999999</max_isometric_force>
@@ -6021,13 +6021,8 @@
 					<pennation_angle_at_optimal>0.383972435439</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Thelen2003Muscle name="glut_med1_r">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -6051,6 +6046,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>819</max_isometric_force>
@@ -6078,13 +6078,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="semiten_r">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -6130,6 +6125,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>410</max_isometric_force>
@@ -6157,13 +6157,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="bifemlh_r">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -6193,6 +6188,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>896</max_isometric_force>
@@ -6220,13 +6220,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="sar_r">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -6268,6 +6263,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>156</max_isometric_force>
@@ -6295,13 +6295,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="tfl_r">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -6337,6 +6332,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>233</max_isometric_force>
@@ -6364,13 +6364,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="vas_med_r">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -6418,22 +6413,22 @@
 									<!--Function defining the x component of the point's location expressed in the Frame of the Point.-->
 									<x_location>
 										<SimmSpline>
-											<x> -2.0943999999999998174 -1.9999700000000000255 -1.5707999999999999741 -1.4575199999999999267 -1.3962600000000000566 -1.0471999999999999087 -0.6981319999999999748 -0.5263910000000000533 -0.3490659999999999874 -0.1745329999999999937 0 0.00017452999999999999764 0.0003490699999999999901 0.027925300000000000122 0.087266499999999996851 0.1745329999999999937 2.0943999999999998174</x>
-											<y> 0.0098109700000000004544 0.012224300000000000443 0.021737099999999998784 0.023885099999999999387 0.024990200000000000607 0.030795900000000001051 0.036418699999999998296 0.039287099999999998412 0.042565400000000003233 0.047576399999999997859 0.055958599999999997232 0.055968099999999999794 0.055977600000000002356 0.057541899999999999993 0.06133679999999999688 0.067950300000000005141 0.0629331999999999947</y>
+											<x> -2.0944 -1.99997 -1.5708 -1.45752 -1.39626 -1.0472 -0.698132 -0.526391 -0.349066 -0.174533 0 0.00017453 0.00034907 0.0279253 0.0872665 0.174533 2.0944</x>
+											<y> 0.00981097 0.0122243 0.0217371 0.0238851 0.0249902 0.0307959 0.0364187 0.0392871 0.0425654 0.0475764 0.0559586 0.0559681 0.0559776 0.0575419 0.0613368 0.0679503 0.0629332</y>
 										</SimmSpline>
 									</x_location>
 									<!--Function defining the y component of the point's location expressed in the Frame of the Point.-->
 									<y_location>
 										<SimmSpline>
-											<x> -2.0943999999999998174 -1.9999700000000000255 -1.5707999999999999741 -1.4575199999999999267 -1.3962600000000000566 -1.0471999999999999087 -0.6981319999999999748 -0.5263910000000000533 -0.3490659999999999874 -0.1745329999999999937 0 0.00017452999999999999764 0.0003490699999999999901 0.027925300000000000122 0.087266499999999996851 0.1745329999999999937 2.0943999999999998174</x>
-											<y> 0.02241539999999999852 0.022765099999999999919 0.024126499999999998641 0.02429330000000000031 0.024328700000000001713 0.023946200000000000818 0.023359299999999999509 0.02306770000000000001 0.022834199999999998942 0.022636199999999998683 0.021791700000000000653 0.021790299999999998559 0.021788899999999999935 0.021536500000000000088 0.020684199999999999808 0.018326900000000000135 -0.065620499999999998275</y>
+											<x> -2.0944 -1.99997 -1.5708 -1.45752 -1.39626 -1.0472 -0.698132 -0.526391 -0.349066 -0.174533 0 0.00017453 0.00034907 0.0279253 0.0872665 0.174533 2.0944</x>
+											<y> 0.0224154 0.0227651 0.0241265 0.0242933 0.0243287 0.0239462 0.0233593 0.0230677 0.0228342 0.0226362 0.0217917 0.0217903 0.0217889 0.0215365 0.0206842 0.0183269 -0.0656205</y>
 										</SimmSpline>
 									</y_location>
 									<!--Function defining the z component of the point's location expressed in the Frame of the Point.-->
 									<z_location>
 										<SimmSpline>
-											<x> -2.0943999999999998174 2.0943999999999998174</x>
-											<y> -0.01460000000000000013 -0.01460000000000000013</y>
+											<x> -2.0944 2.0944</x>
+											<y> -0.0146 -0.0146</y>
 										</SimmSpline>
 									</z_location>
 								</MovingPathPoint>
@@ -6445,6 +6440,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>1294</max_isometric_force>
@@ -6472,13 +6472,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="vas_lat_r">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -6526,22 +6521,22 @@
 									<!--Function defining the x component of the point's location expressed in the Frame of the Point.-->
 									<x_location>
 										<SimmSpline>
-											<x> -2.0943999999999998174 -1.9999700000000000255 -1.5707999999999999741 -1.4575199999999999267 -1.3962600000000000566 -1.0471999999999999087 -0.6981319999999999748 -0.5263910000000000533 -0.3490659999999999874 -0.1745329999999999937 0 0.00017452999999999999764 0.0003490699999999999901 0.027925300000000000122 0.087266499999999996851 0.1745329999999999937 2.0943999999999998174</x>
-											<y> 0.014289700000000000665 0.016702999999999999098 0.026214500000000001689 0.028362300000000000011 0.029467400000000001231 0.035270900000000000862 0.040878499999999998171 0.043729099999999999915 0.046970400000000002427 0.051874200000000002253 0.05995570000000000066 0.059964700000000002722 0.059973800000000000721 0.061457699999999997054 0.065035099999999998466 0.071186700000000005528 0.058376600000000000712</y>
+											<x> -2.0944 -1.99997 -1.5708 -1.45752 -1.39626 -1.0472 -0.698132 -0.526391 -0.349066 -0.174533 0 0.00017453 0.00034907 0.0279253 0.0872665 0.174533 2.0944</x>
+											<y> 0.0142897 0.016703 0.0262145 0.0283623 0.0294674 0.0352709 0.0408785 0.0437291 0.0469704 0.0518742 0.0599557 0.0599647 0.0599738 0.0614577 0.0650351 0.0711867 0.0583766</y>
 										</SimmSpline>
 									</x_location>
 									<!--Function defining the y component of the point's location expressed in the Frame of the Point.-->
 									<y_location>
 										<SimmSpline>
-											<x> -2.0943999999999998174 -1.9999700000000000255 -1.5707999999999999741 -1.4575199999999999267 -1.3962600000000000566 -1.0471999999999999087 -0.6981319999999999748 -0.5263910000000000533 -0.3490659999999999874 -0.1745329999999999937 0 0.00017452999999999999764 0.0003490699999999999901 0.027925300000000000122 0.087266499999999996851 0.1745329999999999937 2.0943999999999998174</x>
-											<y> 0.021531800000000000245 0.021881500000000001643 0.023236199999999998522 0.023401899999999999785 0.023437099999999998906 0.023043899999999999106 0.02238419999999999993 0.022015099999999999253 0.021635899999999999577 0.021097100000000000575 0.019586400000000000338 0.019584199999999999525 0.019581999999999998713 0.019189999999999998725 0.018007999999999999702 0.015107300000000000589 -0.065342100000000000182</y>
+											<x> -2.0944 -1.99997 -1.5708 -1.45752 -1.39626 -1.0472 -0.698132 -0.526391 -0.349066 -0.174533 0 0.00017453 0.00034907 0.0279253 0.0872665 0.174533 2.0944</x>
+											<y> 0.0215318 0.0218815 0.0232362 0.0234019 0.0234371 0.0230439 0.0223842 0.0220151 0.0216359 0.0210971 0.0195864 0.0195842 0.019582 0.01919 0.018008 0.0151073 -0.0653421</y>
 										</SimmSpline>
 									</y_location>
 									<!--Function defining the z component of the point's location expressed in the Frame of the Point.-->
 									<z_location>
 										<SimmSpline>
-											<x> -2.0943999999999998174 2.0943999999999998174</x>
-											<y> 0.016500000000000000777 0.016500000000000000777</y>
+											<x> -2.0944 2.0944</x>
+											<y> 0.0165 0.0165</y>
 										</SimmSpline>
 									</z_location>
 								</MovingPathPoint>
@@ -6553,6 +6548,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>1871</max_isometric_force>
@@ -6580,13 +6580,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="med_gas_r">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -6620,6 +6615,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>1558</max_isometric_force>
@@ -6647,13 +6647,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="lat_gas_r">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -6687,6 +6682,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>683</max_isometric_force>
@@ -6714,13 +6714,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="soleus_r">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -6744,6 +6739,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>3549</max_isometric_force>
@@ -6771,13 +6771,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="tib_post_r">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -6813,6 +6808,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>1588</max_isometric_force>
@@ -6840,13 +6840,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="tib_ant_r">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -6876,6 +6871,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>905</max_isometric_force>
@@ -6903,13 +6903,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="per_long_r">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -6963,6 +6958,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>943</max_isometric_force>
@@ -6990,13 +6990,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="glut_med1_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -7020,6 +7015,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>819</max_isometric_force>
@@ -7047,13 +7047,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="semiten_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -7099,6 +7094,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>410</max_isometric_force>
@@ -7126,13 +7126,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="bifemlh_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -7162,6 +7157,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>896</max_isometric_force>
@@ -7189,13 +7189,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="sar_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -7237,6 +7232,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>156</max_isometric_force>
@@ -7264,13 +7264,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="tfl_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -7306,6 +7301,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>233</max_isometric_force>
@@ -7333,13 +7333,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="vas_med_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -7387,22 +7382,22 @@
 									<!--Function defining the x component of the point's location expressed in the Frame of the Point.-->
 									<x_location>
 										<SimmSpline>
-											<x> -2.0943999999999998174 -1.9999700000000000255 -1.5707999999999999741 -1.4575199999999999267 -1.3962600000000000566 -1.0471999999999999087 -0.6981319999999999748 -0.5263910000000000533 -0.3490659999999999874 -0.1745329999999999937 0 0.00017452999999999999764 0.0003490699999999999901 0.027925300000000000122 0.087266499999999996851 0.1745329999999999937 2.0943999999999998174</x>
-											<y> 0.0098109700000000004544 0.012224300000000000443 0.021737099999999998784 0.023885099999999999387 0.024990200000000000607 0.030795900000000001051 0.036418699999999998296 0.039287099999999998412 0.042565400000000003233 0.047576399999999997859 0.055958599999999997232 0.055968099999999999794 0.055977600000000002356 0.057541899999999999993 0.06133679999999999688 0.067950300000000005141 0.0629331999999999947</y>
+											<x> -2.0944 -1.99997 -1.5708 -1.45752 -1.39626 -1.0472 -0.698132 -0.526391 -0.349066 -0.174533 0 0.00017453 0.00034907 0.0279253 0.0872665 0.174533 2.0944</x>
+											<y> 0.00981097 0.0122243 0.0217371 0.0238851 0.0249902 0.0307959 0.0364187 0.0392871 0.0425654 0.0475764 0.0559586 0.0559681 0.0559776 0.0575419 0.0613368 0.0679503 0.0629332</y>
 										</SimmSpline>
 									</x_location>
 									<!--Function defining the y component of the point's location expressed in the Frame of the Point.-->
 									<y_location>
 										<SimmSpline>
-											<x> -2.0943999999999998174 -1.9999700000000000255 -1.5707999999999999741 -1.4575199999999999267 -1.3962600000000000566 -1.0471999999999999087 -0.6981319999999999748 -0.5263910000000000533 -0.3490659999999999874 -0.1745329999999999937 0 0.00017452999999999999764 0.0003490699999999999901 0.027925300000000000122 0.087266499999999996851 0.1745329999999999937 2.0943999999999998174</x>
-											<y> 0.02241539999999999852 0.022765099999999999919 0.024126499999999998641 0.02429330000000000031 0.024328700000000001713 0.023946200000000000818 0.023359299999999999509 0.02306770000000000001 0.022834199999999998942 0.022636199999999998683 0.021791700000000000653 0.021790299999999998559 0.021788899999999999935 0.021536500000000000088 0.020684199999999999808 0.018326900000000000135 -0.065620499999999998275</y>
+											<x> -2.0944 -1.99997 -1.5708 -1.45752 -1.39626 -1.0472 -0.698132 -0.526391 -0.349066 -0.174533 0 0.00017453 0.00034907 0.0279253 0.0872665 0.174533 2.0944</x>
+											<y> 0.0224154 0.0227651 0.0241265 0.0242933 0.0243287 0.0239462 0.0233593 0.0230677 0.0228342 0.0226362 0.0217917 0.0217903 0.0217889 0.0215365 0.0206842 0.0183269 -0.0656205</y>
 										</SimmSpline>
 									</y_location>
 									<!--Function defining the z component of the point's location expressed in the Frame of the Point.-->
 									<z_location>
 										<SimmSpline>
-											<x> -2.0943999999999998174 2.0943999999999998174</x>
-											<y> 0.01460000000000000013 0.01460000000000000013</y>
+											<x> -2.0944 2.0944</x>
+											<y> 0.0146 0.0146</y>
 										</SimmSpline>
 									</z_location>
 								</MovingPathPoint>
@@ -7414,6 +7409,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>1294</max_isometric_force>
@@ -7441,13 +7441,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="vas_lat_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -7495,22 +7490,22 @@
 									<!--Function defining the x component of the point's location expressed in the Frame of the Point.-->
 									<x_location>
 										<SimmSpline>
-											<x> -2.0943999999999998174 -1.9999700000000000255 -1.5707999999999999741 -1.4575199999999999267 -1.3962600000000000566 -1.0471999999999999087 -0.6981319999999999748 -0.5263910000000000533 -0.3490659999999999874 -0.1745329999999999937 0 0.00017452999999999999764 0.0003490699999999999901 0.027925300000000000122 0.087266499999999996851 0.1745329999999999937 2.0943999999999998174</x>
-											<y> 0.014289700000000000665 0.016702999999999999098 0.026214500000000001689 0.028362300000000000011 0.029467400000000001231 0.035270900000000000862 0.040878499999999998171 0.043729099999999999915 0.046970400000000002427 0.051874200000000002253 0.05995570000000000066 0.059964700000000002722 0.059973800000000000721 0.061457699999999997054 0.065035099999999998466 0.071186700000000005528 0.058376600000000000712</y>
+											<x> -2.0944 -1.99997 -1.5708 -1.45752 -1.39626 -1.0472 -0.698132 -0.526391 -0.349066 -0.174533 0 0.00017453 0.00034907 0.0279253 0.0872665 0.174533 2.0944</x>
+											<y> 0.0142897 0.016703 0.0262145 0.0283623 0.0294674 0.0352709 0.0408785 0.0437291 0.0469704 0.0518742 0.0599557 0.0599647 0.0599738 0.0614577 0.0650351 0.0711867 0.0583766</y>
 										</SimmSpline>
 									</x_location>
 									<!--Function defining the y component of the point's location expressed in the Frame of the Point.-->
 									<y_location>
 										<SimmSpline>
-											<x> -2.0943999999999998174 -1.9999700000000000255 -1.5707999999999999741 -1.4575199999999999267 -1.3962600000000000566 -1.0471999999999999087 -0.6981319999999999748 -0.5263910000000000533 -0.3490659999999999874 -0.1745329999999999937 0 0.00017452999999999999764 0.0003490699999999999901 0.027925300000000000122 0.087266499999999996851 0.1745329999999999937 2.0943999999999998174</x>
-											<y> 0.021531800000000000245 0.021881500000000001643 0.023236199999999998522 0.023401899999999999785 0.023437099999999998906 0.023043899999999999106 0.02238419999999999993 0.022015099999999999253 0.021635899999999999577 0.021097100000000000575 0.019586400000000000338 0.019584199999999999525 0.019581999999999998713 0.019189999999999998725 0.018007999999999999702 0.015107300000000000589 -0.065342100000000000182</y>
+											<x> -2.0944 -1.99997 -1.5708 -1.45752 -1.39626 -1.0472 -0.698132 -0.526391 -0.349066 -0.174533 0 0.00017453 0.00034907 0.0279253 0.0872665 0.174533 2.0944</x>
+											<y> 0.0215318 0.0218815 0.0232362 0.0234019 0.0234371 0.0230439 0.0223842 0.0220151 0.0216359 0.0210971 0.0195864 0.0195842 0.019582 0.01919 0.018008 0.0151073 -0.0653421</y>
 										</SimmSpline>
 									</y_location>
 									<!--Function defining the z component of the point's location expressed in the Frame of the Point.-->
 									<z_location>
 										<SimmSpline>
-											<x> -2.0943999999999998174 2.0943999999999998174</x>
-											<y> -0.016500000000000000777 -0.016500000000000000777</y>
+											<x> -2.0944 2.0944</x>
+											<y> -0.0165 -0.0165</y>
 										</SimmSpline>
 									</z_location>
 								</MovingPathPoint>
@@ -7522,6 +7517,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>1871</max_isometric_force>
@@ -7549,13 +7549,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="med_gas_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -7589,6 +7584,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>1558</max_isometric_force>
@@ -7616,13 +7616,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="lat_gas_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -7656,6 +7651,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>683</max_isometric_force>
@@ -7683,13 +7683,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="soleus_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -7713,6 +7708,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>3549</max_isometric_force>
@@ -7740,13 +7740,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="tib_post_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -7782,6 +7777,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>1588</max_isometric_force>
@@ -7809,13 +7809,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="tib_ant_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -7845,6 +7840,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>905</max_isometric_force>
@@ -7872,13 +7872,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="per_long_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -7932,6 +7927,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>943</max_isometric_force>
@@ -7959,13 +7959,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="ercspn_r">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -7989,6 +7984,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>2500</max_isometric_force>
@@ -8016,13 +8016,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="ercspn_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8046,6 +8041,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>2500</max_isometric_force>
@@ -8073,13 +8073,8 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="rect_abd_r">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8103,6 +8098,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>263</max_isometric_force>
@@ -8112,13 +8112,8 @@
 					<tendon_slack_length>0.017000000000000001</tendon_slack_length>
 				</Thelen2003Muscle>
 				<Thelen2003Muscle name="rect_abd_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8142,6 +8137,11 @@
 							<objects />
 							<groups />
 						</PathWrapSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>263</max_isometric_force>
@@ -8151,13 +8151,8 @@
 					<tendon_slack_length>0.017000000000000001</tendon_slack_length>
 				</Thelen2003Muscle>
 				<Schutte1993Muscle_Deprecated name="r_stern_mast">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8175,6 +8170,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>68.950000000000003</max_isometric_force>
@@ -8186,13 +8186,8 @@
 					<pennation_angle_at_optimal>0.26179938779900003</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="l_stern_mast">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8210,6 +8205,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>68.950000000000003</max_isometric_force>
@@ -8221,13 +8221,8 @@
 					<pennation_angle_at_optimal>0.26179938779900003</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="r_trap_acr">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8245,6 +8240,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>376.94999999999999</max_isometric_force>
@@ -8256,13 +8256,8 @@
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="l_trap_acr">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8280,6 +8275,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>376.94999999999999</max_isometric_force>
@@ -8291,13 +8291,8 @@
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="TRIlong">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8333,6 +8328,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>798.51999999999998</max_isometric_force>
@@ -8344,13 +8344,8 @@
 					<pennation_angle_at_optimal>0.20943951023900001</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="TRIlong_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8386,6 +8381,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>798.51999999999998</max_isometric_force>
@@ -8397,13 +8397,8 @@
 					<pennation_angle_at_optimal>0.20943951023900001</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="TRIlat">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8439,6 +8434,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>624.29999999999995</max_isometric_force>
@@ -8450,13 +8450,8 @@
 					<pennation_angle_at_optimal>0.15707963267899999</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="TRIlat_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8492,6 +8487,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>624.29999999999995</max_isometric_force>
@@ -8503,13 +8503,8 @@
 					<pennation_angle_at_optimal>0.15707963267899999</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="BIClong">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8575,6 +8570,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>624.29999999999995</max_isometric_force>
@@ -8586,13 +8586,8 @@
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="BIClong_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8658,6 +8653,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>624.29999999999995</max_isometric_force>
@@ -8669,13 +8669,8 @@
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="BRD">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8699,6 +8694,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>261.32999999999998</max_isometric_force>
@@ -8710,13 +8710,8 @@
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="BRD_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8740,6 +8735,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>261.32999999999998</max_isometric_force>
@@ -8751,13 +8751,8 @@
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="FCR">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8781,6 +8776,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>73.959999999999994</max_isometric_force>
@@ -8792,13 +8792,8 @@
 					<pennation_angle_at_optimal>0.054105206811999998</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="FCR_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8822,6 +8817,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>73.959999999999994</max_isometric_force>
@@ -8833,13 +8833,8 @@
 					<pennation_angle_at_optimal>0.054105206811999998</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="ECRL">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8869,6 +8864,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>304.88999999999999</max_isometric_force>
@@ -8880,13 +8880,8 @@
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="ECRL_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8916,6 +8911,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>304.88999999999999</max_isometric_force>
@@ -8927,13 +8927,8 @@
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="PT">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -8963,6 +8958,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>566.22000000000003</max_isometric_force>
@@ -8974,13 +8974,8 @@
 					<pennation_angle_at_optimal>0.17453292519899999</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="PT_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -9010,6 +9005,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>566.22000000000003</max_isometric_force>
@@ -9021,13 +9021,8 @@
 					<pennation_angle_at_optimal>0.17453292519899999</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="LAT2">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -9057,6 +9052,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>389.10000000000002</max_isometric_force>
@@ -9068,13 +9068,8 @@
 					<pennation_angle_at_optimal>0.33161255787900001</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="LAT2_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -9104,6 +9099,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>389.10000000000002</max_isometric_force>
@@ -9115,13 +9115,8 @@
 					<pennation_angle_at_optimal>0.33161255787900001</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="PECM2">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -9151,6 +9146,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>515.40999999999997</max_isometric_force>
@@ -9162,13 +9162,8 @@
 					<pennation_angle_at_optimal>0.43633231299899999</pennation_angle_at_optimal>
 				</Schutte1993Muscle_Deprecated>
 				<Schutte1993Muscle_Deprecated name="PECM2_l">
-					<!--The path of the actuator which defines length and lengthening speed.-->
-					<GeometryPath name="path">
-						<!--Default appearance attributes for this AbstractGeometryPath.-->
-						<Appearance>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
-						</Appearance>
+					<!--The set of points defining the path of the actuator.-->
+					<GeometryPath name="geometrypath">
 						<!--The set of points defining the path-->
 						<PathPointSet>
 							<objects>
@@ -9198,6 +9193,11 @@
 								</PathPoint>
 							</objects>
 						</PathPointSet>
+						<!--Default appearance attributes for this GeometryPath-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
 					</GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>515.40999999999997</max_isometric_force>
@@ -9390,6 +9390,14 @@
 					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
 					<fixed>false</fixed>
 				</Marker>
+				<Marker name="REJC">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
+					<socket_parent_frame>/bodyset/humerus_r</socket_parent_frame>
+					<!--The fixed location of the station expressed in its parent frame.-->
+					<location>0.0058399999999999997 -0.28069 -0.00020000000000000001</location>
+					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
+					<fixed>false</fixed>
+				</Marker>
 				<Marker name="RUS">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
 					<socket_parent_frame>/bodyset/radius_r</socket_parent_frame>
@@ -9403,6 +9411,14 @@
 					<socket_parent_frame>/bodyset/radius_r</socket_parent_frame>
 					<!--The fixed location of the station expressed in its parent frame.-->
 					<location>-0.0030000000000000001 -0.23000000000000001 0.050000000000000003</location>
+					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
+					<fixed>false</fixed>
+				</Marker>
+				<Marker name="RWJC">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
+					<socket_parent_frame>/bodyset/radius_r</socket_parent_frame>
+					<!--The fixed location of the station expressed in its parent frame.-->
+					<location>-0.01 -0.23186999999999999 0.017000000000000001</location>
 					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
 					<fixed>false</fixed>
 				</Marker>
@@ -9422,6 +9438,14 @@
 					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
 					<fixed>false</fixed>
 				</Marker>
+				<Marker name="LSJC">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
+					<socket_parent_frame>/bodyset/humerus_l</socket_parent_frame>
+					<!--The fixed location of the station expressed in its parent frame.-->
+					<location>0 0 0</location>
+					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
+					<fixed>false</fixed>
+				</Marker>
 				<Marker name="LLHE">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
 					<socket_parent_frame>/bodyset/humerus_l</socket_parent_frame>
@@ -9438,6 +9462,14 @@
 					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
 					<fixed>false</fixed>
 				</Marker>
+				<Marker name="LEJC">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
+					<socket_parent_frame>/bodyset/humerus_l</socket_parent_frame>
+					<!--The fixed location of the station expressed in its parent frame.-->
+					<location>0.0058399999999999997 -0.28069 0.00020000000000000001</location>
+					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
+					<fixed>false</fixed>
+				</Marker>
 				<Marker name="LUS">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
 					<socket_parent_frame>/bodyset/radius_l</socket_parent_frame>
@@ -9451,6 +9483,14 @@
 					<socket_parent_frame>/bodyset/radius_l</socket_parent_frame>
 					<!--The fixed location of the station expressed in its parent frame.-->
 					<location>-0.00316 -0.22312000000000001 -0.049880000000000001</location>
+					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
+					<fixed>false</fixed>
+				</Marker>
+				<Marker name="LWJC">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
+					<socket_parent_frame>/bodyset/radius_l</socket_parent_frame>
+					<!--The fixed location of the station expressed in its parent frame.-->
+					<location>-0.01 -0.23186999999999999 -0.017000000000000001</location>
 					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
 					<fixed>false</fixed>
 				</Marker>
@@ -9494,6 +9534,22 @@
 					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
 					<fixed>false</fixed>
 				</Marker>
+				<Marker name="LHJC">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
+					<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
+					<!--The fixed location of the station expressed in its parent frame.-->
+					<location>-0.070699999999999999 -0.066100000000000006 0.083500000000000005</location>
+					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
+					<fixed>false</fixed>
+				</Marker>
+				<Marker name="RHJC">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
+					<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
+					<!--The fixed location of the station expressed in its parent frame.-->
+					<location>-0.070699999999999999 -0.066100000000000006 -0.083500000000000005</location>
+					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
+					<fixed>false</fixed>
+				</Marker>
 				<Marker name="RPSIS">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
 					<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
@@ -9518,6 +9574,14 @@
 					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
 					<fixed>false</fixed>
 				</Marker>
+				<Marker name="RKJC">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
+					<socket_parent_frame>/bodyset/femur_r</socket_parent_frame>
+					<!--The fixed location of the station expressed in its parent frame.-->
+					<location>0 -0.40400000000000003 0</location>
+					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
+					<fixed>false</fixed>
+				</Marker>
 				<Marker name="RATT">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
 					<socket_parent_frame>/bodyset/tibia_r</socket_parent_frame>
@@ -9539,6 +9603,14 @@
 					<socket_parent_frame>/bodyset/tibia_r</socket_parent_frame>
 					<!--The fixed location of the station expressed in its parent frame.-->
 					<location>0.0060000000000000001 -0.39500000000000002 -0.044999999999999998</location>
+					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
+					<fixed>false</fixed>
+				</Marker>
+				<Marker name="RAJC">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
+					<socket_parent_frame>/bodyset/tibia_r</socket_parent_frame>
+					<!--The fixed location of the station expressed in its parent frame.-->
+					<location>0 -0.40000000000000002 0</location>
 					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
 					<fixed>false</fixed>
 				</Marker>
@@ -9598,6 +9670,14 @@
 					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
 					<fixed>false</fixed>
 				</Marker>
+				<Marker name="LKJC">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
+					<socket_parent_frame>/bodyset/femur_l</socket_parent_frame>
+					<!--The fixed location of the station expressed in its parent frame.-->
+					<location>0 -0.40400000000000003 0</location>
+					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
+					<fixed>false</fixed>
+				</Marker>
 				<Marker name="LATT">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
 					<socket_parent_frame>/bodyset/tibia_l</socket_parent_frame>
@@ -9622,6 +9702,14 @@
 					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
 					<fixed>false</fixed>
 				</Marker>
+				<Marker name="LAJC">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
+					<socket_parent_frame>/bodyset/tibia_l</socket_parent_frame>
+					<!--The fixed location of the station expressed in its parent frame.-->
+					<location>0 -0.40000000000000002 0</location>
+					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
+					<fixed>false</fixed>
+				</Marker>
 				<Marker name="LCAL">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
 					<socket_parent_frame>/bodyset/calcn_l</socket_parent_frame>
@@ -9643,6 +9731,14 @@
 					<socket_parent_frame>/bodyset/calcn_l</socket_parent_frame>
 					<!--The fixed location of the station expressed in its parent frame.-->
 					<location>0.14499999999999999 0.01 -0.052999999999999999</location>
+					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
+					<fixed>false</fixed>
+				</Marker>
+				<Marker name="RSJC">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
+					<socket_parent_frame>/bodyset/humerus_r</socket_parent_frame>
+					<!--The fixed location of the station expressed in its parent frame.-->
+					<location>0 0 0</location>
 					<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
 					<fixed>false</fixed>
 				</Marker>
